@@ -1,0 +1,37 @@
+name: Claude
+
+# Tes commentaires « @claude … » (et ceux du Relecteur) renvoient le travail au Bâtisseur.
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+jobs:
+  claude:
+    if: contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          trigger_phrase: "@claude"
+          # Autorise le Relecteur (app Claude) à relancer le Bâtisseur
+          allowed_bots: "claude[bot]"
+          claude_args: |
+            --model ${{ vars.MODELE_FORT || 'claude-opus-5-5' }}
+            --max-turns 40
+            --append-system-prompt "Suis les consignes de .claude/agents/batisseur.md."
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(stylua:*),Bash(selene:*),Bash(lune:*),Bash(rojo:*)"

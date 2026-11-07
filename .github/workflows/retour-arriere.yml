@@ -1,0 +1,26 @@
+name: Retour arrière
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version à remettre en ligne (ex. v2026.11.06-1430), voir l'onglet Releases"
+        required: true
+
+jobs:
+  republier:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Récupérer l'ancienne version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "${{ inputs.version }}" --pattern jeu.rbxl --repo ${{ github.repository }}
+
+      - name: Remettre en ligne
+        run: |
+          curl --fail-with-body -X POST \
+            "https://apis.roblox.com/universes/v1/${{ vars.UNIVERSE_ID }}/places/${{ vars.PLACE_ID }}/versions?versionType=Published" \
+            -H "x-api-key: ${{ secrets.ROBLOX_API_KEY }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @jeu.rbxl

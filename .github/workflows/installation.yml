@@ -1,0 +1,21 @@
+name: Installation
+
+# À lancer une fois après « Use this template » : onglet Actions, Installation, Run workflow.
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Créer les labels utilisés par les agents
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh label create claude   --color 7c3aed --description "Demande traitée par les agents" --force
+          gh label create claude-express --color a78bfa --description "Petite demande, mode express" --force
+          gh label create relu-ok  --color 16a34a --description "Approuvée par le Relecteur" --force

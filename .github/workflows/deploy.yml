@@ -1,0 +1,47 @@
+name: Mise en ligne
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:            # une note Obsidian ne déclenche pas de mise en ligne
+      - "**/*.md"
+      - ".obsidian/**"
+
+permissions:
+  contents: write            # pour archiver chaque version en release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - run: stylua --check src && selene src && lune run tests/lanceur
+      - run: rojo build default.project.json -o build/jeu.rbxl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jeu-build
+          path: build/jeu.rbxl
+
+  production:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production     # « Required reviewers » = toi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: jeu-build
+      - name: Publier le jeu
+        run: |
+          curl --fail-with-body -X POST \
+            "https://apis.roblox.com/universes/v1/${{ vars.UNIVERSE_ID }}/places/${{ vars.PLACE_ID }}/versions?versionType=Published" \
+            -H "x-api-key: ${{ secrets.ROBLOX_API_KEY }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @jeu.rbxl
+
+      - name: Archiver la version (pour le retour arrière)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "v$(date +%Y.%m.%d-%H%M)" jeu.rbxl --repo ${{ github.repository }} --generate-notes

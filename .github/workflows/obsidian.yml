@@ -1,0 +1,48 @@
+name: Demandes Obsidian
+
+on:
+  push:
+    branches: [main]
+    paths: ["Demandes/**.md"]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  creer-demandes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Transformer les notes « prêt » en demandes
+        env:
+          # Jeton personnel : une action faite avec le jeton par défaut
+          # ne réveillerait pas les agents.
+          GH_TOKEN: ${{ secrets.AGENTS_TOKEN }}
+        run: |
+          for note in Demandes/*.md; do
+            grep -q '^statut: prêt' "$note" || continue
+
+            # Vitrine à la demande
+            if grep -q '^type: vitrine' "$note"; then
+              gh workflow run vitrine.yml -f note="$note"
+              sed -i "s|^statut: prêt.*|statut: en-cours|" "$note"
+              continue
+            fi
+
+            # Petite demande : mode express (sans Architecte ni Testeur)
+            label=claude
+            grep -q '^taille: petite' "$note" && label=claude-express
+
+            titre=$(basename "$note" .md)
+            url=$(gh issue create --title "$titre" --body-file "$note" --label "$label")
+            sed -i "s|^statut: prêt.*|statut: en-cours\nissue: $url|" "$note"
+          done
+
+      - name: Renvoyer les statuts dans le coffre
+        run: |
+          git config user.name "pipeline-bot"
+          git config user.email "pipeline-bot@users.noreply.github.com"
+          git commit -am "Demandes : passage en cours" || exit 0
+          git push

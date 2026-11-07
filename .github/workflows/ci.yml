@@ -1,0 +1,61 @@
+name: Vérifications
+
+on:
+  pull_request:
+    paths-ignore:            # les notes Obsidian ne relancent pas la CI
+      - "**/*.md"
+      - ".obsidian/**"
+
+concurrency:
+  group: ci-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: Formatage (StyLua)
+        run: stylua --check src
+
+      - name: Lint (Selene)
+        run: selene src
+
+      - name: Typage (luau-lsp)
+        run: |
+          rojo sourcemap default.project.json -o sourcemap.json
+          curl -sSfLo globalTypes.d.luau https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.luau
+          luau-lsp analyze --sourcemap=sourcemap.json --defs=globalTypes.d.luau src
+
+      - name: Tests unitaires (Lune)
+        run: lune run tests/lanceur
+
+      - name: Construction (Rojo)
+        run: rojo build default.project.json -o build/jeu.rbxl
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jeu-build
+          path: build/jeu.rbxl
+
+  tests-en-jeu:
+    needs: verifier
+    runs-on: ubuntu-latest
+    environment: test
+    concurrency:
+      group: place-de-test   # une seule publication de test à la fois
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: jeu-build
+      - name: Publier sur la place de test et lancer les tests en jeu
+        env:
+          ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+          UNIVERSE_ID: ${{ vars.UNIVERSE_ID }}
+          PLACE_ID: ${{ vars.PLACE_ID }}
+        run: bash scripts/tests-en-jeu.sh jeu.rbxl

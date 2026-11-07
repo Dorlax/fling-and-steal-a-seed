@@ -1,0 +1,156 @@
+name: Équipe d'agents
+
+on:
+  issues:
+    types: [labeled]              # ta demande (label claude ou claude-express)
+  workflow_run:
+    workflows: ["Vérifications"]
+    types: [completed]            # fin de la CI
+  pull_request:
+    types: [labeled]              # « relu-ok » posé par le Relecteur
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+# Modèles : modifiables pour tous tes jeux dans les variables de l'organisation.
+env:
+  MODELE_FORT: ${{ vars.MODELE_FORT || 'claude-opus-5-5' }}     # Architecte, Bâtisseur
+  MODELE_MOYEN: ${{ vars.MODELE_MOYEN || 'claude-sonnet-5-5' }} # Testeur, Relecteur
+  MODELE_LEGER: ${{ vars.MODELE_LEGER || 'claude-haiku-5-5' }}  # Contexte
+  OUTILS: "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(gh:*),Bash(stylua:*),Bash(selene:*),Bash(lune:*),Bash(rojo:*)"
+
+jobs:
+  # 1a. Demande normale : Architecte, puis Testeur, puis Bâtisseur
+  architecte:
+    if: github.event_name == 'issues' && github.event.label.name == 'claude'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: --model ${{ env.MODELE_FORT }} --max-turns 25 --allowedTools "${{ env.OUTILS }}"
+          prompt: |
+            Suis .claude/agents/architecte.md pour l'issue #${{ github.event.issue.number }}.
+            Crée la branche claude/issue-${{ github.event.issue.number }}, commit la maquette et push.
+
+  testeur:
+    needs: architecte
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/issue-${{ github.event.issue.number }}
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: --model ${{ env.MODELE_MOYEN }} --max-turns 25 --allowedTools "${{ env.OUTILS }}"
+          prompt: |
+            Suis .claude/agents/testeur.md avec Maquettes/issue-${{ github.event.issue.number }}.md.
+
+  batisseur:
+    needs: testeur
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/issue-${{ github.event.issue.number }}
+          lfs: true
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: --model ${{ env.MODELE_FORT }} --max-turns 50 --allowedTools "${{ env.OUTILS }}"
+          prompt: |
+            Suis .claude/agents/batisseur.md avec Maquettes/issue-${{ github.event.issue.number }}.md.
+            Ouvre ensuite la pull request liée à l'issue #${{ github.event.issue.number }}.
+
+  # 1b. Mode express (note avec « taille: petite ») : le Bâtisseur fait tout en un passage
+  express:
+    if: github.event_name == 'issues' && github.event.label.name == 'claude-express'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: --model ${{ env.MODELE_FORT }} --max-turns 40 --allowedTools "${{ env.OUTILS }}"
+          prompt: |
+            Suis la section « Mode express » de .claude/agents/batisseur.md
+            pour l'issue #${{ github.event.issue.number }}.
+            Travaille sur la branche claude/issue-${{ github.event.issue.number }},
+            puis ouvre la pull request liée à l'issue.
+
+  # 2. CI terminée : correction si échec, relecture si succès
+  correction:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      startsWith(github.event.workflow_run.head_branch, 'claude/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          lfs: true
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - name: Extraire uniquement les lignes d'erreur
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run view ${{ github.event.workflow_run.id }} --log-failed | tail -n 150 > /tmp/erreurs-ci.txt
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: --model ${{ env.MODELE_FORT }} --max-turns 30 --allowedTools "${{ env.OUTILS }},Read(/tmp/erreurs-ci.txt)"
+          prompt: |
+            Suis .claude/agents/batisseur.md. La CI a échoué.
+            Les lignes d'erreur sont dans /tmp/erreurs-ci.txt : lis ce fichier,
+            corrige uniquement ce qui est en cause, puis push.
+
+  relecteur:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_branch, 'claude/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: --model ${{ env.MODELE_MOYEN }} --max-turns 15 --allowedTools "Read,Bash(gh:*)"
+          prompt: |
+            Suis .claude/agents/relecteur.md pour la PR de la branche
+            ${{ github.event.workflow_run.head_branch }}.
+
+  # 3. PR validée par le Relecteur : Contexte met la mémoire à jour et écrit ton rapport
+  contexte:
+    if: github.event_name == 'pull_request' && github.event.label.name == 'relu-ok'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: --model ${{ env.MODELE_LEGER }} --max-turns 15 --allowedTools "Read,Write,Edit,Bash(git:*),Bash(gh:*)"
+          prompt: |
+            Suis .claude/agents/contexte.md pour la PR #${{ github.event.pull_request.number }}.

@@ -1,0 +1,5 @@
+{
+  "userIgnoreFilters": ["src/", "tests/", "scripts/", "build/", "assets/", ".github/", ".claude/"],
+  "newFileFolderPath": "Demandes",
+  "newFileLocation": "folder"
+}

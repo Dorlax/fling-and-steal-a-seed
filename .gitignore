@@ -1,0 +1,6 @@
+build/
+sourcemap.json
+globalTypes.d.luau
+*.rbxl.lock
+.obsidian/workspace*.json
+.obsidian/plugins/obsidian-git/data.json
