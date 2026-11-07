@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-07 — Correctif CI (RemoteEvent ChoisirModeForge absent en test)
+- Le RemoteEvent `ChoisirModeForge` est déclaré dans `default.project.json` : il existe dès le chargement de la place, même quand les Scripts ne tournent pas (tests Open Cloud). `Principal.server.luau` réutilise l'instance existante.
+
 ## 2026-11-07 — Correctif CI (dossier build manquant)
 - Le dossier `build/` est maintenant présent dans le dépôt (`build/.gitkeep`) : `rojo build … -o build/jeu.rbxl` ne plante plus en CI. Son contenu généré reste ignoré.
 

@@ -8,9 +8,15 @@ local Entrainement = require(script.Parent.Entrainement)
 local Sauvegarde = require(script.Parent.Sauvegarde)
 
 -- Le client n'envoie qu'un nom de mode ; le serveur le valide.
-local choisirModeForge = Instance.new("RemoteEvent")
-choisirModeForge.Name = "ChoisirModeForge"
-choisirModeForge.Parent = ReplicatedStorage
+-- Le RemoteEvent est déclaré dans default.project.json (présent dès le chargement).
+local choisirModeForge = ReplicatedStorage:FindFirstChild("ChoisirModeForge") :: RemoteEvent?
+if not choisirModeForge then
+	local nouveau = Instance.new("RemoteEvent")
+	nouveau.Name = "ChoisirModeForge"
+	nouveau.Parent = ReplicatedStorage
+	choisirModeForge = nouveau
+end
+assert(choisirModeForge, "ChoisirModeForge manquant")
 
 choisirModeForge.OnServerEvent:Connect(function(joueur: Player, valeur: any)
 	if Sauvegarde.estCharge(joueur) then
