@@ -47,7 +47,10 @@ Les taux sont toujours affichés au joueur.
 - Plateformes : PC, mobile, console
 
 ## Ambiance
-- Style : cartoon très coloré, dans l'esprit des jeux de simulation populaires que le propriétaire apprécie : formes arrondies et épaisses, couleurs vives et saturées, contours lisibles, créatures expressives et mignonnes.
+- Style : cartoon très coloré, dans l'esprit des jeux de simulation populaires que le propriétaire apprécie (deux références vues sur leurs pages Roblox, à ne jamais copier) : décor aux formes simples et épaisses, herbe vert vif, sol orange ou sable, grosses créatures expressives et mignonnes.
+- Textes et chiffres : gros caractères épais avec contour, nombres qui apparaissent et flottent (« +20 »), compteurs d'argent bien visibles, messages d'encouragement colorés.
+- Jauges : barres de couleur en dégradé vert, jaune, orange, rouge, très lisibles.
+- Étals et panneaux : couleurs franches, rayures et enseignes lisibles de loin (par exemple un stand de vente).
 - Univers : nature sauvage joyeuse, graines et créatures lumineuses.
 - Les nuits restent plus sombres et menaçantes, mais gardent le même style cartoon (couleurs profondes, monstres comiques plutôt qu'effrayants), pour rester adapté aux 9 ans et plus.
 - Interface : gros boutons colorés, texte épais et lisible, animations rebondissantes et effets visuels généreux à chaque tirage rare.
