@@ -10,7 +10,7 @@ Le joueur s'entraîne, lance des graines magiques dans les Terres Sauvages pour 
 
 ## Boucle de jeu
 1. S'entraîner sur la Forge (même en AFK) : Force ou Vitesse.
-2. Lancer une graine : la distance dépend de la Force.
+2. Lancer une graine : la distance dépend de la Force et d'une jauge de timing (appuyer au bon moment pour lancer plus loin).
 3. Courir récolter la créature et la ramener à sa base : la Vitesse aide à fuir.
 4. Les créatures de la base rapportent des pièces en continu.
 5. Dépenser les pièces : meilleures graines, niveaux de Forge, nouvelles zones.
