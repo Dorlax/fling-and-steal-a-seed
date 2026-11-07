@@ -103,7 +103,7 @@ function Sauvegarde.sauvegarder(joueur: Player)
 	local donnees = collecter(joueur, session)
 	session.donnees = donnees
 	local ok, erreur = avecTentatives(function()
-		store:SetAsync(cle(joueur), donnees, { joueur.UserId })
+		(store :: DataStore):SetAsync(cle(joueur), donnees, { joueur.UserId })
 	end)
 	if not ok then
 		warn(`Sauvegarde : échec pour {joueur.Name} : {erreur}`)

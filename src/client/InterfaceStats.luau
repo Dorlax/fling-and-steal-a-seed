@@ -94,7 +94,7 @@ function InterfaceStats.demarrer()
 	disposition.Padding = UDim.new(0, 8)
 	disposition.Parent = rangee
 
-	local boutons = {
+	local boutons: { [string]: TextButton } = {
 		Force = bouton(rangee, "Force"),
 		Vitesse = bouton(rangee, "Vitesse"),
 	}

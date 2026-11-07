@@ -2,6 +2,11 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-07 — Correctif CI (erreurs de typage du code)
+- InterfaceStats : table des boutons typée `{ [string]: TextButton }`.
+- Sauvegarde, Bases : raffinements explicites des valeurs optionnelles (DataStore, emplacement, Forge, personnage).
+- Forge, Donnees : `require` côté Lune casté en `any` pour que luau-lsp ne tente pas de le résoudre.
+
 ## 2026-11-07 — Correctif CI (typage luau-lsp)
 - Définitions `globalTypes.d.luau` épinglées sur luau-lsp 1.32.0 (version de rokit.toml) au lieu de `main`, devenue incompatible.
 

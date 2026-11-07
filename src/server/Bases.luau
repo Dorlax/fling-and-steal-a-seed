@@ -102,11 +102,12 @@ function Bases.creer(joueur: any): Model?
 	if existante then
 		return existante.modele
 	end
-	local numero = emplacementLibre()
-	if numero == nil then
+	local libre = emplacementLibre()
+	if libre == nil then
 		warn("Bases : aucun emplacement libre pour " .. tostring(joueur.Name))
 		return nil
 	end
+	local numero = libre :: number
 	occupants[numero] = joueur
 	local modele = construire(joueur, centreEmplacement(numero))
 	basesParJoueur[joueur] = { emplacement = numero, modele = modele }
@@ -151,16 +152,24 @@ end
 
 -- Vrai si le personnage du joueur est vivant et au-dessus de SA Forge.
 function Bases.estSurSaForge(joueur: Player): boolean
-	local forge = Bases.forgeDe(joueur)
-	local personnage = joueur.Character
-	if forge == nil or personnage == nil then
+	local forgeTrouvee = Bases.forgeDe(joueur)
+	local personnageTrouve = joueur.Character
+	if forgeTrouvee == nil or personnageTrouve == nil then
 		return false
 	end
+	local forge = forgeTrouvee :: BasePart
+	local personnage = personnageTrouve :: Model
 	local humanoide = personnage:FindFirstChildOfClass("Humanoid")
-	local racine = personnage:FindFirstChild("HumanoidRootPart")
-	if humanoide == nil or humanoide.Health <= 0 or racine == nil or not racine:IsA("BasePart") then
+	local racineTrouvee = personnage:FindFirstChild("HumanoidRootPart")
+	if
+		humanoide == nil
+		or humanoide.Health <= 0
+		or racineTrouvee == nil
+		or not racineTrouvee:IsA("BasePart")
+	then
 		return false
 	end
+	local racine = racineTrouvee :: BasePart
 	local local_ = forge.CFrame:PointToObjectSpace(racine.Position)
 	local demi = forge.Size / 2
 	local hauteur = local_.Y - demi.Y

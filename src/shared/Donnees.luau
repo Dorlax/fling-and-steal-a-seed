@@ -3,9 +3,9 @@
 -- Testable avec Lune (pas de dépendance à Roblox).
 -- Roblox : require(script.Parent.X) ; Lune (tests) : require("./X").
 -- selene: allow(incorrect_standard_library_use)
-local Config = if script then require(script.Parent.Config) else require("./Config")
+local Config = if script then require(script.Parent.Config) else (require :: any)("./Config")
 -- selene: allow(incorrect_standard_library_use)
-local Forge = if script then require(script.Parent.Forge) else require("./Forge")
+local Forge = if script then require(script.Parent.Forge) else (require :: any)("./Forge")
 
 export type DonneesJoueur = {
 	Force: number,
