@@ -47,4 +47,7 @@ Les taux sont toujours affichés au joueur.
 - Plateformes : PC, mobile, console
 
 ## Ambiance
-- Style : nature sauvage colorée, graines et créatures lumineuses, nuits plus sombres et menaçantes.
+- Style : cartoon très coloré, dans l'esprit des jeux de simulation populaires que le propriétaire apprécie : formes arrondies et épaisses, couleurs vives et saturées, contours lisibles, créatures expressives et mignonnes.
+- Univers : nature sauvage joyeuse, graines et créatures lumineuses.
+- Les nuits restent plus sombres et menaçantes, mais gardent le même style cartoon (couleurs profondes, monstres comiques plutôt qu'effrayants), pour rester adapté aux 9 ans et plus.
+- Interface : gros boutons colorés, texte épais et lisible, animations rebondissantes et effets visuels généreux à chaque tirage rare.
