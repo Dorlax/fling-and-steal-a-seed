@@ -1,5 +1,5 @@
 {
-  "name": "mon-jeu",
+  "name": "fling-and-steal-a-seed",
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {

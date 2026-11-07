@@ -1,7 +1,7 @@
 --!strict
 -- Configuration partagée du jeu (module pur : testable avec Lune).
 local Config = {
-	NomDuJeu = "Mon jeu",
+	NomDuJeu = "Fling & Steal a Seed",
 	Version = "0.1.0",
 }
 
