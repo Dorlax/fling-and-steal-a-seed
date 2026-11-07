@@ -1,5 +1,5 @@
 ---
-statut: brouillon
+statut: prêt
 taille: normale
 priorité: haute
 ---
