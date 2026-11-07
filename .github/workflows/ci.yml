@@ -28,7 +28,7 @@ jobs:
       - name: Typage (luau-lsp)
         run: |
           rojo sourcemap default.project.json -o sourcemap.json
-          curl -sSfLo globalTypes.d.luau https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.luau
+          curl -sSfLo globalTypes.d.luau https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/1.32.0/scripts/globalTypes.d.luau
           luau-lsp analyze --sourcemap=sourcemap.json --defs=globalTypes.d.luau src
 
       - name: Tests unitaires (Lune)
