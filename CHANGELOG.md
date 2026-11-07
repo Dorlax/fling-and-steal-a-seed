@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-07 — Correctif CI (dossier build manquant)
+- Le dossier `build/` est maintenant présent dans le dépôt (`build/.gitkeep`) : `rojo build … -o build/jeu.rbxl` ne plante plus en CI. Son contenu généré reste ignoré.
+
 ## 2026-11-07 — Correctif CI (erreurs de typage du code)
 - InterfaceStats : table des boutons typée `{ [string]: TextButton }`.
 - Sauvegarde, Bases : raffinements explicites des valeurs optionnelles (DataStore, emplacement, Forge, personnage).

@@ -1,4 +1,5 @@
-build/
+build/*
+!build/.gitkeep
 sourcemap.json
 globalTypes.d.luau
 *.rbxl.lock
