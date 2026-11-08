@@ -300,7 +300,7 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 		Zone = zone,
 		Rarete = rarete,
 		-- Taille et espèce : tirages serveur indépendants de la rareté.
-		Taille = Fiche.tirerTaille(hasard:NextNumber()),
+		Taille = Fiche.tirerTaille(hasard:NextNumber(), biome),
 		Espece = Bestiaire.tirerEspece(rarete, hasard:NextNumber(), biome).Nom,
 	}
 

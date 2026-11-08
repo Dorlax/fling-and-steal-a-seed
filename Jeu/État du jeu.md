@@ -21,7 +21,7 @@
 - Les créatures atterrissent au sol (max 10), récoltables ; elles disparaissent si on les laisse.
 
 ## Tailles des créatures
-- Taille tirée par le serveur à la pousse (taux affichés au lancer) : Normale 60 %, Grande 25 %, Géante 10 %, Colossale 4 %, Titan 1 % ; échelle ×1 à ×2,8, revenu ×1, ×2, ×4, ×8, ×20 (`Config.Tailles`).
+- Taille tirée par le serveur à la pousse (taux affichés au lancer) : Normale 60 %, Grande 25 %, Géante 10 %, Colossale 4 %, Titan 1 % au biome 1, puis grosses tailles plus fréquentes à chaque biome (poids × (1 + 0,2 × (biome - 1))^(rang - 1), ex. biome 6 : 30/25/20/16/8 %) ; taux du biome atteint affichés au lancer ; échelle ×1 à ×2,8, revenu ×1, ×2, ×4, ×8, ×20 (`Config.Tailles`).
 - Fiche de créature sauvegardée « Rarete[:Taille[:Espece]] » (`Shared.Fiche`) ; les anciennes sauvegardes (rareté seule) restent valides (taille Normale).
 - La créature pousse depuis la graine (croissance animée de 0,7 s, récolte possible ensuite).
 
