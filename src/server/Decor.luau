@@ -14,11 +14,10 @@ local Decor = {}
 
 -- Doit rester cohérent avec Bases (sol de 40, emplacements tous les 60 studs,
 -- de -360 à +360) et TerresSauvages (800 de large, de Z = 20 à Z = 600).
-local DEMI_LARGEUR = 400
+local DEMI_LARGEUR = 600
 local BORD_BASES = 20
 local FOND_SAUVAGE = 600 -- fond du biome 1 (Prairie)
-local ECART_BASES = 60
-local DEMI_SOL_BASE = 20
+local ECART_BASES = 90
 local LARGEUR_PORTE = 10
 local GRAINE = 20261108 -- même décor à chaque serveur
 
@@ -937,7 +936,7 @@ local function creerBiome(racine: Instance, numero: number)
 	local hasard = Random.new(GRAINE + numero * 97)
 	local debut = BORD_BASES + Biomes.debut(numero)
 	for _, element in theme do
-		for _ = 1, element.nombre do
+		for _ = 1, math.floor(element.nombre * 1.5) do
 			local x = hasard:NextNumber(-DEMI_LARGEUR + 12, DEMI_LARGEUR - 12)
 			local z = hasard:NextNumber(debut + 25, debut + Biomes.Longueur - 15)
 			if math.abs(x) > 50 or z > debut + 60 then
@@ -960,8 +959,8 @@ function Decor.creer(): Folder
 		racine,
 		"Place",
 		Enum.PartType.Block,
-		Vector3.new(DEMI_LARGEUR * 2, 1, 100),
-		CFrame.new(0, -0.55, BORD_BASES - 50),
+		Vector3.new(DEMI_LARGEUR * 2, 1, 140),
+		CFrame.new(0, -0.55, BORD_BASES - 70),
 		COULEURS.Sable,
 		true
 	)
@@ -995,17 +994,17 @@ function Decor.creer(): Folder
 			FOND_SAUVAGE - 20
 		)
 	end
-	for _ = 1, 70 do
+	for _ = 1, 105 do
 		arbre(nature, pointLibre(), hasard)
 	end
-	for _ = 1, 40 do
+	for _ = 1, 60 do
 		rocher(nature, pointLibre(), hasard)
 	end
-	for _ = 1, 14 do
+	for _ = 1, 21 do
 		champignon(nature, pointLibre(), hasard)
 	end
 	local fleurs = dossier(nature, "Fleurs")
-	for _ = 1, 45 do
+	for _ = 1, 65 do
 		-- Petits massifs de 3 à 5 fleurs.
 		local centre = pointLibre()
 		for _ = 1, hasard:NextInteger(3, 5) do
@@ -1018,9 +1017,9 @@ function Decor.creer(): Folder
 	end
 
 	-- Arbres derrière les bases.
-	for _ = 1, 30 do
+	for _ = 1, 45 do
 		local x = hasard:NextNumber(-DEMI_LARGEUR + 10, DEMI_LARGEUR - 10)
-		arbre(nature, Vector3.new(x, 0, hasard:NextNumber(-95, -40)), hasard)
+		arbre(nature, Vector3.new(x, 0, hasard:NextNumber(-130, -75)), hasard)
 	end
 
 	-- Collines tout autour : derrière les bases, le long de chaque biome (à sa
@@ -1034,10 +1033,10 @@ function Decor.creer(): Folder
 		local couleurFin =
 			Color3.fromRGB(dernier.Bordure[1], dernier.Bordure[2], dernier.Bordure[3])
 		colline(bord, Vector3.new(x, 0, fin + 15), t, couleurFin)
-		colline(bord, Vector3.new(x, 0, -110), t * 0.8, COULEURS.CollineClaire)
+		colline(bord, Vector3.new(x, 0, -150), t * 0.8, COULEURS.CollineClaire)
 		x += 45
 	end
-	local z = -100
+	local z = -140
 	while z <= fin do
 		local t = hasard:NextNumber(50, 80)
 		local biome = Biomes.biome(Biomes.index(z - BORD_BASES))
@@ -1097,7 +1096,7 @@ function Decor.ornerBase(base: Model)
 			BORDURES_BASE[(n - 1) % #BORDURES_BASE + 1]
 		)
 	end
-	local d = DEMI_SOL_BASE
+	local d = (trouve :: BasePart).Size.X / 2
 	local segment = 5
 	for i = -d + segment / 2, d - segment / 2, segment do
 		bordure(centre + Vector3.new(i, 0.4, -d), Vector3.new(segment - 0.3, 0.8, 1))

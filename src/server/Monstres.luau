@@ -98,7 +98,7 @@ end
 local function pointAleatoire(zone: string, biome: number): Vector3
 	local zMin, zMax = Monstre.bandeZone(zone, biome)
 	local p = Monstre.limiter({
-		X = aleatoire:NextNumber(-380, 380),
+		X = aleatoire:NextNumber(-580, 580),
 		Y = hauteurSol(zone),
 		Z = aleatoire:NextNumber(zMin, zMax),
 	}, zone, biome)

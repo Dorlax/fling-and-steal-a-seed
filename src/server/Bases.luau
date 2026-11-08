@@ -30,12 +30,10 @@ end
 local reglagesRaid = Config.Raid
 
 local raretes: any = Config.Raretes -- indexé par des noms dynamiques
-local TAILLE_SOL = 40
+local BORD_BASES = 20 -- bord des bases côté Terres Sauvages (Z)
 local HAUTEUR_BASE = 12 -- « dans la base » : jusqu'à 12 studs au-dessus du sol
-local TAILLE_EXPOSEE = 2 -- diamètre des créatures exposées dans la base
+local TAILLE_EXPOSEE = 3 -- diamètre des créatures exposées (leur vraie taille)
 local HAUTEUR_SOCLE = 1.4 -- les créatures exposées trônent sur un socle
-local BORD_EXPOSITION = 16 -- rangées à 16 studs du centre (sol de 40)
-local ECART = 60 -- distance entre deux bases (studs)
 local NOMBRE_EMPLACEMENTS = 12
 
 local COULEUR_SOL = Color3.fromRGB(110, 215, 80)
@@ -53,6 +51,19 @@ local occupants: { [number]: any } = {}
 type Base = { emplacement: number, modele: Model }
 local basesParJoueur: { [any]: Base } = {}
 
+-- Niveau d'agrandissement (1 à 3) et côté du sol de la base du joueur.
+local function agrandissementDe(joueur: any): number
+	local niveau = joueur:GetAttribute("Agrandissement")
+	if type(niveau) ~= "number" or niveau ~= niveau or niveau < 1 then
+		return 1
+	end
+	return math.min(math.floor(niveau), #Config.Bases.Tailles)
+end
+
+local function tailleDe(joueur: any): number
+	return Config.Bases.Tailles[agrandissementDe(joueur)]
+end
+
 local function dossierBases(): Folder
 	local dossier = Workspace:FindFirstChild("Bases")
 	if dossier and dossier:IsA("Folder") then
@@ -64,11 +75,12 @@ local function dossierBases(): Folder
 	return nouveau
 end
 
--- Les emplacements forment une ligne centrée sur l'origine : 0, +60, -60, +120…
-local function centreEmplacement(numero: number): Vector3
+-- Les emplacements forment une ligne centrée sur l'origine : 0, +90, -90…
+-- Le bord avant de la base reste à Z = BORD_BASES, quelle que soit sa taille.
+local function centreEmplacement(numero: number, taille: number): Vector3
 	local rang = math.floor(numero / 2)
 	local signe = if numero % 2 == 1 then 1 else -1
-	return Vector3.new(signe * rang * ECART, 0, 0)
+	return Vector3.new(signe * rang * Config.Bases.Ecart, 0, BORD_BASES - taille / 2)
 end
 
 local function emplacementLibre(): number?
@@ -81,6 +93,7 @@ local function emplacementLibre(): number?
 end
 
 local function construire(joueur: any, centre: Vector3): Model
+	local TAILLE_SOL = tailleDe(joueur)
 	local modele = Instance.new("Model")
 	modele.Name = "Base_" .. tostring(joueur.Name)
 
@@ -230,7 +243,7 @@ function Bases.creer(joueur: any): Model?
 	end
 	local numero = libre :: number
 	occupants[numero] = joueur
-	local modele = construire(joueur, centreEmplacement(numero))
+	local modele = construire(joueur, centreEmplacement(numero, tailleDe(joueur)))
 	basesParJoueur[joueur] = { emplacement = numero, modele = modele }
 	return modele
 end
@@ -420,8 +433,9 @@ local function creerCreatureExposee(
 	local infos = Fiche.lire(fiche) or { Rarete = "Commune", Taille = "Normale", Espece = nil }
 	local rarete = infos.Rarete
 	-- Les grosses sont réduites dans la base pour tenir dans leur emplacement.
-	local diametre = TAILLE_EXPOSEE
-		* math.min(Fiche.echelle(infos.Taille), Config.Tailles.EchelleBaseMax)
+	-- Les grosses ne sont réduites que si la base est trop petite pour elles.
+	local echelleMax = Config.Bases.EchelleMax[agrandissementDe(proprietaire)]
+	local diametre = TAILLE_EXPOSEE * math.min(Fiche.echelle(infos.Taille), echelleMax)
 	position += Vector3.new(0, (diametre - TAILLE_EXPOSEE) / 2, 0)
 	local rgb = raretes.Couleurs[rarete] or { 255, 255, 255 }
 	local couleur = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
@@ -492,7 +506,8 @@ end
 -- Position (relative au centre de la base) de l'emplacement `numero` :
 -- deux rangées le long des bords X, loin de la Forge (centre, Z +4..+12)
 -- et du point d'apparition (centre, Z -8).
-local function positionEmplacement(numeroGlobal: number): Vector3
+local function positionEmplacement(numeroGlobal: number, taille: number): Vector3
+	local BORD_EXPOSITION = taille / 2 - 4
 	-- 10 places par étage : l'étage est donné par le numéro.
 	local parEtage = Config.Creatures.MaxCreaturesBase
 	local etage = math.floor((numeroGlobal - 1) / parEtage)
@@ -543,6 +558,7 @@ end
 
 -- (Re)crée les étages achetés : plateforme, garde-corps et ascenseurs.
 local function afficherEtages(joueur: any, base: Base)
+	local TAILLE_SOL = tailleDe(joueur)
 	local ancien = base.modele:FindFirstChild("Etages")
 	if ancien then
 		ancien:Destroy()
@@ -622,6 +638,29 @@ local function afficherEtages(joueur: any, base: Base)
 		bouclier.Size = Vector3.new(TAILLE_SOL, hauteur, TAILLE_SOL)
 		bouclier.Position = sol - Vector3.new(0, 0.5, 0) + Vector3.new(0, hauteur / 2, 0)
 	end
+end
+
+-- Achat de l'agrandissement suivant (sol plus grand, socles plus espacés,
+-- créatures exposées plus grandes). La base est reconstruite au même
+-- emplacement ; l'appelant réaffiche les créatures. Renvoie true si acheté.
+function Bases.agrandir(joueur: any): boolean
+	local base = basesParJoueur[joueur]
+	local niveau = agrandissementDe(joueur)
+	if base == nil or niveau >= #Config.Bases.Tailles then
+		return false
+	end
+	local prix = Config.Bases.PrixAgrandissement[niveau]
+	local pieces = joueur:GetAttribute("Pieces")
+	if type(prix) ~= "number" or type(pieces) ~= "number" or pieces ~= pieces or pieces < prix then
+		return false
+	end
+	joueur:SetAttribute("Pieces", pieces - prix)
+	joueur:SetAttribute("Agrandissement", niveau + 1)
+	-- Nouvelle base d'abord (personne ne tombe), puis l'ancienne disparaît.
+	local ancienne = base.modele
+	base.modele = construire(joueur, centreEmplacement(base.emplacement, tailleDe(joueur)))
+	ancienne:Destroy()
+	return true
 end
 
 -- Achat de l'étage suivant avec des pièces (tout vérifié ici). Renvoie true
@@ -737,7 +776,7 @@ function Bases.afficherCreatures(joueur: any, liste: { string })
 			local rgb = raretes.Couleurs[infos.Rarete] or { 255, 255, 255 }
 			couleur = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
 		end
-		local position = centre + positionEmplacement(numero)
+		local position = centre + positionEmplacement(numero, tailleDe(joueur))
 		local etage = math.floor((numero - 1) / Config.Creatures.MaxCreaturesBase)
 		local y = centre.Y + etage * Config.Bases.HauteurEtage
 		creerSocle(numero, Vector3.new(position.X, y, position.Z), couleur, socles)
@@ -749,7 +788,12 @@ function Bases.afficherCreatures(joueur: any, liste: { string })
 			break
 		end
 		if type(rarete) == "string" then
-			creerCreatureExposee(joueur, numero, rarete, centre + positionEmplacement(numero)).Parent =
+			creerCreatureExposee(
+				joueur,
+				numero,
+				rarete,
+				centre + positionEmplacement(numero, tailleDe(joueur))
+			).Parent =
 				dossier
 		end
 	end

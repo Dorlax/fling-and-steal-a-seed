@@ -11,7 +11,7 @@ local TerresSauvages = {}
 
 -- Les 12 emplacements de Bases vont de X = -360 à +360 (sols de 40 studs) :
 -- 800 studs de large les couvrent tous.
-local LARGEUR = 800
+local LARGEUR = 1200 -- couvre les 12 bases (90 studs d'écart, jusqu'à 72 de large)
 local BORD_BASES = 20 -- bord des bases côté +Z
 local EPAISSEUR = 1
 

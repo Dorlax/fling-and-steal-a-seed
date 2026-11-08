@@ -32,7 +32,7 @@ local reglages = Config.Monstres
 -- Sol des Terres Sauvages (voir TerresSauvages) : 800 studs de large centrés
 -- sur X = 0, de Z = BordBases jusqu'à la fin du dernier biome.
 local MARGE_SOL = 5
-local DEMI_LARGEUR = 400 - MARGE_SOL
+local DEMI_LARGEUR = 600 - MARGE_SOL
 local Z_FOND = reglages.BordBases + Biomes.nombre() * Biomes.Longueur - MARGE_SOL
 
 local function estNombreFini(valeur: any): boolean

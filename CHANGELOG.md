@@ -8,6 +8,11 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+
+## 2026-11-08 — Agrandissement des bases
+- Trois tailles de base (40, 56, 72 studs), achetées en pièces ; la base est reconstruite au même endroit, socles plus espacés.
+- Créatures exposées à leur vraie taille (3 studs × taille), réduites seulement au-delà de ce que la base permet (× 1,3 / 2,1 / 2,8).
+- Bases espacées de 90 studs ; Terres Sauvages et décor élargis à 1 200 studs.
 ## 2026-11-08 — Étages de base
 - Jusqu'à 3 étages par base, 10 socles chacun, achetés en pièces ; ascenseurs entre les étages ; capacité de la base = 10 × étages (sauvegardé).
 - Les raids et le verrou couvrent tous les étages.
