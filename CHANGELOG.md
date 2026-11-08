@@ -4,6 +4,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+
+## 2026-11-08 — Tailles des créatures et espèces « graine »
+- Cinq tailles (Normale → Titan) tirées par le serveur, taux affichés dans le panneau des taux ; revenu × 1 à × 20 selon la taille (`Config.Tailles`, `Shared.Fiche`).
+- Sauvegarde : chaque créature de base est une fiche « Rarete[:Taille[:Espece]] », compatible avec les anciennes sauvegardes.
+- Cinq nouvelles espèces sur le thème plante (Champichou, Tortipousse, Hibouflor, Lionfeuille, Phenigraine) : deux espèces par rareté.
+- La créature sort de terre et grandit à l'atterrissage de la graine ; panneaux et messages indiquent la taille (« Géante Épique »).
 ## 2026-11-08 — Textures pixel-art
 - Trois motifs 16×16 en niveaux de gris (Pelage, Écailles, Gelée), créés dans Blender et envoyés sur Roblox ; `Modeleur` les pose sur les faces visibles des gros blocs, teintés par leur couleur.
 ## 2026-11-08 — Finition du bestiaire

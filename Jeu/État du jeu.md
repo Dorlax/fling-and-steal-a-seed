@@ -11,6 +11,11 @@
 - Lancer une graine avec jauge de timing (Force + bonus de jauge) vers les Terres Sauvages ; zones Proche / Moyenne / Lointaine ; taux de rareté du Plan affichés. [[02 Lancer et raretés]]
 - Les créatures atterrissent au sol (max 10), récoltables ; elles disparaissent si on les laisse.
 
+## Tailles des créatures
+- Taille tirée par le serveur à la pousse (taux affichés au lancer) : Normale 60 %, Grande 25 %, Géante 10 %, Colossale 4 %, Titan 1 % ; échelle ×1 à ×2,8, revenu ×1, ×2, ×4, ×8, ×20 (`Config.Tailles`).
+- Fiche de créature sauvegardée « Rarete[:Taille[:Espece]] » (`Shared.Fiche`) ; les anciennes sauvegardes (rareté seule) restent valides (taille Normale).
+- La créature pousse depuis la graine (croissance animée de 0,7 s, récolte possible ensuite).
+
 ## Porter et revenus
 - Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (10 emplacements, « Base pleine ! »). [[03 Porter et revenus]]
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
@@ -24,7 +29,7 @@
 ## Décor et ambiance
 - Décor cartoon généré par le serveur (`Decor`) : éclairage coloré (atmosphère, saturation, éclat), place de sable sous les bases, chemins devant les portes, arbres (dont roses et dorés), rochers, champignons, fleurs, nuages, collines de bordure.
 - Bases ornées : bordure colorée (sans collision) et lampadaires-sucettes ; sol vert vif.
-- Bestiaire en blocs (`Shared.Bestiaire`, construit par `Modeleur`) : une espèce de créature par rareté (Poussigraine, Lapinou, Renardelle, Cerfaurore, Dragonnet) ; deux monstres par zone (Gloupinou/Piquerelle, Ronchonbulle/Croquelune, Grobidou/Brasaurus). Le `Corps` reste la racine invisible (taille et règles inchangées).
+- Bestiaire en blocs (`Shared.Bestiaire`, construit par `Modeleur`) : deux espèces de créature par rareté (Poussigraine/Champichou, Lapinou/Tortipousse, Renardelle/Hibouflor, Cerfaurore/Lionfeuille, Dragonnet/Phenigraine), tirées au hasard ; deux monstres par zone (Gloupinou/Piquerelle, Ronchonbulle/Croquelune, Grobidou/Brasaurus). Le `Corps` reste la racine invisible (taille et règles inchangées).
 - Auras de rareté : étincelles dès Épique, halo arc-en-ciel en Mythique.
 - Finition : ombrage automatique en 3 tons des gros blocs (bande sombre, dessus clair), détails par espèce (griffes, dents, rayures…), contours cartoon (Highlight) sur les 20 modèles les plus proches.
 - Textures pixel-art 16×16 (Pelage, Écailles, Gelée) teintées par la couleur de chaque gros bloc (`Bestiaire.Textures`, images du compte du propriétaire).

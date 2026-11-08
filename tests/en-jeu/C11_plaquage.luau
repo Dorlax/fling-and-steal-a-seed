@@ -119,7 +119,10 @@ end
 return {
 	["C11 RemoteEvent Plaquer et module Plaquages exposés"] = function()
 		local remote = ReplicatedStorage:WaitForChild("Plaquer", 5)
-		assert(remote and remote:IsA("RemoteEvent"), "RemoteEvent Plaquer attendu dans ReplicatedStorage")
+		assert(
+			remote and remote:IsA("RemoteEvent"),
+			"RemoteEvent Plaquer attendu dans ReplicatedStorage"
+		)
 		local P = module("Plaquages")
 		assert(type(P.plaquer) == "function", "Plaquages.plaquer manquant")
 		assert(type(P.traiterRequete) == "function", "Plaquages.traiterRequete manquant")

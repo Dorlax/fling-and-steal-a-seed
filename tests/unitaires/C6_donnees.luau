@@ -25,18 +25,25 @@ return {
 
 	["C7 Force invalide devient 0"] = function()
 		for _, v in { "abc", -5, 0 / 0 } do
-			local d = Donnees.nettoyer({ Force = v, Vitesse = 3, ModeForge = "Force", NiveauForge = 1 })
+			local d =
+				Donnees.nettoyer({ Force = v, Vitesse = 3, ModeForge = "Force", NiveauForge = 1 })
 			assert(d.Force == 0, "Force doit valoir 0 pour " .. tostring(v))
 		end
 	end,
 
 	["C7 Vitesse au-dessus du plafond est ramenée au plafond"] = function()
-		local d = Donnees.nettoyer({ Force = 1, Vitesse = plafond + 500, ModeForge = "Force", NiveauForge = 1 })
+		local d = Donnees.nettoyer({
+			Force = 1,
+			Vitesse = plafond + 500,
+			ModeForge = "Force",
+			NiveauForge = 1,
+		})
 		assert(d.Vitesse == plafond)
 	end,
 
 	["C7 mode inconnu devient Force"] = function()
-		local d = Donnees.nettoyer({ Force = 1, Vitesse = 1, ModeForge = "Triche", NiveauForge = 1 })
+		local d =
+			Donnees.nettoyer({ Force = 1, Vitesse = 1, ModeForge = "Triche", NiveauForge = 1 })
 		assert(d.ModeForge == "Force")
 	end,
 
@@ -47,7 +54,10 @@ return {
 	end,
 
 	["C7 valeurs valides conservées"] = function()
-		local d = Donnees.nettoyer({ Force = 12, Vitesse = 34, ModeForge = "Vitesse", NiveauForge = 1 })
-		assert(d.Force == 12 and d.Vitesse == 34 and d.ModeForge == "Vitesse" and d.NiveauForge == 1)
+		local d =
+			Donnees.nettoyer({ Force = 12, Vitesse = 34, ModeForge = "Vitesse", NiveauForge = 1 })
+		assert(
+			d.Force == 12 and d.Vitesse == 34 and d.ModeForge == "Vitesse" and d.NiveauForge == 1
+		)
 	end,
 }

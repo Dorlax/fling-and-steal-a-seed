@@ -14,6 +14,7 @@ local Lancer = require(ReplicatedStorage.Shared.Lancer)
 local Bases = require(script.Parent.Bases)
 local TerresSauvages = require(script.Parent.TerresSauvages)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
+local Fiche = require(ReplicatedStorage.Shared.Fiche)
 local Modeleur = require(script.Parent.Modeleur)
 
 export type Resultat = {
@@ -22,6 +23,8 @@ export type Resultat = {
 	Message: string,
 	Zone: string,
 	Rarete: string,
+	Taille: string?, -- Normale, Grande, Geante, Colossale ou Titan
+	Espece: string?,
 }
 
 type Etat = {
@@ -114,9 +117,16 @@ local function limiterCreatures(etat: Etat)
 	etat.creatures = vivantes
 end
 
-local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): Model
+local function creerCreature(
+	joueur: any,
+	resultat: Resultat,
+	point: Vector3,
+	pousse: boolean?
+): Model
 	local couleur = couleurRarete(resultat.Rarete)
 	local precieuse = (table.find(raretes.Ordre, resultat.Rarete) or 1) >= 3
+	local taille = resultat.Taille or "Normale"
+	local diametre = TAILLE_CREATURE * Fiche.echelle(taille)
 
 	local modele = Instance.new("Model")
 	modele.Name = "Creature"
@@ -124,22 +134,17 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 	local corps = Instance.new("Part")
 	corps.Name = "Corps"
 	corps.Shape = Enum.PartType.Ball
-	corps.Size = Vector3.one * TAILLE_CREATURE
+	corps.Size = Vector3.one * diametre
 	corps.Anchored = true
 	corps.CanCollide = false
 	corps.Color = couleur
 	corps.Material = if precieuse then Enum.Material.Neon else Enum.Material.SmoothPlastic
-	corps.CFrame = CFrame.new(point + Vector3.new(0, TAILLE_CREATURE / 2, 0))
+	corps.CFrame = CFrame.new(point + Vector3.new(0, diametre / 2, 0))
 	corps.Parent = modele
 
-	-- Forme en blocs de l'espèce de cette rareté (le Corps devient invisible).
-	Modeleur.construire(
-		modele,
-		corps,
-		Bestiaire.especeCreature(resultat.Rarete),
-		TAILLE_CREATURE,
-		couleur
-	)
+	-- Forme en blocs de l'espèce (le Corps devient invisible), à sa taille.
+	local espece = Bestiaire.especeCreature(resultat.Rarete, resultat.Espece)
+	Modeleur.construire(modele, corps, espece, diametre, couleur)
 	Modeleur.aura(corps, couleur, table.find(raretes.Ordre, resultat.Rarete) or 1)
 
 	if precieuse then
@@ -153,7 +158,7 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"
 	panneau.Size = UDim2.fromOffset(160, 40)
-	panneau.StudsOffset = Vector3.new(0, TAILLE_CREATURE + 1, 0)
+	panneau.StudsOffset = Vector3.new(0, diametre + 1, 0)
 	panneau.MaxDistance = 250
 	panneau.Parent = corps
 	local texte = Instance.new("TextLabel")
@@ -164,7 +169,7 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 	texte.TextColor3 = couleur
 	texte.TextStrokeTransparency = 0
 	texte.TextStrokeColor3 = Color3.new(0, 0, 0)
-	texte.Text = raretes.Noms[resultat.Rarete] or resultat.Rarete
+	texte.Text = Fiche.texte(resultat.Rarete, taille)
 	texte.Parent = panneau
 
 	-- Bouton « Récolter » (tactile, touche, manette) ; validé par le serveur.
@@ -185,10 +190,15 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 
 	modele.PrimaryPart = corps
 	modele:SetAttribute("Rarete", resultat.Rarete)
+	modele:SetAttribute("Taille", taille)
+	modele:SetAttribute("Espece", espece.Nom)
 	modele:SetAttribute("Zone", resultat.Zone)
 	modele:SetAttribute("Proprietaire", joueur.UserId)
 	modele:SetAttribute("Distance", resultat.Distance)
 	modele.Parent = TerresSauvages.dossierCreatures()
+	if pousse ~= false then
+		Modeleur.pousser(modele)
+	end
 	return modele
 end
 
@@ -280,12 +290,16 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 	local distance = Lancer.distance(joueur:GetAttribute("Force"), palier.Bonus)
 	local zone = Lancer.zone(distance)
 	local tirage = if estNombreFini(aleatoire) then aleatoire :: number else hasard:NextNumber()
+	local rarete = Lancer.tirerRarete(zone, tirage)
 	local resultat: Resultat = {
 		Distance = distance,
 		Couleur = palier.Couleur,
 		Message = palier.Message,
 		Zone = zone,
-		Rarete = Lancer.tirerRarete(zone, tirage),
+		Rarete = rarete,
+		-- Taille et espèce : tirages serveur indépendants de la rareté.
+		Taille = Fiche.tirerTaille(hasard:NextNumber()),
+		Espece = Bestiaire.tirerEspece(rarete, hasard:NextNumber()).Nom,
 	}
 
 	local bord = bordDeBase(modele :: Model)
@@ -325,14 +339,17 @@ end
 -- Crée une créature identique à une créature récoltée (bouton « Récolter »,
 -- Rarete, Proprietaire = joueur), marquée Volee, au point donné (raid).
 -- Elle n'entre pas dans la liste « au sol » du joueur.
-function Lancers.creerCreaturePortable(joueur: any, rarete: string, point: Vector3): Model
+function Lancers.creerCreaturePortable(joueur: any, fiche: string, point: Vector3): Model
+	local infos = Fiche.lire(fiche) or { Rarete = "Commune", Taille = "Normale", Espece = nil }
 	local modele = creerCreature(joueur, {
 		Distance = 0,
 		Couleur = "",
 		Message = "",
 		Zone = "Raid",
-		Rarete = rarete,
-	}, point)
+		Rarete = infos.Rarete,
+		Taille = infos.Taille,
+		Espece = infos.Espece,
+	}, point, false)
 	modele:SetAttribute("Volee", true)
 	return modele
 end

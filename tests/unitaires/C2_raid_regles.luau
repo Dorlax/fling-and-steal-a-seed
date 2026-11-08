@@ -86,7 +86,10 @@ return {
 		local c = table.clone(tout)
 		for _, etape in ordre do
 			local _, pourquoi = Raid.verifierVol(c)
-			assert(pourquoi == etape[3], "attendu " .. etape[3] .. ", obtenu " .. tostring(pourquoi))
+			assert(
+				pourquoi == etape[3],
+				"attendu " .. etape[3] .. ", obtenu " .. tostring(pourquoi)
+			)
 			c[etape[1]] = not etape[2]
 		end
 		local _, dernier = Raid.verifierVol(c)
@@ -119,7 +122,10 @@ return {
 	end,
 
 	["C4 verifierVerrou : ordre de priorité et bornes"] = function()
-		refusVerrou({ estProprietaire = false, vivant = false, distance = 99, pieces = 0 }, "proprietaire")
+		refusVerrou(
+			{ estProprietaire = false, vivant = false, distance = 99, pieces = 0 },
+			"proprietaire"
+		)
 		refusVerrou({ vivant = false, distance = 99, pieces = 0 }, "indisponible")
 		refusVerrou({ distance = 99, verrouJusqua = 150, pieces = 0 }, "portee")
 		refusVerrou({ verrouJusqua = 150, pretA = 200, pieces = 0 }, "verrouillee")
@@ -153,7 +159,13 @@ return {
 					local r = Raid.doitExpulser(proprio, dans, verrouillee)
 					assert(
 						r == attendu,
-						string.format("(%s, %s, %s) : attendu %s", tostring(proprio), tostring(dans), tostring(verrouillee), tostring(attendu))
+						string.format(
+							"(%s, %s, %s) : attendu %s",
+							tostring(proprio),
+							tostring(dans),
+							tostring(verrouillee),
+							tostring(attendu)
+						)
 					)
 				end
 			end
@@ -164,7 +176,10 @@ return {
 		local liste = { "Commune", "Rare", "Epique" }
 		local nouvelle, rarete = Raid.retirerEmplacement(liste, 2)
 		assert(rarete == "Rare", "rareté retirée attendue : Rare")
-		assert(#nouvelle == 2 and nouvelle[1] == "Commune" and nouvelle[2] == "Epique", "les suivants remontent")
+		assert(
+			#nouvelle == 2 and nouvelle[1] == "Commune" and nouvelle[2] == "Epique",
+			"les suivants remontent"
+		)
 		assert(#liste == 3 and liste[2] == "Rare", "l'entrée ne doit pas être modifiée")
 		assert(nouvelle ~= liste, "doit renvoyer une copie")
 	end,
@@ -174,7 +189,13 @@ return {
 		for _, numero in { 0, 4, 1.5, -1, "2", 0 / 0 } do
 			local nouvelle, rarete = Raid.retirerEmplacement(liste, numero :: any)
 			assert(rarete == nil, "rareté nil attendue pour " .. tostring(numero))
-			assert(#nouvelle == 3 and nouvelle[1] == "Commune" and nouvelle[2] == "Rare" and nouvelle[3] == "Epique", "liste identique pour " .. tostring(numero))
+			assert(
+				#nouvelle == 3
+					and nouvelle[1] == "Commune"
+					and nouvelle[2] == "Rare"
+					and nouvelle[3] == "Epique",
+				"liste identique pour " .. tostring(numero)
+			)
 			assert(nouvelle ~= liste, "doit renvoyer une copie")
 		end
 		local nouvelle, rarete = Raid.retirerEmplacement(liste, nil :: any)

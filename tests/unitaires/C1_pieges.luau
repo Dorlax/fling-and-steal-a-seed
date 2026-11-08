@@ -118,7 +118,16 @@ return {
 		local seuil = Config.Monstres.BordBases + Config.Monstres.MargeBases
 		refusPose({ dansUneBase = true }, "zone")
 		refusPose({ position = { X = 0, Y = 0, Z = seuil - 1 } }, "zone")
-		refusPose({ position = { X = 0, Y = 0, Z = Config.Monstres.BordBases + Config.Lancer.DistanceMax + 41 } }, "zone")
+		refusPose(
+			{
+				position = {
+					X = 0,
+					Y = 0,
+					Z = Config.Monstres.BordBases + Config.Lancer.DistanceMax + 41,
+				},
+			},
+			"zone"
+		)
 		refusPose({ position = { X = 401, Y = 0, Z = seuil + 10 } }, "zone")
 		local ok = Piege.verifierPose(contexteHors({ position = { X = 0, Y = 0, Z = seuil } }))
 		assert(ok == true, "Z = BordBases + MargeBases : pose permise")
@@ -155,16 +164,20 @@ return {
 	end,
 
 	["C4 peutAffecter refuse pendant la protection puis accepte après"] = function()
-		local ok, raison = Piege.peutAffecter(contexteAffecter({ maintenant = 100, protegeeJusqua = 104 }))
+		local ok, raison =
+			Piege.peutAffecter(contexteAffecter({ maintenant = 100, protegeeJusqua = 104 }))
 		assert(ok == false and raison == "protegee", "raison « protegee » attendue")
-		local apres = Piege.peutAffecter(contexteAffecter({ maintenant = 104, protegeeJusqua = 104 }))
+		local apres =
+			Piege.peutAffecter(contexteAffecter({ maintenant = 104, protegeeJusqua = 104 }))
 		assert(apres == true, "protection finie : affectable")
 	end,
 
 	["C4 peutAffecter refuse pendant une immobilisation"] = function()
-		local ok, raison = Piege.peutAffecter(contexteAffecter({ maintenant = 100, immobileJusqua = 103 }))
+		local ok, raison =
+			Piege.peutAffecter(contexteAffecter({ maintenant = 100, immobileJusqua = 103 }))
 		assert(ok == false and raison == "deja", "raison « deja » attendue")
-		local apres = Piege.peutAffecter(contexteAffecter({ maintenant = 103, immobileJusqua = 103 }))
+		local apres =
+			Piege.peutAffecter(contexteAffecter({ maintenant = 103, immobileJusqua = 103 }))
 		assert(apres == true, "immobilisation finie : affectable")
 	end,
 
@@ -175,7 +188,10 @@ return {
 
 	["C5 walkSpeed applique le multiplicateur de glu"] = function()
 		local attendu = 16 * PIEGES.Types.Glu.Multiplicateur
-		assert(math.abs(Piege.walkSpeed(16, false, true) - attendu) < 1e-6, "base × Multiplicateur attendu")
+		assert(
+			math.abs(Piege.walkSpeed(16, false, true) - attendu) < 1e-6,
+			"base × Multiplicateur attendu"
+		)
 	end,
 
 	["C5 walkSpeed renvoie la base sans effet"] = function()
@@ -197,7 +213,10 @@ return {
 				englue == base or math.abs(englue - base * mult) < 1e-6,
 				"base invalide englué : WalkSpeedBase éventuellement multiplié"
 			)
-			assert(Piege.walkSpeed(invalide, true, false) == 0, "immobilisé : 0 même si base invalide")
+			assert(
+				Piege.walkSpeed(invalide, true, false) == 0,
+				"immobilisé : 0 même si base invalide"
+			)
 		end
 	end,
 
@@ -221,7 +240,10 @@ return {
 
 	["C7 texteBouton affiche nom et prix quand prêt"] = function()
 		local attendu = PIEGES.Types.Filet.Nom .. " " .. PIEGES.Types.Filet.Prix
-		assert(Piege.texteBouton("Filet", 100, nil, 0) == attendu, "« " .. attendu .. " » attendu")
+		assert(
+			Piege.texteBouton("Filet", 100, nil, 0) == attendu,
+			"« " .. attendu .. " » attendu"
+		)
 		assert(Piege.texteBouton("Filet", 100, 100, 0) == attendu, "prêt pile à pretA")
 		local glu = PIEGES.Types.Glu.Nom .. " " .. PIEGES.Types.Glu.Prix
 		assert(Piege.texteBouton("Glu", 100, 50, 1) == glu, "délai passé : texte normal")
@@ -234,6 +256,9 @@ return {
 
 	["C7 texteBouton affiche MAX à la limite de pièges"] = function()
 		assert(Piege.texteBouton("Filet", 100, nil, PIEGES.MaxParJoueur) == "MAX", "MAX attendu")
-		assert(Piege.texteBouton("Filet", 100, nil, PIEGES.MaxParJoueur + 2) == "MAX", "MAX attendu (>)")
+		assert(
+			Piege.texteBouton("Filet", 100, nil, PIEGES.MaxParJoueur + 2) == "MAX",
+			"MAX attendu (>)"
+		)
 	end,
 }

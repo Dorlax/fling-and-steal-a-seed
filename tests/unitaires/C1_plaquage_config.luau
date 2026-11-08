@@ -15,12 +15,18 @@ return {
 		assert(type(Config.Plaquage) == "table", "Config.Plaquage manquant")
 		for _, cle in CLES do
 			local v = Config.Plaquage[cle]
-			assert(type(v) == "number" and v > 0, "Config.Plaquage." .. cle .. " doit être un nombre > 0")
+			assert(
+				type(v) == "number" and v > 0,
+				"Config.Plaquage." .. cle .. " doit être un nombre > 0"
+			)
 		end
 	end,
 
 	["C1 DureeProtection >= DureeAuSol"] = function()
-		assert(Config.Plaquage.DureeProtection >= Config.Plaquage.DureeAuSol, "protection plus courte que le temps au sol")
+		assert(
+			Config.Plaquage.DureeProtection >= Config.Plaquage.DureeAuSol,
+			"protection plus courte que le temps au sol"
+		)
 	end,
 
 	["C2 touches : F au clavier, ButtonY à la manette"] = function()

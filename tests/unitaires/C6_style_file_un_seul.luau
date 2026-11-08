@@ -21,7 +21,10 @@ return {
 		for i = 0, 200 do
 			local t = i * 0.05
 			local c = Style.courant(f, t)
-			assert(c == nil or type(c) == "string", "courant doit renvoyer un texte ou nil à t=" .. t)
+			assert(
+				c == nil or type(c) == "string",
+				"courant doit renvoyer un texte ou nil à t=" .. t
+			)
 			if c ~= nil then
 				vus[c] = true
 			end

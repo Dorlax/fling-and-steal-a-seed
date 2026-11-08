@@ -7,6 +7,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Fiche = require(ReplicatedStorage.Shared.Fiche)
 local Donnees = require(ReplicatedStorage.Shared.Donnees)
 local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
@@ -69,9 +70,10 @@ function Sauvegarde.creaturesDe(joueur: any): { string }
 	return table.clone(creaturesParJoueur[joueur] or {})
 end
 
--- Ajoute une créature (rareté valide) à la base si elle n'est pas pleine.
+-- Ajoute une créature (fiche valide : « Rarete[:Taille[:Espece]] ») à la
+-- base si elle n'est pas pleine.
 function Sauvegarde.ajouterCreature(joueur: any, rarete: any): boolean
-	if type(rarete) ~= "string" or not table.find(Config.Raretes.Ordre, rarete) then
+	if not Fiche.valide(rarete) then
 		return false
 	end
 	local liste = creaturesParJoueur[joueur]

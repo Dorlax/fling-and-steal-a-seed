@@ -12,7 +12,10 @@ return {
 			local somme = 0
 			for _, rarete in Config.Raretes.Ordre do
 				local taux = Config.Raretes.Taux[zone][rarete]
-				assert(type(taux) == "number" and taux > 0, "taux invalide : " .. zone .. " " .. rarete)
+				assert(
+					type(taux) == "number" and taux > 0,
+					"taux invalide : " .. zone .. " " .. rarete
+				)
 				somme += taux
 			end
 			assert(math.abs(somme - 100) < 1e-9, "somme != 100 pour " .. zone .. " : " .. somme)
@@ -22,7 +25,10 @@ return {
 	["C1 les taux sont exactement ceux du Plan"] = function()
 		for zone, taux in attendu do
 			for rarete, valeur in taux do
-				assert(Config.Raretes.Taux[zone][rarete] == valeur, "taux différent : " .. zone .. " " .. rarete)
+				assert(
+					Config.Raretes.Taux[zone][rarete] == valeur,
+					"taux différent : " .. zone .. " " .. rarete
+				)
 			end
 		end
 		assert(Config.Raretes.Taux.Proche.Mythique == 0.2, "Proche Mythique doit valoir 0,2")

@@ -13,13 +13,29 @@ local ROLES = {
 }
 
 return {
-	["C2 chaque rareté a sa propre espèce de créature"] = function()
+	["C2 chaque rareté a au moins deux espèces, jamais partagées"] = function()
 		local vues = {}
 		for _, rarete in Config.Raretes.Ordre do
-			local espece = Bestiaire.especeCreature(rarete)
-			assert(espece ~= nil, "pas d'espèce pour " .. rarete)
-			assert(vues[espece.Nom] == nil, "espèce partagée : " .. espece.Nom)
-			vues[espece.Nom] = true
+			local liste = (Bestiaire.Creatures :: any)[rarete]
+			assert(liste and #liste >= 2, "pas assez d'espèces pour " .. rarete)
+			for _, nom in liste do
+				assert(Bestiaire.Especes[nom], "espèce inconnue : " .. nom)
+				assert(vues[nom] == nil, "espèce partagée : " .. nom)
+				vues[nom] = true
+			end
+			assert(
+				Bestiaire.especeCreature(rarete).Nom == liste[1],
+				"par défaut : première espèce"
+			)
+			assert(Bestiaire.especeCreature(rarete, liste[2]).Nom == liste[2], "espèce demandée")
+			assert(
+				Bestiaire.especeCreature(rarete, "Inconnue").Nom == liste[1],
+				"espèce inconnue : première"
+			)
+			assert(
+				Bestiaire.tirerEspece(rarete, 0.999).Nom == liste[#liste],
+				"tirage 0.999 : dernière"
+			)
 		end
 	end,
 
@@ -27,12 +43,18 @@ return {
 		for zone, reglage in Config.Monstres.Zones do
 			local liste = (Bestiaire.Monstres :: any)[zone]
 			assert(liste and #liste >= 2, "pas assez de monstres en " .. zone)
-			assert(liste[1] == reglage.Nom, "le premier monstre de " .. zone .. " doit être " .. reglage.Nom)
+			assert(
+				liste[1] == reglage.Nom,
+				"le premier monstre de " .. zone .. " doit être " .. reglage.Nom
+			)
 			for _, nom in liste do
 				assert(Bestiaire.Especes[nom], "espèce inconnue : " .. nom)
 			end
 			assert(Bestiaire.especeMonstre(zone, 0).Nom == liste[1], "tirage 0 = première espèce")
-			assert(Bestiaire.especeMonstre(zone, 0.999).Nom == liste[#liste], "tirage 0.999 = dernière espèce")
+			assert(
+				Bestiaire.especeMonstre(zone, 0.999).Nom == liste[#liste],
+				"tirage 0.999 = dernière espèce"
+			)
 		end
 	end,
 

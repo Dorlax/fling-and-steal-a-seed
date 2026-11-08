@@ -4,7 +4,10 @@ return {
 	["C8 texteTaux Proche : virgule française"] = function()
 		local texte = Lancer.texteTaux("Proche")
 		assert(string.find(texte, "Commune 70 %", 1, true), "Commune 70 % manquant : " .. texte)
-		assert(string.find(texte, "Légendaire 1,8 %", 1, true), "Légendaire 1,8 % manquant : " .. texte)
+		assert(
+			string.find(texte, "Légendaire 1,8 %", 1, true),
+			"Légendaire 1,8 % manquant : " .. texte
+		)
 		assert(string.find(texte, "Mythique 0,2 %", 1, true), "Mythique 0,2 % manquant : " .. texte)
 	end,
 

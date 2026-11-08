@@ -103,7 +103,10 @@ end
 local function ajouter(joueur: any, ...: string)
 	local Sauvegarde, Bases = module("Sauvegarde"), module("Bases")
 	for _, rarete in { ... } do
-		assert(Sauvegarde.ajouterCreature(joueur, rarete) == true, "ajout de " .. rarete .. " attendu")
+		assert(
+			Sauvegarde.ajouterCreature(joueur, rarete) == true,
+			"ajout de " .. rarete .. " attendu"
+		)
 	end
 	Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
 end
@@ -170,7 +173,10 @@ return {
 		assert(#resultats == 0, table.concat(resultats, " ; "))
 		assert(porte ~= nil, "Porte attendue")
 		assert(bouton ~= nil, "BoutonVerrou attendu")
-		assert(verrou and verrou:IsA("ProximityPrompt"), "prompt Verrouiller attendu sur BoutonVerrou")
+		assert(
+			verrou and verrou:IsA("ProximityPrompt"),
+			"prompt Verrouiller attendu sur BoutonVerrou"
+		)
 		assert(bouclier and bouclier:IsA("BasePart"), "Bouclier attendu")
 		assert((bouclier :: BasePart).CanCollide == false, "Bouclier.CanCollide doit être false")
 	end,
@@ -188,7 +194,10 @@ return {
 		local corps2 = expo2 and expo2:FindFirstChild("Corps")
 		nettoyer(a, b)
 		assert(ok == true, "le vol doit réussir")
-		assert(#liste == 2 and liste[1] == "Commune" and liste[2] == "Epique", "la victime doit perdre la Rare")
+		assert(
+			#liste == 2 and liste[1] == "Commune" and liste[2] == "Epique",
+			"la victime doit perdre la Rare"
+		)
 		assert(revenuApres < revenuAvant, "RevenuParSeconde doit baisser")
 		assert(porte == "Rare", "Porte du voleur attendu : Rare, obtenu " .. tostring(porte))
 		assert(expo3 == nil, "il ne doit rester que 2 créatures exposées")
@@ -264,11 +273,15 @@ return {
 		assert(ok == false, "second vol refusé attendu")
 		assert(#liste == 2, "la base de la victime doit rester à 2 créatures")
 		assert(porte == "Rare", "la créature portée doit rester la Rare")
-		assert(portee ~= nil and encorePortee == portee, "la créature portée doit être inchangée")
+		assert(
+			portee ~= nil and encorePortee == portee,
+			"la créature portée doit être inchangée"
+		)
 	end,
 
 	["C13 le voleur dépose la créature volée dans sa propre base"] = function()
-		local Raids, Sauvegarde, Portage, Bases = module("Raids"), module("Sauvegarde"), module("Portage"), module("Bases")
+		local Raids, Sauvegarde, Portage, Bases =
+			module("Raids"), module("Sauvegarde"), module("Portage"), module("Bases")
 		local a, b = scenario()
 		assert(Raids.voler(b, a, 2, Workspace:GetServerTimeNow()) == true, "vol attendu")
 		local sol = Bases.solDe(b) :: BasePart
@@ -342,14 +355,19 @@ return {
 		for _, d in b.Character:GetDescendants() do
 			if d:IsA("BillboardGui") then
 				for _, t in d:GetDescendants() do
-					if t:IsA("TextLabel") and string.find((t :: TextLabel).Text, "VOLÉ", 1, true) then
+					if
+						t:IsA("TextLabel") and string.find((t :: TextLabel).Text, "VOLÉ", 1, true)
+					then
 						trouve = true
 					end
 				end
 			end
 		end
 		nettoyer(a, b)
-		assert(remote and remote:IsA("RemoteEvent"), "RemoteEvent AlerteVol attendu dans ReplicatedStorage")
+		assert(
+			remote and remote:IsA("RemoteEvent"),
+			"RemoteEvent AlerteVol attendu dans ReplicatedStorage"
+		)
 		assert(ok == true, "vol attendu")
 		assert(trouve, "billboard « VOLÉ ! » attendu au-dessus du voleur")
 	end,
@@ -372,8 +390,14 @@ return {
 		nettoyer(a)
 		assert(ok == true, "verrouillage attendu")
 		assert(pieces == 50, "exactement PrixVerrou pièces retirées, reste " .. tostring(pieces))
-		assert(type(jusqua) == "number" and math.abs(jusqua - (t + 60)) < 0.01, "VerrouJusqua = t + 60")
-		assert(type(pret) == "number" and math.abs(pret - (t + 120)) < 0.01, "VerrouPretA = t + 120")
+		assert(
+			type(jusqua) == "number" and math.abs(jusqua - (t + 60)) < 0.01,
+			"VerrouJusqua = t + 60"
+		)
+		assert(
+			type(pret) == "number" and math.abs(pret - (t + 120)) < 0.01,
+			"VerrouPretA = t + 120"
+		)
 		assert(transparence < 1, "Bouclier doit être visible")
 	end,
 
@@ -387,7 +411,8 @@ return {
 		local bouton = (Bases.modeleDe(a) :: Model):FindFirstChild("BoutonVerrou") :: BasePart
 		placer(b, bouton.Position + Vector3.new(0, 3, 0))
 		local ok = Raids.verrouiller(a, b, Workspace:GetServerTimeNow())
-		local pa, pb, jusqua = a:GetAttribute("Pieces"), b:GetAttribute("Pieces"), a:GetAttribute("VerrouJusqua")
+		local pa, pb, jusqua =
+			a:GetAttribute("Pieces"), b:GetAttribute("Pieces"), a:GetAttribute("VerrouJusqua")
 		nettoyer(a, b)
 		assert(ok == false, "refus attendu")
 		assert(pa == 500 and pb == 500 and jusqua == nil, "rien ne doit changer")
@@ -423,8 +448,14 @@ return {
 		local piecesRecharge = a:GetAttribute("Pieces")
 		local jusqua = a:GetAttribute("VerrouJusqua")
 		nettoyer(a)
-		assert(actif == false and piecesActif == piecesApres, "verrou actif : refus sans changement")
-		assert(recharge == false and piecesRecharge == piecesApres, "recharge : refus sans changement")
+		assert(
+			actif == false and piecesActif == piecesApres,
+			"verrou actif : refus sans changement"
+		)
+		assert(
+			recharge == false and piecesRecharge == piecesApres,
+			"recharge : refus sans changement"
+		)
 		assert(math.abs(jusqua - (t + RAID.DureeVerrou)) < 0.01, "VerrouJusqua inchangé")
 	end,
 

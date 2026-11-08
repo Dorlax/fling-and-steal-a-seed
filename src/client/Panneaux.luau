@@ -14,6 +14,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Style = require(Shared:WaitForChild("Style"))
 local Revenus = require(Shared:WaitForChild("Revenus"))
+local Fiche = require(Shared:WaitForChild("Fiche"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local Panneaux = {}
@@ -55,10 +56,15 @@ local function genreDe(panneau: BillboardGui, label: TextLabel): Genre?
 		if courant:IsA("Model") then
 			local rarete = courant:GetAttribute("Rarete")
 			if type(rarete) == "string" then
-				local nom = Style.texteRarete(rarete)
+				-- Taille (Grande, Géante…) devant la rareté ; Normale : rien.
+				local attributTaille = courant:GetAttribute("Taille")
+				local taille = if type(attributTaille) == "string"
+					then attributTaille
+					else "Normale"
+				local nom = Fiche.texte(rarete, taille)
 				if courant:GetAttribute("Emplacement") ~= nil then
-					-- Exposée en base : rareté + revenu actuel.
-					nom ..= `\n+{Revenus.parSeconde(rarete)}/s`
+					-- Exposée en base : rareté + revenu actuel (taille comprise).
+					nom ..= `\n+{Revenus.parSeconde(Fiche.ecrire(rarete, taille))}/s`
 				end
 				return { couleur = Style.couleurRarete(rarete), texte = nom }
 			end

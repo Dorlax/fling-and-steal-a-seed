@@ -154,7 +154,10 @@ return {
 			local zone = m:GetAttribute("Zone")
 			assert(m:GetAttribute("Monstre") == true, "attribut Monstre = true attendu")
 			local z = (m :: Model):GetPivot().Position.Z
-			assert(Monstre.zoneDe({ X = 0, Y = 0, Z = z }) == zone, "pivot hors de la bande de " .. tostring(zone))
+			assert(
+				Monstre.zoneDe({ X = 0, Y = 0, Z = z }) == zone,
+				"pivot hors de la bande de " .. tostring(zone)
+			)
 		end
 	end,
 
@@ -179,7 +182,10 @@ return {
 			math.abs(horizontale - Config.Plaquage.DistanceChute) <= 1.5,
 			"créature à " .. horizontale .. " studs, attendu ~" .. Config.Plaquage.DistanceChute
 		)
-		assert(math.abs((avant - vie) - M.Zones.Proche.Degats) < 0.01, "vie perdue : " .. (avant - vie))
+		assert(
+			math.abs((avant - vie) - M.Zones.Proche.Degats) < 0.01,
+			"vie perdue : " .. (avant - vie)
+		)
 	end,
 
 	["C11 protection après un coup : refus 'protegee', puis succès après DureeProtection"] = function()
@@ -198,7 +204,10 @@ return {
 			type(protege) == "number" and math.abs(protege - (t + M.DureeProtection)) < 0.01,
 			"ProtegeMonstreJusqua attendu t + DureeProtection"
 		)
-		assert(pendant == false and raison == "protegee", "refus 'protegee' attendu, obtenu " .. tostring(raison))
+		assert(
+			pendant == false and raison == "protegee",
+			"refus 'protegee' attendu, obtenu " .. tostring(raison)
+		)
 		assert(apres == true, "le coup doit réussir après la protection")
 	end,
 
@@ -218,8 +227,14 @@ return {
 		end
 		local ok, raison = Monstres.frapper(monstre, joueur, t + 1000)
 		nettoyer(joueur)
-		assert(zMin >= M.BordBases + M.MargeBases - 0.01, "monstre entré dans une base : Z min " .. zMin)
-		assert(ok == false and raison == "base", "refus 'base' attendu, obtenu " .. tostring(raison))
+		assert(
+			zMin >= M.BordBases + M.MargeBases - 0.01,
+			"monstre entré dans une base : Z min " .. zMin
+		)
+		assert(
+			ok == false and raison == "base",
+			"refus 'base' attendu, obtenu " .. tostring(raison)
+		)
 	end,
 
 	["C13 nuit forcée : attribut Nuit, ClockTime, vague puis retour au jour"] = function()
@@ -240,7 +255,10 @@ return {
 		for _, zone in ZONES do
 			apres[zone] = compter(zone)
 		end
-		assert(nuit == true and heure == C.HeureNuit, "nuit attendue (Nuit = true, ClockTime = HeureNuit)")
+		assert(
+			nuit == true and heure == C.HeureNuit,
+			"nuit attendue (Nuit = true, ClockTime = HeureNuit)"
+		)
 		assert(jour == false and heureJour == C.HeureJour, "jour attendu au retour")
 		for _, zone in ZONES do
 			assert(nombres[zone] == M.Zones[zone].NombreNuit, zone .. " nuit : " .. nombres[zone])
@@ -253,7 +271,8 @@ return {
 			if enfant:IsA("RemoteEvent") then
 				local nom = string.lower(enfant.Name)
 				assert(
-					not string.find(nom, "monstre", 1, true) and not string.find(nom, "cycle", 1, true),
+					not string.find(nom, "monstre", 1, true)
+						and not string.find(nom, "cycle", 1, true),
 					"RemoteEvent interdit : " .. enfant.Name
 				)
 			end

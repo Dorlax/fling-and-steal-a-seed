@@ -5,6 +5,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Forge = require(ReplicatedStorage.Shared.Forge)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
+local Fiche = require(ReplicatedStorage.Shared.Fiche)
 
 -- API serveur supposée d'après la maquette issue-5 (à ajuster avec le Bâtisseur si les noms diffèrent) :
 --   Portage.recolter(joueur, creature) -> boolean ; Portage.verifierDepot(joueur)
@@ -150,7 +151,10 @@ return {
 		local porte = j:GetAttribute("Porte")
 		local reste = dansLeDossier(c)
 		nettoyer(j)
-		assert(ok == false and porte == nil and reste, "récolte trop loin doit être refusée sans effet")
+		assert(
+			ok == false and porte == nil and reste,
+			"récolte trop loin doit être refusée sans effet"
+		)
 	end,
 
 	["C8 récolte refusée si le joueur porte déjà une créature"] = function()
@@ -223,8 +227,13 @@ return {
 		local apres = #(base :: Instance):GetDescendants()
 		nettoyer(j)
 		assert(porte == nil, "Porte doit être effacé")
-		assert(#liste == 1 and liste[1] == rarete, "CreaturesBase doit contenir la rareté")
-		assert(revenu == Revenus.parSeconde(rarete), "RevenuParSeconde incorrect : " .. tostring(revenu))
+		-- Depuis les tailles : la base garde la fiche complète (rareté, taille, espèce).
+		local infos = Fiche.lire(liste[1])
+		assert(#liste == 1 and infos and infos.Rarete == rarete, "CreaturesBase doit contenir la rareté")
+		assert(
+			revenu == Revenus.parSeconde(liste[1]),
+			"RevenuParSeconde incorrect : " .. tostring(revenu)
+		)
 		assert(apres > avant, "un modèle de créature doit apparaître dans la base")
 	end,
 
@@ -283,7 +292,10 @@ return {
 		Portage.tickRevenus(j)
 		local gain = j:GetAttribute("Pieces") - base
 		nettoyer(j)
-		assert(gain == Revenus.total({ "Commune", "Mythique" }), "gain attendu 101, obtenu " .. gain)
+		assert(
+			gain == Revenus.total({ "Commune", "Mythique" }),
+			"gain attendu 101, obtenu " .. gain
+		)
 	end,
 
 	["C13 une créature portée survit à MaxCreaturesAuSol"] = function()
@@ -362,7 +374,8 @@ return {
 	end,
 
 	["C17 InterfacePieces existe côté client et est démarrée"] = function()
-		local client = game:GetService("StarterPlayer").StarterPlayerScripts:FindFirstChild("Client")
+		local client = game:GetService("StarterPlayer").StarterPlayerScripts
+			:FindFirstChild("Client")
 		assert(client, "dossier Client introuvable")
 		local m = client:FindFirstChild("InterfacePieces")
 		assert(m and m:IsA("ModuleScript"), "InterfacePieces manquant")

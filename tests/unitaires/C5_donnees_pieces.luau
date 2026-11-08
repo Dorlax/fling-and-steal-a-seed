@@ -8,7 +8,10 @@ return {
 	["C5 parDefaut contient Pieces = 0 et CreaturesBase = {}"] = function()
 		local d = Donnees.parDefaut()
 		assert(d.Pieces == 0, "Pieces doit valoir 0")
-		assert(type(d.CreaturesBase) == "table" and #d.CreaturesBase == 0, "CreaturesBase doit être vide")
+		assert(
+			type(d.CreaturesBase) == "table" and #d.CreaturesBase == 0,
+			"CreaturesBase doit être vide"
+		)
 	end,
 
 	["C5 parDefaut renvoie des listes CreaturesBase distinctes"] = function()
@@ -54,7 +57,8 @@ return {
 	end,
 
 	["C6 anciennes données sans ces champs restent valides"] = function()
-		local d = Donnees.nettoyer({ Force = 12, Vitesse = 34, ModeForge = "Vitesse", NiveauForge = 1 })
+		local d =
+			Donnees.nettoyer({ Force = 12, Vitesse = 34, ModeForge = "Vitesse", NiveauForge = 1 })
 		assert(d.Force == 12 and d.Vitesse == 34, "Force et Vitesse conservées")
 		assert(d.Pieces == 0 and #d.CreaturesBase == 0, "nouveaux champs par défaut")
 	end,

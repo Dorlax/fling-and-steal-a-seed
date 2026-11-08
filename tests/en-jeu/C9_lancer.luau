@@ -21,7 +21,8 @@ local prochainId = -100
 
 local function fauxJoueur(force: number, ping: number?): any
 	prochainId -= 1
-	local attributs: { [string]: any } = { Force = force, Vitesse = 0, ModeForge = "Force", SurForge = false }
+	local attributs: { [string]: any } =
+		{ Force = force, Vitesse = 0, ModeForge = "Force", SurForge = false }
 	return {
 		Name = "FauxLanceur" .. prochainId,
 		UserId = prochainId,
@@ -70,7 +71,10 @@ return {
 		local resultat = Lancers.lacher(j, 0.8, 0)
 		Bases.liberer(j)
 		assert(resultat ~= nil, "le lâcher devrait réussir")
-		assert(resultat.Couleur == "Rouge", "le début doit être resté à 0 (Rouge attendu à t=0,8)")
+		assert(
+			resultat.Couleur == "Rouge",
+			"le début doit être resté à 0 (Rouge attendu à t=0,8)"
+		)
 	end,
 
 	["C9 demarrer avant DelaiEntreLancers après un lâcher est refusé"] = function()
@@ -81,7 +85,10 @@ return {
 		Lancers.demarrer(j, 0)
 		assert(Lancers.lacher(j, 0.8, 0) ~= nil, "premier lancer attendu")
 		Lancers.demarrer(j, 0.8 + Config.Lancer.DelaiEntreLancers - 0.5)
-		assert(Lancers.lacher(j, 0.8 + Config.Lancer.DelaiEntreLancers, 0) == nil, "demarrer trop tôt doit être refusé")
+		assert(
+			Lancers.lacher(j, 0.8 + Config.Lancer.DelaiEntreLancers, 0) == nil,
+			"demarrer trop tôt doit être refusé"
+		)
 		Lancers.demarrer(j, 0.8 + Config.Lancer.DelaiEntreLancers + 0.1)
 		assert(
 			Lancers.lacher(j, 0.8 + Config.Lancer.DelaiEntreLancers + 0.9, 0) ~= nil,
@@ -128,7 +135,10 @@ return {
 		local r = Lancers.lacher(j, 0.8 + max, 0)
 		Bases.liberer(j)
 		assert(r ~= nil, "résultat attendu")
-		assert(r.Couleur == "Rouge", "ping plafonné : Rouge attendu, obtenu " .. tostring(r.Couleur))
+		assert(
+			r.Couleur == "Rouge",
+			"ping plafonné : Rouge attendu, obtenu " .. tostring(r.Couleur)
+		)
 		-- Sans plafond, t serait négatif -> position 0 -> Vert.
 		local j2 = fauxJoueur(100, 5)
 		Bases.creer(j2)
@@ -203,7 +213,10 @@ return {
 	["C13 le serveur ignore les arguments envoyés par le client"] = function()
 		local Lancers = module("Lancers")
 		local Bases = module("Bases")
-		assert(type(Lancers.traiterLacher) == "function", "Lancers.traiterLacher manquant (gestionnaire de LacherJauge)")
+		assert(
+			type(Lancers.traiterLacher) == "function",
+			"Lancers.traiterLacher manquant (gestionnaire de LacherJauge)"
+		)
 		local function lancer(avecArguments: boolean): any
 			local j = fauxJoueur(100, 0)
 			Bases.creer(j)
@@ -226,6 +239,9 @@ return {
 		assert(avec.Distance < 999, "la distance du client ne doit pas être utilisée")
 		assert(avec.Distance <= Config.Lancer.DistanceMax, "Distance hors plafond")
 		assert(avec.Zone == sans.Zone or avec.Zone == "Proche", "la zone doit venir du serveur")
-		assert(avec.Rarete ~= "Mythique" or sans.Rarete == "Mythique", "la rareté du client ne doit pas être utilisée")
+		assert(
+			avec.Rarete ~= "Mythique" or sans.Rarete == "Mythique",
+			"la rareté du client ne doit pas être utilisée"
+		)
 	end,
 }

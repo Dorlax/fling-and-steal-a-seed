@@ -12,6 +12,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config")) :: any
 local Jauge = require(Shared:WaitForChild("Jauge")) :: any
 local Lancer = require(Shared:WaitForChild("Lancer")) :: any
+local Fiche = require(Shared:WaitForChild("Fiche"))
 local Style = require(Shared:WaitForChild("Style"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
@@ -83,6 +84,23 @@ local function creerPanneauTaux(ecran: ScreenGui)
 		ligne.Text = Lancer.texteTaux(zone.Nom)
 		table.insert(lignes, ligne)
 	end
+
+	-- Taux de taille (identiques partout) : plus elle est grosse, plus elle rapporte.
+	local morceaux = {}
+	for _, taille in Config.Tailles.Ordre do
+		local nom = (Config.Tailles.Noms :: any)[taille]
+		local taux = (Config.Tailles.Taux :: any)[taille]
+		local mult = (Config.Tailles.Multiplicateur :: any)[taille]
+		table.insert(morceaux, `{nom} {taux} % (×{mult})`)
+	end
+	local ligneTailles = Habillage.texte(cadre, "TauxTailles", {
+		couleur = Color3.fromRGB(255, 240, 200),
+		contour = Style.Contour.Petit,
+	})
+	ligneTailles.LayoutOrder = #Config.Lancer.Zones + 1
+	ligneTailles.Size = UDim2.new(1, 0, 0, Style.TailleTexteMin + 2)
+	ligneTailles.Text = "Tailles : " .. table.concat(morceaux, " · ")
+	table.insert(lignes, ligneTailles)
 
 	local ouvert = true
 	titre.Activated:Connect(function()
@@ -234,7 +252,9 @@ function InterfaceLancer.demarrer()
 		local numero = numeroMessage
 		local couleurPalier = COULEURS_PALIERS[resultat.Couleur] or Color3.new(1, 1, 1)
 		local rangRarete = table.find(Config.Raretes.Ordre, rarete) or 1
-		local genereux = rangRarete >= 3 -- Épique et au-dessus
+		local taille = if type(resultat.Taille) == "string" then resultat.Taille else "Normale"
+		local rangTaille = table.find(Config.Tailles.Ordre, taille) or 1
+		local genereux = rangRarete >= 3 or rangTaille >= 3 -- Épique ou Géante et au-dessus
 
 		local tailleMessage = if resultat.Couleur == "Rouge" then 1.25 else 1
 		afficher(tostring(resultat.Message or ""), couleurPalier, tailleMessage)
@@ -242,7 +262,7 @@ function InterfaceLancer.demarrer()
 		if numero ~= numeroMessage then
 			return
 		end
-		local nom = Config.Raretes.Noms[rarete] or rarete
+		local nom = Fiche.texte(rarete, taille)
 		afficher(
 			`+{math.floor(distance)} m · {nom}`,
 			couleurRarete(rarete),
