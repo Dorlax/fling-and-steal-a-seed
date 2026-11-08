@@ -47,6 +47,13 @@ local function suivre(objet: Instance)
 	end)
 end
 
+-- Vrai si deux CFrame sont (presque) égales : position et orientation.
+local function identiques(a: CFrame, b: CFrame): boolean
+	return (a.Position - b.Position).Magnitude < 1e-3
+		and a.LookVector:Dot(b.LookVector) > 0.99999
+		and a.UpVector:Dot(b.UpVector) > 0.99999
+end
+
 local function pas()
 	local camera = Workspace.CurrentCamera
 	if camera == nil then
@@ -60,14 +67,14 @@ local function pas()
 			suivis[modele] = nil
 			continue
 		end
-		if not corps.Anchored then
+		if not (corps :: BasePart).Anchored then
 			-- Portée : c'est la soudure du serveur qui la place.
 			s.pose = nil
 			continue
 		end
 		local actuel = modele:GetPivot()
 		local pose = s.pose
-		if pose == nil or not actuel:FuzzyEq(pose, 1e-3) then
+		if pose == nil or not identiques(actuel, pose) then
 			-- Le serveur a déplacé le modèle : nouvelle position de repos.
 			s.base = actuel
 		end
