@@ -37,7 +37,16 @@ export type Bloc = {
 export type Espece = {
 	Nom: string,
 	Hauteur: number, -- haut du modèle (unités), pour placer le panneau
+	Texture: string, -- motif pixel-art des gros blocs (clé de Bestiaire.Textures)
 	Blocs: { Bloc },
+}
+
+-- Motifs pixel-art en niveaux de gris (16 × 16), teintés par la couleur du
+-- bloc. Images envoyées sur Roblox par le propriétaire du jeu.
+Bestiaire.Textures = {
+	Pelage = "rbxassetid://81171612489010",
+	Ecailles = "rbxassetid://71701688098794",
+	Gelee = "rbxassetid://135687429520497",
 }
 
 local PI = math.pi
@@ -196,11 +205,18 @@ local function ombrer(liste: { Bloc })
 	end
 end
 
+local TEXTURES: { [string]: string } = {
+	Dragonnet = "Ecailles",
+	Brasaurus = "Ecailles",
+	Gloupinou = "Gelee",
+}
+
 local function definir(nom: string, hauteur: number, remplir: (liste: { Bloc }) -> ())
 	local liste: { Bloc } = {}
 	remplir(liste)
 	ombrer(liste)
-	especes[nom] = { Nom = nom, Hauteur = hauteur, Blocs = liste }
+	especes[nom] =
+		{ Nom = nom, Hauteur = hauteur, Texture = TEXTURES[nom] or "Pelage", Blocs = liste }
 end
 
 ---------------------------------------------------------------------------

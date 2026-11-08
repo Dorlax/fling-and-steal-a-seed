@@ -27,6 +27,36 @@ local function vecteur(v: { number }, echelle: number): Vector3
 	return Vector3.new(v[1], v[2], v[3]) * echelle
 end
 
+local FACES = {
+	Enum.NormalId.Top,
+	Enum.NormalId.Front,
+	Enum.NormalId.Back,
+	Enum.NormalId.Left,
+	Enum.NormalId.Right,
+}
+
+-- Habille de pixel-art les faces visibles d'un gros bloc (teinté par sa
+-- couleur). Les petits détails (yeux, dents, griffes) restent unis.
+local function texturer(p: BasePart, b: Bestiaire.Bloc, image: string, taille: number)
+	if b.f ~= nil or b.m == "Neon" or b.m == "Foil" then
+		return
+	end
+	if math.min(b.t[1], b.t[3]) < 0.1 or string.sub(b.n, 1, 4) == "Oeil" then
+		return
+	end
+	for _, face in FACES do
+		local tex = Instance.new("Texture")
+		tex.Name = "Motif"
+		tex.Face = face
+		tex.Texture = image
+		tex.Color3 = p.Color
+		tex.Transparency = p.Transparency
+		tex.StudsPerTileU = taille * 0.8
+		tex.StudsPerTileV = taille * 0.8
+		tex.Parent = p
+	end
+end
+
 local function couleurDe(c: Bestiaire.Couleur, rarete: Color3): Color3
 	if type(c) == "string" then
 		return rarete
@@ -47,6 +77,7 @@ function Modeleur.construire(
 	corps.Transparency = 1
 	corps.CastShadow = false
 	local origine = corps.CFrame
+	local image = Bestiaire.Textures[espece.Texture] or Bestiaire.Textures.Pelage
 	for _, b in espece.Blocs do
 		local p: Part
 		if b.f == "Wedge" then
@@ -81,6 +112,7 @@ function Modeleur.construire(
 			p:SetAttribute("Phase", b.ph or 0)
 			p:SetAttribute("Cote", b.cote or 0)
 		end
+		texturer(p, b, image, taille)
 		p.Parent = modele
 	end
 	modele:SetAttribute("Espece", espece.Nom)
