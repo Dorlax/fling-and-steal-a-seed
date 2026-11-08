@@ -30,6 +30,15 @@ type Etat = {
 
 local Lancers = {}
 
+-- Appelé quand un joueur active le bouton « Récolter » d'une créature
+-- (branché par Principal sur Portage ; le joueur n'envoie aucune valeur).
+type RappelRecolte = (joueur: Player, creature: Model) -> ()
+local rappelRecolte: RappelRecolte? = nil
+
+function Lancers.surRecolte(rappel: RappelRecolte)
+	rappelRecolte = rappel
+end
+
 local reglages = Config.Lancer
 local raretes: any = Config.Raretes -- indexé par des noms dynamiques
 local DUREE_VOL = 1 -- secondes de vol de la graine (effet visuel)
@@ -157,6 +166,22 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 	texte.TextStrokeColor3 = Color3.new(0, 0, 0)
 	texte.Text = raretes.Noms[resultat.Rarete] or resultat.Rarete
 	texte.Parent = panneau
+
+	-- Bouton « Récolter » (tactile, touche, manette) ; validé par le serveur.
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "Recolter"
+	prompt.ActionText = "Récolter"
+	prompt.ObjectText = texte.Text
+	prompt.HoldDuration = Config.Creatures.DureeRecolte
+	prompt.MaxActivationDistance = Config.Creatures.DistanceRecolte
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = corps
+	prompt.Triggered:Connect(function(declencheur: Player)
+		local rappel = rappelRecolte
+		if rappel then
+			rappel(declencheur, modele)
+		end
+	end)
 
 	modele.PrimaryPart = corps
 	modele:SetAttribute("Rarete", resultat.Rarete)
@@ -295,6 +320,34 @@ function Lancers.traiterLacher(joueur: any): Resultat?
 		end
 	end
 	return resultat
+end
+
+-- Sort une créature de la liste « au sol » du joueur (elle est portée) :
+-- elle n'est plus détruite par MaxCreaturesAuSol.
+function Lancers.retirerDuSol(joueur: any, creature: Model)
+	local etat = etats[joueur]
+	if etat == nil then
+		return
+	end
+	local index = table.find(etat.creatures, creature)
+	if index then
+		table.remove(etat.creatures, index)
+	end
+end
+
+-- Remet une créature dans la liste « au sol » du joueur (et dans le dossier
+-- des créatures). Joueur parti : la créature est détruite.
+function Lancers.remettreAuSol(joueur: any, creature: Model)
+	local etat = etats[joueur]
+	if etat == nil then
+		creature:Destroy()
+		return
+	end
+	creature.Parent = TerresSauvages.dossierCreatures()
+	if not table.find(etat.creatures, creature) then
+		table.insert(etat.creatures, creature)
+	end
+	limiterCreatures(etat)
 end
 
 -- Départ du joueur : ses créatures au sol disparaissent.

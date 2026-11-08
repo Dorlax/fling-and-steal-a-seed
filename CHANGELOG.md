@@ -2,6 +2,15 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Porter et revenus (issue #5)
+- Bouton « Récolter » (ProximityPrompt, maintien 0,5 s, 10 studs) sur chaque créature : seul son propriétaire peut la récolter, vérifié par le serveur.
+- La créature portée flotte au-dessus de la tête ; le joueur marche à 80 % de sa vitesse.
+- Dépôt automatique en entrant dans sa base (10 emplacements, « Base pleine ! » au-delà) ; les créatures s'affichent en rangées avec « +N/s ».
+- Revenus chaque seconde : Commune 1, Rare 3, Épique 10, Légendaire 30, Mythique 100 pièces/s.
+- Compteur de pièces en haut au centre, « +N » flottant, ligne « +X / s », messages du serveur.
+- Mort en portant : la créature retombe au sol et reste récoltable ; une créature portée n'est plus retirée par la limite de 10 au sol.
+- Pièces et créatures de la base sauvegardées (DataStore), nettoyées au chargement.
+
 ## 2026-11-08 — Lancer et raretés (issue #3)
 - Bouton LANCER (souris, toucher, manette R2, touche F) : 1er appui = jauge de timing, 2e appui = lâcher.
 - Distance = 30 + 0,4 × Force + bonus de jauge (0 / 15 / 35 / 60, « PERFECT ! » en haut), plafond 520 studs.

@@ -71,6 +71,17 @@ local Config = {
 		},
 	},
 
+	-- Récolte, portage, dépôt en base et revenus des créatures.
+	Creatures = {
+		DistanceRecolte = 10, -- studs, vérifiée par le serveur
+		DureeRecolte = 0.5, -- secondes de maintien du ProximityPrompt
+		MultiplicateurPortage = 0.8, -- WalkSpeed × 0,8 pendant le portage
+		MaxCreaturesBase = 10, -- emplacements par base
+		IntervalleRevenus = 1, -- secondes entre deux versements
+		RevenuParSeconde = { Commune = 1, Rare = 3, Epique = 10, Legendaire = 30, Mythique = 100 },
+		PiecesMax = 1e15, -- plafond de sécurité
+	},
+
 	-- Sauvegarde des joueurs (DataStore).
 	Sauvegarde = {
 		NomDataStore = "JoueursV1",
