@@ -13,7 +13,8 @@ local Jauge = require(ReplicatedStorage.Shared.Jauge)
 local Lancer = require(ReplicatedStorage.Shared.Lancer)
 local Bases = require(script.Parent.Bases)
 local TerresSauvages = require(script.Parent.TerresSauvages)
-local Decor = require(script.Parent.Decor)
+local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
+local Modeleur = require(script.Parent.Modeleur)
 
 export type Resultat = {
 	Distance: number,
@@ -131,20 +132,9 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 	corps.CFrame = CFrame.new(point + Vector3.new(0, TAILLE_CREATURE / 2, 0))
 	corps.Parent = modele
 
-	for _, cote in { -1, 1 } do
-		local oeil = Instance.new("Part")
-		oeil.Name = "Oeil"
-		oeil.Shape = Enum.PartType.Ball
-		oeil.Size = Vector3.one * 0.6
-		oeil.Anchored = true
-		oeil.CanCollide = false
-		oeil.Color = Color3.new(0.05, 0.05, 0.05)
-		oeil.CFrame = corps.CFrame * CFrame.new(cote * 0.6, 0.4, -TAILLE_CREATURE / 2 + 0.1)
-		oeil.Parent = modele
-	end
-
-	Decor.mignonner(modele, corps, TAILLE_CREATURE)
-	Decor.detaillerCreature(modele, corps, TAILLE_CREATURE, resultat.Rarete)
+	-- Forme en blocs de l'espèce de cette rareté (le Corps devient invisible).
+	Modeleur.construire(modele, corps, Bestiaire.especeCreature(resultat.Rarete), TAILLE_CREATURE, couleur)
+	Modeleur.aura(corps, couleur, table.find(raretes.Ordre, resultat.Rarete) or 1)
 
 	if precieuse then
 		local lumiere = Instance.new("PointLight")

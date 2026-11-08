@@ -6,7 +6,8 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
-local Decor = require(script.Parent.Decor)
+local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
+local Modeleur = require(script.Parent.Modeleur)
 
 local Bases = {}
 
@@ -418,20 +419,8 @@ local function creerCreatureExposee(
 	corps.CFrame = CFrame.lookAt(position, position + Vector3.new(regard, 0, 0))
 	corps.Parent = modele
 
-	for _, cote in { -1, 1 } do
-		local oeil = Instance.new("Part")
-		oeil.Name = "Oeil"
-		oeil.Shape = Enum.PartType.Ball
-		oeil.Size = Vector3.one * 0.4
-		oeil.Anchored = true
-		oeil.CanCollide = false
-		oeil.Color = Color3.new(0.05, 0.05, 0.05)
-		oeil.CFrame = corps.CFrame * CFrame.new(cote * 0.4, 0.3, -TAILLE_EXPOSEE / 2 + 0.05)
-		oeil.Parent = modele
-	end
-
-	Decor.mignonner(modele, corps, TAILLE_EXPOSEE)
-	Decor.detaillerCreature(modele, corps, TAILLE_EXPOSEE, rarete)
+	Modeleur.construire(modele, corps, Bestiaire.especeCreature(rarete), TAILLE_EXPOSEE, couleur)
+	Modeleur.aura(corps, couleur, table.find(raretes.Ordre, rarete) or 1)
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"

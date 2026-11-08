@@ -24,9 +24,9 @@
 ## Décor et ambiance
 - Décor cartoon généré par le serveur (`Decor`) : éclairage coloré (atmosphère, saturation, éclat), place de sable sous les bases, chemins devant les portes, arbres (dont roses et dorés), rochers, champignons, fleurs, nuages, collines de bordure.
 - Bases ornées : bordure colorée (sans collision) et lampadaires-sucettes ; sol vert vif.
-- Créatures : reflets dans les yeux, joues roses, petits pieds ; ornements selon la rareté (pousse, oreilles, ailes + étincelles, couronne, auréole).
-- Monstres détaillés par zone (antenne/gouttes, sourcils/cornes/piquants, grandes cornes/dents/bras) ; pieds et reflets.
-- Animations client (module `Animations`, calcul dans `Shared.Anime`) : créatures posées qui sautillent, monstres qui se dandinent.
+- Bestiaire en blocs (`Shared.Bestiaire`, construit par `Modeleur`) : une espèce de créature par rareté (Poussigraine, Lapinou, Renardelle, Cerfaurore, Dragonnet) ; deux monstres par zone (Gloupinou/Piquerelle, Ronchonbulle/Croquelune, Grobidou/Brasaurus). Le `Corps` reste la racine invisible (taille et règles inchangées).
+- Auras de rareté : étincelles dès Épique, halo arc-en-ciel en Mythique.
+- Animations client (`Animations`, calculs dans `Shared.Anime`) : sautillement des créatures, dandinement des monstres, pattes qui marchent, ailes, queues, oreilles, coup de bras/mâchoire quand un monstre frappe (attribut `FrappeA`).
 - Interface : boutons de pièges en rangée en bas à gauche (ne recouvrent plus les stats).
 
 ## À faire

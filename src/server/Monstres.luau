@@ -9,9 +9,10 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Monstre = require(ReplicatedStorage.Shared.Monstre)
 local Bases = require(script.Parent.Bases)
-local Decor = require(script.Parent.Decor)
+local Modeleur = require(script.Parent.Modeleur)
 local Portage = require(script.Parent.Portage)
 
 type Etat = {
@@ -103,31 +104,9 @@ local function pointAleatoire(zone: string): Vector3
 end
 
 -- ----------------------------------------------------------------------------
--- Apparence (cartoon : boule colorée, gros yeux, sourire, langue tirée)
-
-local function partie(
-	modele: Model,
-	nom: string,
-	taille: Vector3,
-	couleur: Color3,
-	decalage: CFrame
-): Part
-	local p = Instance.new("Part")
-	p.Name = nom
-	p.Shape = Enum.PartType.Ball
-	p.Size = taille
-	p.Color = couleur
-	p.Material = Enum.Material.SmoothPlastic
-	p.TopSurface = Enum.SurfaceType.Smooth
-	p.BottomSurface = Enum.SurfaceType.Smooth
-	p.Anchored = true
-	p.CanCollide = false
-	p.CanTouch = false
-	p.CastShadow = false
-	p.CFrame = decalage
-	p.Parent = modele
-	return p
-end
+-- Apparence : une espèce en blocs du Bestiaire (deux par zone), construite
+-- autour d'un Corps invisible de la taille de la zone (la portée de coup et la
+-- hauteur au sol ne changent pas).
 
 local function appliquerYeux(modele: Model, nuit: boolean)
 	for _, objet in modele:GetChildren() do
@@ -144,48 +123,23 @@ local function creerModele(zone: string, position: Vector3): Model
 	modele.Name = "Monstre"
 
 	-- Construit à l'origine, face vers -Z (LookVector), puis déplacé.
-	local corps = partie(modele, "Corps", Vector3.one * t, couleurDe(r.Couleur), CFrame.new())
+	local corps = Instance.new("Part")
+	corps.Name = "Corps"
+	corps.Shape = Enum.PartType.Ball
+	corps.Size = Vector3.one * t
+	corps.Anchored = true
+	corps.CanCollide = false
+	corps.CanTouch = false
+	corps.CFrame = CFrame.new()
+	corps.Parent = modele
 	modele.PrimaryPart = corps
-	for _, cote in { -1, 1 } do
-		local nom = if cote < 0 then "Gauche" else "Droite"
-		partie(
-			modele,
-			"Oeil" .. nom,
-			Vector3.one * t * 0.38,
-			Color3.new(1, 1, 1),
-			CFrame.new(cote * t * 0.2, t * 0.18, -t * 0.36)
-		)
-		partie(
-			modele,
-			"Pupille" .. nom,
-			Vector3.one * t * 0.16,
-			Color3.new(0.05, 0.05, 0.05),
-			CFrame.new(cote * t * 0.2, t * 0.18, -t * 0.53)
-		)
-	end
-	local bouche = partie(
-		modele,
-		"Bouche",
-		Vector3.new(t * 0.34, t * 0.12, t * 0.12),
-		Color3.fromRGB(120, 30, 60),
-		CFrame.new(0, -t * 0.14, -t * 0.47)
-	)
-	bouche.Shape = Enum.PartType.Cylinder
-	bouche.Size = Vector3.new(t * 0.08, t * 0.3, t * 0.3)
-	bouche.CFrame = CFrame.new(0, -t * 0.14, -t * 0.47) * CFrame.Angles(0, math.rad(90), 0)
-	partie(
-		modele,
-		"Langue",
-		Vector3.new(t * 0.16, t * 0.1, t * 0.16),
-		Color3.fromRGB(255, 120, 160),
-		CFrame.new(t * 0.05, -t * 0.24, -t * 0.5)
-	)
-	Decor.detaillerMonstre(modele, corps, zone)
+	local espece = Bestiaire.especeMonstre(zone, aleatoire:NextNumber())
+	Modeleur.construire(modele, corps, espece, t, couleurDe(r.Couleur))
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"
 	panneau.Size = UDim2.fromOffset(160, 36)
-	panneau.StudsOffset = Vector3.new(0, t / 2 + 1.5, 0)
+	panneau.StudsOffset = Vector3.new(0, t * espece.Hauteur + 1.5, 0)
 	panneau.MaxDistance = 150
 	panneau.Parent = corps
 	local texte = Instance.new("TextLabel")
@@ -197,7 +151,7 @@ local function creerModele(zone: string, position: Vector3): Model
 	texte.TextColor3 = couleurDe(r.Couleur)
 	texte.TextStrokeColor3 = Color3.new(0, 0, 0)
 	texte.TextStrokeTransparency = 0
-	texte.Text = r.Nom
+	texte.Text = espece.Nom
 	texte.Parent = panneau
 
 	modele:SetAttribute("Monstre", true)
@@ -374,6 +328,10 @@ function Monstres.frapper(monstre: any, joueur: any, maintenant: number?): (bool
 	etat.pretA = instant + Monstre.reglagesZone(etat.zone).Recharge
 
 	effetPaf(joueur)
+	-- Pour l'animation de coup côté client (affichage seulement).
+	if typeof(monstre) == "Instance" then
+		monstre:SetAttribute("FrappeA", Workspace:GetServerTimeNow())
+	end
 	if creature then
 		envoyerMessage(joueur, "Un monstre t'a frappé… tu as lâché ta créature !")
 	else
