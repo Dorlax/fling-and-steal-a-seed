@@ -144,16 +144,13 @@ function InterfacePieges.demarrer()
 			codeTouche(reglages.Touches.Manette[typePiege])
 		)
 
-		table.insert(
-			boutons,
-			{
-				typePiege = typePiege,
-				bouton = bouton,
-				texte = texte,
-				echelle = echelle,
-				couleur = couleur,
-			}
-		)
+		table.insert(boutons, {
+			typePiege = typePiege,
+			bouton = bouton,
+			texte = texte,
+			echelle = echelle,
+			couleur = couleur,
+		})
 	end
 
 	-- « PIÉGÉ ! » rebondissant au centre pendant l'immobilisation.
