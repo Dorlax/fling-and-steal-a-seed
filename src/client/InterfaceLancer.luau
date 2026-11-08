@@ -12,52 +12,23 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config")) :: any
 local Jauge = require(Shared:WaitForChild("Jauge")) :: any
 local Lancer = require(Shared:WaitForChild("Lancer")) :: any
+local Style = require(Shared:WaitForChild("Style"))
+local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local InterfaceLancer = {}
 
-local COULEUR_FOND = Color3.fromRGB(30, 30, 40)
-local COULEUR_BOUTON = Color3.fromRGB(235, 90, 40)
-local COULEUR_BOUTON_ATTENTE = Color3.fromRGB(90, 90, 105)
+local COULEUR_FOND = Habillage.nommee("Fond")
+local COULEUR_BOUTON = Habillage.nommee("Vert")
+local COULEUR_BOUTON_ATTENTE = Habillage.nommee("Gris")
 local COULEURS_PALIERS: { [string]: Color3 } = {
-	Vert = Color3.fromRGB(80, 220, 90),
-	Jaune = Color3.fromRGB(255, 220, 50),
-	Orange = Color3.fromRGB(255, 140, 30),
-	Rouge = Color3.fromRGB(255, 50, 50),
+	Vert = Habillage.nommee("Vert"),
+	Jaune = Habillage.nommee("Jaune"),
+	Orange = Habillage.nommee("Orange"),
+	Rouge = Habillage.nommee("Rouge"),
 }
 
-local function arrondi(element: GuiObject, rayon: number)
-	local coin = Instance.new("UICorner")
-	coin.CornerRadius = UDim.new(0, rayon)
-	coin.Parent = element
-end
-
-local function contour(element: GuiObject, epaisseur: number)
-	local trait = Instance.new("UIStroke")
-	trait.Thickness = epaisseur
-	trait.Color = Color3.new(0, 0, 0)
-	trait.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-	trait.Parent = element
-end
-
 local function couleurRarete(rarete: string): Color3
-	local rgb = Config.Raretes.Couleurs[rarete]
-	if type(rgb) ~= "table" then
-		return Color3.new(1, 1, 1)
-	end
-	return Color3.fromRGB(rgb[1], rgb[2], rgb[3])
-end
-
--- Dégradé vert -> jaune -> orange -> rouge (bas -> haut), paliers nets.
-local function degradeJauge(): ColorSequence
-	local points = {}
-	local paliers = Config.Lancer.Jauge.Paliers
-	for i, palier in paliers do
-		local couleur = COULEURS_PALIERS[palier.Couleur] or Color3.new(1, 1, 1)
-		local fin = if paliers[i + 1] then paliers[i + 1].Min - 0.001 else 1
-		table.insert(points, ColorSequenceKeypoint.new(palier.Min, couleur))
-		table.insert(points, ColorSequenceKeypoint.new(fin, couleur))
-	end
-	return ColorSequence.new(points)
+	return Habillage.couleur(Style.couleurRarete(rarete))
 end
 
 local function creerPanneauTaux(ecran: ScreenGui)
@@ -70,7 +41,8 @@ local function creerPanneauTaux(ecran: ScreenGui)
 	cadre.BackgroundColor3 = COULEUR_FOND
 	cadre.BackgroundTransparency = 0.25
 	cadre.Parent = ecran
-	arrondi(cadre, 10)
+	Habillage.arrondi(cadre, 0.15)
+	Habillage.contour(cadre, Style.Contour.Petit, Enum.ApplyStrokeMode.Border)
 
 	local contrainte = Instance.new("UISizeConstraint")
 	contrainte.MinSize = Vector2.new(300, 0)
@@ -92,27 +64,23 @@ local function creerPanneauTaux(ecran: ScreenGui)
 	local titre = Instance.new("TextButton")
 	titre.Name = "Titre"
 	titre.LayoutOrder = 0
-	titre.Size = UDim2.new(1, 0, 0, 24)
+	titre.Size = UDim2.new(1, 0, 0, 26)
 	titre.BackgroundTransparency = 1
-	titre.Font = Enum.Font.GothamBlack
-	titre.TextScaled = true
 	titre.TextColor3 = Color3.new(1, 1, 1)
 	titre.Text = "Taux de rareté ▲"
 	titre.Selectable = true
+	Habillage.styliserTexte(titre, Style.Contour.Petit)
 	titre.Parent = cadre
 
 	local lignes: { TextLabel } = {}
 	for i, zone in Config.Lancer.Zones do
-		local ligne = Instance.new("TextLabel")
-		ligne.Name = "Taux" .. zone.Nom
+		local ligne = Habillage.texte(cadre, "Taux" .. zone.Nom, {
+			couleur = Habillage.couleur(Style.couleurZone(zone.Nom)),
+			contour = Style.Contour.Petit,
+		})
 		ligne.LayoutOrder = i
-		ligne.Size = UDim2.new(1, 0, 0, 18)
-		ligne.BackgroundTransparency = 1
-		ligne.Font = Enum.Font.GothamBold
-		ligne.TextScaled = true
-		ligne.TextColor3 = Color3.fromRGB(230, 230, 230)
+		ligne.Size = UDim2.new(1, 0, 0, Style.TailleTexteMin + 2)
 		ligne.Text = Lancer.texteTaux(zone.Nom)
-		ligne.Parent = cadre
 		table.insert(lignes, ligne)
 	end
 
@@ -137,34 +105,27 @@ function InterfaceLancer.demarrer()
 	ecran.ResetOnSpawn = false
 
 	-- Bouton LANCER (souris et toucher via Activated).
-	local bouton = Instance.new("TextButton")
-	bouton.Name = "Lancer"
+	local bouton, texteBouton = Habillage.bouton(ecran, "Lancer", {
+		texte = "LANCER",
+		couleur = COULEUR_BOUTON,
+		taille = Vector2.new(170, Style.TailleBoutonMin),
+	})
 	bouton.AnchorPoint = Vector2.new(1, 1)
 	bouton.Position = UDim2.new(1, -20, 1, -20)
-	bouton.Size = UDim2.fromOffset(170, 80)
-	bouton.BackgroundColor3 = COULEUR_BOUTON
-	bouton.Font = Enum.Font.GothamBlack
-	bouton.TextScaled = true
-	bouton.TextColor3 = Color3.new(1, 1, 1)
-	bouton.Text = "LANCER"
-	bouton.Selectable = true
-	bouton.Parent = ecran
-	arrondi(bouton, 14)
-	contour(bouton, 3)
 
-	-- Jauge verticale, au-dessus du bouton.
+	-- Jauge verticale, au-dessus du bouton : dégradé continu (vert en bas -> rouge en haut).
 	local jauge = Instance.new("Frame")
 	jauge.Name = "Jauge"
 	jauge.AnchorPoint = Vector2.new(1, 1)
-	jauge.Position = UDim2.new(1, -85, 1, -115)
+	jauge.Position = UDim2.new(1, -85, 1, -20 - Style.TailleBoutonMin - 25)
 	jauge.Size = UDim2.fromOffset(44, 260)
 	jauge.BackgroundColor3 = Color3.new(1, 1, 1)
 	jauge.Visible = false
 	jauge.Parent = ecran
-	arrondi(jauge, 10)
-	contour(jauge, 3)
+	Habillage.arrondi(jauge, 0.3)
+	Habillage.contour(jauge, Style.Contour.Moyen, Enum.ApplyStrokeMode.Border)
 	local degrade = Instance.new("UIGradient")
-	degrade.Color = degradeJauge()
+	degrade.Color = Habillage.degrade()
 	degrade.Rotation = -90 -- 0 en bas, 1 en haut
 	degrade.Parent = jauge
 
@@ -172,29 +133,20 @@ function InterfaceLancer.demarrer()
 	curseur.Name = "Curseur"
 	curseur.AnchorPoint = Vector2.new(0.5, 0.5)
 	curseur.Position = UDim2.fromScale(0.5, 1)
-	curseur.Size = UDim2.new(1, 16, 0, 6)
+	curseur.Size = UDim2.new(1, 16, 0, 8)
 	curseur.BackgroundColor3 = Color3.new(1, 1, 1)
 	curseur.ZIndex = 2
 	curseur.Parent = jauge
-	contour(curseur, 2)
+	Habillage.arrondi(curseur, 0.5)
+	Habillage.contour(curseur, Style.Contour.Petit, Enum.ApplyStrokeMode.Border)
 
-	-- Message de résultat.
-	local message = Instance.new("TextLabel")
-	message.Name = "Message"
-	message.AnchorPoint = Vector2.new(0.5, 0.5)
-	message.Position = UDim2.fromScale(0.5, 0.32)
+	-- Message de résultat (sous le bandeau des messages, sans le recouvrir).
+	local message = Habillage.texte(ecran, "Message", { contour = Style.Contour.Gros })
+	message.AnchorPoint = Vector2.new(0.5, 0)
+	message.Position = UDim2.new(0.5, 0, 0, 276)
 	message.Size = UDim2.fromOffset(520, 90)
-	message.BackgroundTransparency = 1
-	message.Font = Enum.Font.FredokaOne
-	message.TextScaled = true
 	message.Visible = false
-	message.Parent = ecran
-	local traitMessage = Instance.new("UIStroke")
-	traitMessage.Thickness = 4
-	traitMessage.Color = Color3.new(0, 0, 0)
-	traitMessage.Parent = message
-	local echelle = Instance.new("UIScale")
-	echelle.Parent = message
+	local echelle = Habillage.echelle(message)
 
 	creerPanneauTaux(ecran)
 
@@ -217,10 +169,11 @@ function InterfaceLancer.demarrer()
 	local function rafraichirBouton()
 		local enAttente = os.clock() < attenteJusqua
 		bouton.BackgroundColor3 = if enAttente then COULEUR_BOUTON_ATTENTE else COULEUR_BOUTON
-		bouton.Text = if enCours then "LÂCHER !" else "LANCER"
+		texteBouton.Text = if enCours then "LÂCHER !" else "LANCER"
 	end
 
 	local function actionner()
+		Habillage.rebondir(bouton)
 		if enCours then
 			lacherJauge:FireServer()
 			cacherJauge()

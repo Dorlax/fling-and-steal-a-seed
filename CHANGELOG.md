@@ -2,6 +2,20 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage interface (issue #15)
+
+- InterfacePieges : le champ `jauge` utilise le type `Habillage.Jauge`.
+- Panneaux : genre affiné après le test de nil ; `Adornee` affecté seulement si le support est une BasePart.
+
+## 2026-11-08 — Peaufinage interface et effets (issue #15)
+- Nouveau module pur `Shared/Style` (couleurs, dégradé des jauges, recharges, file de bandeaux) et fabrique client `Habillage` (textes, boutons, jauges, rebonds, nombres flottants).
+- Toute l'interface en police ronde FredokaOne avec contour noir épais ; gros boutons colorés qui rebondissent (LANCER vert, PLAQUER orange, Force rouge, Vitesse bleu, pièges à leur couleur).
+- Jauge de lancer en dégradé continu ; nouvelles barres de recharge pour PLAQUER, les pièges et le verrou de base.
+- Messages du serveur et « VOLÉ ! » dans un bandeau unique qui glisse en haut de l'écran, un message à la fois.
+- Un seul « BOUM ! » au plaquage (gros, blanc, rebondissant) : celui du serveur est caché côté client.
+- Panneaux des créatures (couleur de rareté, revenu en base) et des monstres (couleur du danger) agrandis et plus lisibles ; « Récolter », « Voler » et « Verrouiller » en gros boutons avec jauge de maintien.
+- Aucune règle ni valeur de `Config` modifiée, aucun fichier serveur touché.
+
 ## 2026-11-08 — Correctif typage des pièges (issue #13)
 - `src/server/Pieges.luau` : conversions explicites après les vérifications de nil (`BasePart?`, `Humanoid?`) pour que luau-lsp passe en CI.
 

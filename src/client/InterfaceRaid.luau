@@ -1,37 +1,21 @@
 --!strict
 -- Raids côté client (affichage seulement, le serveur revérifie tout) :
--- cache les prompts inutiles, alerte « VOLÉ ! » et compteur du verrou.
+-- cache les prompts inutiles, alerte « VOLÉ ! » (bandeau) et compteur du verrou
+-- avec sa jauge.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
-local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
+local Style = require(Shared:WaitForChild("Style"))
+local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
+local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local InterfaceRaid = {}
 
-local raretes: any = Config.Raretes
-local ROUGE = Color3.fromRGB(255, 60, 60)
-local VERT = Color3.fromRGB(120, 255, 90)
-local JAUNE = Color3.fromRGB(255, 220, 60)
-
-local function contour(element: GuiObject, epaisseur: number)
-	local trait = Instance.new("UIStroke")
-	trait.Thickness = epaisseur
-	trait.Color = Color3.new(0, 0, 0)
-	trait.Parent = element
-end
-
-local function texte(parent: Instance, nom: string, couleur: Color3): TextLabel
-	local label = Instance.new("TextLabel")
-	label.Name = nom
-	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.FredokaOne
-	label.TextScaled = true
-	label.TextColor3 = couleur
-	label.Parent = parent
-	return label
-end
+local ROUGE = Habillage.nommee("Rouge")
+local JAUNE = Habillage.nommee("Jaune")
 
 -- Base (enfant direct de Workspace.Bases) contenant `objet`, ou nil.
 local function baseDe(objet: Instance, dossier: Instance): Instance?
@@ -83,63 +67,26 @@ function InterfaceRaid.demarrer()
 	ecran.Name = "InterfaceRaid"
 	ecran.ResetOnSpawn = false
 
-	-- Alerte « VOLÉ ! » : gros titre rebondissant + sous-titre.
-	local titre = texte(ecran, "Titre", ROUGE)
-	titre.AnchorPoint = Vector2.new(0.5, 0.5)
-	titre.Position = UDim2.fromScale(0.5, 0.3)
-	titre.Size = UDim2.fromOffset(420, 110)
-	titre.Visible = false
-	contour(titre, 6)
-
-	local sousTitre = texte(ecran, "SousTitre", Color3.new(1, 1, 1))
-	sousTitre.AnchorPoint = Vector2.new(0.5, 0.5)
-	sousTitre.Position = UDim2.new(0.5, 0, 0.3, 70)
-	sousTitre.Size = UDim2.fromOffset(560, 40)
-	sousTitre.Visible = false
-	contour(sousTitre, 3)
-
-	-- Compteur du verrou (propriétaire).
-	local compteur = texte(ecran, "CompteurVerrou", ROUGE)
+	-- Compteur du verrou (propriétaire) + jauge en dégradé.
+	local compteur = Habillage.texte(ecran, "CompteurVerrou", { couleur = ROUGE })
 	compteur.AnchorPoint = Vector2.new(1, 0)
 	compteur.Position = UDim2.new(1, -16, 0, 16)
 	compteur.Size = UDim2.fromOffset(200, 44)
 	compteur.Visible = false
-	contour(compteur, 3)
+	local jauge = Habillage.jauge(ecran, "JaugeVerrou", UDim2.fromOffset(180, 16))
+	jauge.cadre.AnchorPoint = Vector2.new(1, 0)
+	jauge.cadre.Position = UDim2.new(1, -26, 0, 66)
 
+	-- Alerte « VOLÉ ! » : passe par le bandeau unique (deux lignes).
 	local alerte = ReplicatedStorage:WaitForChild("AlerteVol") :: RemoteEvent
-	local numero = 0
 	alerte.OnClientEvent:Connect(function(role: any, rarete: any, autre: any)
 		if type(role) ~= "string" or type(rarete) ~= "string" or type(autre) ~= "string" then
 			return
 		end
-		local nomRarete = raretes.Noms[rarete] or rarete
-		numero += 1
-		local actuel = numero
-		titre.Text = "VOLÉ !"
-		if role == "victime" then
-			titre.TextColor3 = ROUGE
-			sousTitre.TextColor3 = Color3.new(1, 1, 1)
-			sousTitre.Text = string.sub(`{autre} a pris ta créature {nomRarete} !`, 1, 100)
-		else
-			titre.TextColor3 = VERT
-			sousTitre.TextColor3 = JAUNE
-			sousTitre.Text = "Ramène-la dans ta base !"
-		end
-		titre.Visible = true
-		sousTitre.Visible = true
-		titre.Size = UDim2.fromOffset(60, 16)
-		titre.Rotation = -12
-		TweenService:Create(
-			titre,
-			TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-			{ Size = UDim2.fromOffset(420, 110), Rotation = 4 }
-		):Play()
-		task.delay(Config.Raid.DureeAlerte, function()
-			if actuel == numero then
-				titre.Visible = false
-				sousTitre.Visible = false
-			end
-		end)
+		local phrase = if role == "victime"
+			then `{autre} a pris ta créature {Style.texteRarete(rarete)} !`
+			else "Ramène-la dans ta base !"
+		Bandeaux.afficher("VOLÉ !\n" .. phrase)
 	end)
 
 	local function nombre(nom: string): number?
@@ -159,12 +106,15 @@ function InterfaceRaid.demarrer()
 				compteur.Visible = true
 				compteur.TextColor3 = ROUGE
 				compteur.Text = "🔒 " .. math.ceil(jusqua - maintenant) .. " s"
+				jauge.maj(Style.ratioRecharge(maintenant, jusqua, Config.Raid.DureeVerrou))
 			elseif pretA and maintenant < pretA then
 				compteur.Visible = true
 				compteur.TextColor3 = JAUNE
 				compteur.Text = "Prêt dans " .. math.ceil(pretA - maintenant) .. " s"
+				jauge.maj(Style.ratioRecharge(maintenant, pretA, Config.Raid.Recharge))
 			else
 				compteur.Visible = false
+				jauge.maj(0)
 			end
 			task.wait(0.25)
 		end

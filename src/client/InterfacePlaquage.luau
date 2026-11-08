@@ -6,17 +6,18 @@
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Plaquage = require(Shared:WaitForChild("Plaquage"))
+local Style = require(Shared:WaitForChild("Style"))
+local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local InterfacePlaquage = {}
 
-local COULEUR_PRET = Color3.fromRGB(255, 120, 40)
-local COULEUR_ATTENTE = Color3.fromRGB(130, 130, 130)
+local COULEUR_PRET = Habillage.nommee("Orange")
+local COULEUR_ATTENTE = Habillage.nommee("Gris")
 local TAILLE = 120 -- pixels : assez grand pour le tactile
 local MARGE_PORTEE = 2 -- studs : tolérance de l'aide côté client (le serveur tranche)
 
@@ -45,35 +46,20 @@ function InterfacePlaquage.demarrer()
 	ecran.Name = "InterfacePlaquage"
 	ecran.ResetOnSpawn = false
 
-	-- À gauche du bouton LANCER (bas à droite de l'écran).
-	local bouton = Instance.new("TextButton")
-	bouton.Name = "BoutonPlaquer"
+	-- À gauche du bouton LANCER (bas à droite de l'écran), rond.
+	local bouton, texte = Habillage.bouton(ecran, "BoutonPlaquer", {
+		texte = "PLAQUER !",
+		couleur = COULEUR_PRET,
+		taille = Vector2.new(TAILLE, TAILLE),
+		rond = true,
+	})
 	bouton.AnchorPoint = Vector2.new(1, 1)
 	bouton.Position = UDim2.new(1, -210, 1, -20)
-	bouton.Size = UDim2.fromOffset(TAILLE, TAILLE)
-	bouton.BackgroundColor3 = COULEUR_PRET
-	bouton.Font = Enum.Font.FredokaOne
-	bouton.TextScaled = true
-	bouton.TextColor3 = Color3.new(1, 1, 1)
-	bouton.Text = "PLAQUER !"
-	bouton.Selectable = true
-	bouton.AutoButtonColor = true
-	bouton.Parent = ecran
 
-	local arrondi = Instance.new("UICorner")
-	arrondi.CornerRadius = UDim.new(0.5, 0)
-	arrondi.Parent = bouton
-	local bord = Instance.new("UIStroke")
-	bord.Thickness = 4
-	bord.Color = Color3.new(0, 0, 0)
-	bord.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	bord.Parent = bouton
-	local marge = Instance.new("UIPadding")
-	marge.PaddingLeft = UDim.new(0, 12)
-	marge.PaddingRight = UDim.new(0, 12)
-	marge.Parent = bouton
-	local echelle = Instance.new("UIScale")
-	echelle.Parent = bouton
+	-- Jauge de recharge, juste au-dessus du bouton.
+	local jauge = Habillage.jauge(ecran, "RechargePlaquer", UDim2.fromOffset(TAILLE - 10, 16))
+	jauge.cadre.AnchorPoint = Vector2.new(0.5, 1)
+	jauge.cadre.Position = UDim2.new(1, -210 - TAILLE / 2, 1, -28 - TAILLE)
 
 	local function pret(): boolean
 		local pretA = joueur:GetAttribute("PlaquagePretA")
@@ -101,17 +87,8 @@ function InterfacePlaquage.demarrer()
 		return false
 	end
 
-	local function rebondir()
-		echelle.Scale = 0.8
-		TweenService:Create(
-			echelle,
-			TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-			{ Scale = 1 }
-		):Play()
-	end
-
 	local function plaquer()
-		rebondir()
+		Habillage.rebondir(bouton)
 		remote:FireServer()
 	end
 
@@ -143,12 +120,12 @@ function InterfacePlaquage.demarrer()
 	task.spawn(function()
 		while true do
 			local estPret = pret()
-			bouton.Text = Plaquage.texteBouton(
-				Workspace:GetServerTimeNow(),
-				joueur:GetAttribute("PlaquagePretA") :: number?
-			)
+			local maintenant = Workspace:GetServerTimeNow()
+			local pretA = joueur:GetAttribute("PlaquagePretA") :: number?
+			texte.Text = Plaquage.texteBouton(maintenant, pretA)
 			bouton.BackgroundColor3 = if estPret then COULEUR_PRET else COULEUR_ATTENTE
-			bouton.TextTransparency = if estPret then 0 else 0.15
+			texte.TextTransparency = if estPret then 0 else 0.15
+			jauge.maj(Style.ratioRecharge(maintenant, pretA, Config.Plaquage.DelaiRecuperation))
 			task.wait(0.1)
 		end
 	end)
