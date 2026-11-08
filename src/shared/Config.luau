@@ -156,6 +156,42 @@ local Config = {
 		DureeAlerte = 3, -- secondes d'affichage de « VOLÉ ! »
 	},
 
+	-- Pièges posés dans les Terres Sauvages (tout est vérifié par le serveur).
+	Pieges = {
+		Ordre = { "Filet", "Glu", "FausseGraine" },
+		Types = {
+			Filet = { Nom = "Filet", Prix = 50, Couleur = { 255, 140, 30 }, Duree = 3 },
+			Glu = {
+				Nom = "Glu",
+				Prix = 40,
+				Couleur = { 120, 255, 60 },
+				Multiplicateur = 0.3,
+				Rayon = 6,
+			},
+			FausseGraine = {
+				Nom = "Fausse graine",
+				Prix = 60,
+				Couleur = { 255, 215, 60 },
+				Duree = 2,
+			},
+		},
+		MaxParJoueur = 3, -- pièges actifs par joueur, tous types confondus
+		DelaiPose = 5, -- secondes entre deux poses du même joueur
+		DureeVie = 90, -- secondes avant disparition d'un piège non déclenché
+		DureeProtection = 4, -- secondes d'immunité après la fin d'un effet
+		RayonDeclenchement = 4, -- studs (filet) entre la racine du joueur et le piège
+		DistanceRecolteFausse = 10, -- studs (= Creatures.DistanceRecolte)
+		EcartMin = 6, -- studs minimum entre deux pièges (tous poseurs)
+		MargeBases = 6, -- pose interdite à Z < BordBases + MargeBases
+		IntervalleBoucle = 0.1, -- secondes entre deux passages de la boucle serveur
+		IntervalleMinRequetes = 0.2, -- anti-spam de PoserPiege
+		-- Noms d'Enum.KeyCode (F, E, ButtonX, ButtonY, ButtonR2 sont déjà pris).
+		Touches = {
+			Clavier = { Filet = "Z", Glu = "X", FausseGraine = "C" },
+			Manette = { Filet = "DPadLeft", Glu = "DPadUp", FausseGraine = "DPadRight" },
+		},
+	},
+
 	-- Cycle jour/nuit (horloge serveur).
 	Cycle = {
 		DureeJour = 240, -- secondes

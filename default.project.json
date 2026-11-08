@@ -10,7 +10,8 @@
       "ResultatLancer": { "$className": "RemoteEvent" },
       "MessageJeu": { "$className": "RemoteEvent" },
       "Plaquer": { "$className": "RemoteEvent" },
-      "AlerteVol": { "$className": "RemoteEvent" }
+      "AlerteVol": { "$className": "RemoteEvent" },
+      "PoserPiege": { "$className": "RemoteEvent" }
     },
     "Workspace": {
       "TerresSauvages": {

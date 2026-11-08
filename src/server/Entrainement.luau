@@ -6,17 +6,22 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Forge = require(ReplicatedStorage.Shared.Forge)
+local Piege = require(ReplicatedStorage.Shared.Piege)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 
 local Entrainement = {}
 
 -- Applique au personnage le WalkSpeed correspondant à la Vitesse (ralenti
--- pendant le portage d'une créature, attribut Porte) ; le renvoie.
+-- pendant le portage d'une créature, attribut Porte, puis effets de piège :
+-- ImmobileJusqua et Englue, écrits par Pieges) ; le renvoie.
 function Entrainement.appliquerVitesse(joueur: any): number
 	local walkSpeed = Forge.walkSpeedPour(joueur:GetAttribute("Vitesse"))
 	if joueur:GetAttribute("Porte") ~= nil then
 		walkSpeed = Revenus.walkSpeedPortage(walkSpeed)
 	end
+	-- L'attribut ImmobileJusqua n'existe que pendant l'immobilisation.
+	local immobile = type(joueur:GetAttribute("ImmobileJusqua")) == "number"
+	walkSpeed = Piege.walkSpeed(walkSpeed, immobile, joueur:GetAttribute("Englue") == true)
 	local personnage = joueur.Character
 	if personnage then
 		local humanoide = personnage:FindFirstChildOfClass("Humanoid")

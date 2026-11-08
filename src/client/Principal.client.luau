@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local InterfaceLancer = require(script.Parent:WaitForChild("InterfaceLancer"))
+local InterfacePieges = require(script.Parent:WaitForChild("InterfacePieges"))
 local InterfacePieces = require(script.Parent:WaitForChild("InterfacePieces"))
 local InterfacePlaquage = require(script.Parent:WaitForChild("InterfacePlaquage"))
 local InterfaceRaid = require(script.Parent:WaitForChild("InterfaceRaid"))
@@ -15,5 +16,6 @@ InterfacePieces.demarrer()
 -- partagée et laisse l'appui au lancer quand personne n'est à plaquer.
 InterfacePlaquage.demarrer()
 InterfaceRaid.demarrer()
+InterfacePieges.demarrer()
 
 print(`{Config.NomDuJeu} : client démarré`)

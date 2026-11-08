@@ -2,6 +2,16 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage des pièges (issue #13)
+- `src/server/Pieges.luau` : conversions explicites après les vérifications de nil (`BasePart?`, `Humanoid?`) pour que luau-lsp passe en CI.
+
+## 2026-11-08 — Pièges (issue #13)
+- Trois pièges à poser dans les Terres Sauvages : Filet (immobilise 3 s), Flaque de glu (ralentit ×0,3 tant qu'on est dedans), Fausse graine (ressemble à une créature « Récolter » ; immobilise 2 s).
+- Prix en pièces, 3 pièges actifs max par joueur, 5 s entre deux poses, 90 s de durée de vie, 4 s de protection après un effet ; pose interdite dans les bases et trop près d'un autre piège.
+- Tout est décidé par le serveur (nouveau module `Pieges`, logique pure `Piege`) ; le client n'envoie que le nom du type via `PoserPiege`.
+- Le poseur n'est jamais affecté par ses pièges ; une victime garde la créature qu'elle porte.
+- Trois gros boutons à gauche de l'écran (touches Z/X/C, croix directionnelle à la manette) et « PIÉGÉ ! » au centre pendant l'immobilisation.
+
 ## 2026-11-08 — Correctif tests en jeu des raids (issue #11)
 - La créature volée est désormais portée dans le personnage du voleur (et oubliée proprement si ce personnage est détruit).
 
