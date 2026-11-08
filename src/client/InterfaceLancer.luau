@@ -13,6 +13,7 @@ local Config = require(Shared:WaitForChild("Config")) :: any
 local Jauge = require(Shared:WaitForChild("Jauge")) :: any
 local Lancer = require(Shared:WaitForChild("Lancer")) :: any
 local Fiche = require(Shared:WaitForChild("Fiche"))
+local Biomes = require(Shared:WaitForChild("Biomes"))
 local Style = require(Shared:WaitForChild("Style"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
@@ -85,22 +86,32 @@ local function creerPanneauTaux(ecran: ScreenGui)
 		table.insert(lignes, ligne)
 	end
 
-	-- Taux de taille (identiques partout) : plus elle est grosse, plus elle rapporte.
-	local morceaux = {}
-	for _, taille in Config.Tailles.Ordre do
-		local nom = (Config.Tailles.Noms :: any)[taille]
-		local taux = (Config.Tailles.Taux :: any)[taille]
-		local mult = (Config.Tailles.Multiplicateur :: any)[taille]
-		table.insert(morceaux, `{nom} {taux} % (×{mult})`)
-	end
+	-- Taux de taille du biome que le lancer atteint avec la Force actuelle :
+	-- plus on va loin, plus les grosses tailles sortent souvent.
 	local ligneTailles = Habillage.texte(cadre, "TauxTailles", {
 		couleur = Color3.fromRGB(255, 240, 200),
 		contour = Style.Contour.Petit,
 	})
 	ligneTailles.LayoutOrder = #Config.Lancer.Zones + 1
 	ligneTailles.Size = UDim2.new(1, 0, 0, Style.TailleTexteMin + 2)
-	ligneTailles.Text = "Tailles : " .. table.concat(morceaux, " · ")
 	table.insert(lignes, ligneTailles)
+	local joueur = Players.LocalPlayer
+	local function majTailles()
+		local force = joueur:GetAttribute("Force")
+		local biome = Biomes.index(Lancer.distance(if type(force) == "number" then force else 0, 0))
+		local taux = Fiche.tauxTailles(biome)
+		local morceaux = {}
+		for _, taille in Config.Tailles.Ordre do
+			local nom = (Config.Tailles.Noms :: any)[taille]
+			local mult = (Config.Tailles.Multiplicateur :: any)[taille]
+			local pourcent = math.floor(taux[taille] * 10 + 0.5) / 10
+			local texte = string.gsub(tostring(pourcent), "%.", ",")
+			table.insert(morceaux, `{nom} {texte} % (×{mult})`)
+		end
+		ligneTailles.Text = `Tailles (biome {biome}) : ` .. table.concat(morceaux, " · ")
+	end
+	majTailles()
+	joueur:GetAttributeChangedSignal("Force"):Connect(majTailles)
 
 	local ouvert = true
 	titre.Activated:Connect(function()

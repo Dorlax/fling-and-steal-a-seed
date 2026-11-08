@@ -58,17 +58,38 @@ function Fiche.valide(texte: any): boolean
 	return Fiche.lire(texte) ~= nil
 end
 
--- Taille tirée avec `tirage` dans [0, 1[ selon les taux (en %).
-function Fiche.tirerTaille(tirage: number): string
+-- Taux des tailles (en %, total 100) dans le biome n : ceux de Config au
+-- biome 1, puis de plus en plus de grosses tailles à chaque biome.
+function Fiche.tauxTailles(biome: number?): { [string]: number }
+	local n = if type(biome) == "number" and biome == biome
+		then math.max(1, math.floor(biome))
+		else 1
+	local facteur = 1 + (tailles.BonusParBiome or 0) * (n - 1)
+	local poids: { [string]: number } = {}
+	local total = 0
+	for rang, taille in tailles.Ordre do
+		local p = (tailles.Taux :: any)[taille] * facteur ^ (rang - 1)
+		poids[taille] = p
+		total += p
+	end
+	for taille, p in poids do
+		poids[taille] = p / total * 100
+	end
+	return poids
+end
+
+-- Taille tirée avec `tirage` dans [0, 1[ selon les taux du biome (1 par défaut).
+function Fiche.tirerTaille(tirage: number, biome: number?): string
+	local taux = Fiche.tauxTailles(biome)
 	local cumul = 0
 	local seuil = math.clamp(tirage, 0, 0.999999) * 100
 	for _, taille in tailles.Ordre do
-		cumul += (tailles.Taux :: any)[taille]
+		cumul += taux[taille]
 		if seuil < cumul then
 			return taille
 		end
 	end
-	return tailles.Ordre[1]
+	return tailles.Ordre[#tailles.Ordre]
 end
 
 function Fiche.echelle(taille: string): number

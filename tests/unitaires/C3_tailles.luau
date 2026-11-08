@@ -76,4 +76,20 @@ return {
 		assert(#d.CreaturesBase == 2, "2 fiches valides attendues")
 		assert(d.CreaturesBase[2] == "Mythique:Colossale:Phenigraine", "fiche complète conservée")
 	end,
+
+	["C3 plus le biome est loin, plus les grosses tailles sortent"] = function()
+		local t1 = Fiche.tauxTailles(1)
+		local t6 = Fiche.tauxTailles(6)
+		assert(
+			math.abs(t1.Normale - 60) < 1e-9 and math.abs(t1.Titan - 1) < 1e-9,
+			"biome 1 = taux de Config"
+		)
+		assert(t6.Titan > t1.Titan and t6.Normale < t1.Normale, "biome 6 : plus de Titans")
+		local somme = 0
+		for _, v in t6 do
+			somme += v
+		end
+		assert(math.abs(somme - 100) < 1e-6, "les taux font toujours 100 %")
+		assert(Fiche.tirerTaille(0.999, 6) == "Titan", "le haut du tirage reste Titan")
+	end,
 }
