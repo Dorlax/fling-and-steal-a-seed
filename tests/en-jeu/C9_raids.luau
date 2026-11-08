@@ -185,13 +185,14 @@ return {
 		local porte = b:GetAttribute("Porte")
 		local expo3 = creatureExposee(a, 3)
 		local expo2 = creatureExposee(a, 2)
+		local corps2 = expo2 and expo2:FindFirstChild("Corps")
 		nettoyer(a, b)
 		assert(ok == true, "le vol doit réussir")
 		assert(#liste == 2 and liste[1] == "Commune" and liste[2] == "Epique", "la victime doit perdre la Rare")
 		assert(revenuApres < revenuAvant, "RevenuParSeconde doit baisser")
 		assert(porte == "Rare", "Porte du voleur attendu : Rare, obtenu " .. tostring(porte))
 		assert(expo3 == nil, "il ne doit rester que 2 créatures exposées")
-		assert(expo2 ~= nil and expo2:FindFirstChild("Corps") ~= nil, "créatures réaffichées")
+		assert(expo2 ~= nil and corps2 ~= nil, "créatures réaffichées")
 	end,
 
 	["C11 vol refusé sans changement : voleur hors de la base visitée"] = function()
@@ -319,7 +320,8 @@ return {
 		end
 		assert(monstre, "monstre de la zone Proche introuvable")
 		monstre:PivotTo(CFrame.new(POSITION + Vector3.new(0, 0, 2)))
-		local ok = Monstres.frapper(monstre, b, Workspace:GetServerTimeNow())
+		-- Instant futur : le monstre peut être en recharge à cause d'un autre test.
+		local ok = Monstres.frapper(monstre, b, Workspace:GetServerTimeNow() + 1000)
 		local porte = b:GetAttribute("Porte")
 		local libre = volee ~= nil and volee:GetAttribute("Libre")
 		local dans = volee ~= nil and dansLeDossier(volee)
