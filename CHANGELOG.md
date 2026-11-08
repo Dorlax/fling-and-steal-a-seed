@@ -9,6 +9,9 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-08 — Marais, Récif, Bonbon
+- Biomes 7 (Marais Brumeux), 8 (Récif Corail) et 9 (Royaume Bonbon) : 39 nouvelles espèces dessinées à la main (`EspecesMarais`, `EspecesRecif`, `EspecesBonbon`).
+- Décors en blocs : arbres morts, flaques à nénuphars, roseaux, feux follets ; coraux, algues, coquillages géants, bulles ; sucettes, sucres d'orge, cupcakes géants, dragées.
 ## 2026-11-08 — Agrandissement des bases
 - Trois tailles de base (40, 56, 72 studs), achetées en pièces ; la base est reconstruite au même endroit, socles plus espacés.
 - Créatures exposées à leur vraie taille (3 studs × taille), réduites seulement au-delà de ce que la base permet (× 1,3 / 2,1 / 2,8).

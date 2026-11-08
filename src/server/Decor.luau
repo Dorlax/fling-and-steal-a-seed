@@ -890,6 +890,346 @@ local function etoile(parent: Instance, position: Vector3, hasard: Random)
 	p.CastShadow = false
 end
 
+-- Marais : arbre mort penché, couvert de mousse pendante.
+local function arbreMort(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ArbreMort"
+	local e = hasard:NextNumber(1, 1.7)
+	local h = 11 * e
+	local penche = math.rad(hasard:NextNumber(-12, 12))
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), penche)
+	local ecorce = Color3.fromRGB(75, 65, 55)
+	bloc(modele, "Tronc", Vector3.new(2, h, 2) * e, base * CFrame.new(0, h / 2, 0), ecorce, true)
+	for i = 1, 2 do
+		local cote = if i == 1 then 1 else -1
+		bloc(
+			modele,
+			"Branche",
+			Vector3.new(5 * e, 1, 1),
+			base
+				* CFrame.new(cote * 2.2 * e, h * (0.6 + i * 0.12), 0)
+				* CFrame.Angles(0, 0, math.rad(cote * 25)),
+			ecorce
+		)
+		bloc(
+			modele,
+			"Mousse",
+			Vector3.new(0.6, 3 * e, 0.6),
+			base * CFrame.new(cote * 3.6 * e, h * (0.6 + i * 0.12) - 1.4 * e, 0),
+			Color3.fromRGB(110, 140, 80)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Marais : flaque de vase avec un nénuphar fleuri.
+local function flaque(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(7, 16)
+	local angle = hasard:NextNumber(0, 6)
+	local eau = bloc(
+		parent,
+		"Flaque",
+		Vector3.new(t, 0.3, t * 0.75),
+		CFrame.new(position + Vector3.new(0, 0.1, 0)) * CFrame.Angles(0, angle, 0),
+		Color3.fromRGB(60, 95, 80)
+	)
+	eau.Material = Enum.Material.Glass
+	eau.Transparency = 0.2
+	bloc(
+		parent,
+		"Nenuphar",
+		Vector3.new(2.4, 0.2, 2.4),
+		CFrame.new(position + Vector3.new(t * 0.2, 0.35, 0)) * CFrame.Angles(0, angle, 0),
+		Color3.fromRGB(100, 170, 90)
+	)
+	bloc(
+		parent,
+		"Fleur",
+		Vector3.new(0.8, 0.6, 0.8),
+		CFrame.new(position + Vector3.new(t * 0.2, 0.7, 0)) * CFrame.Angles(0, math.rad(45), 0),
+		Color3.fromRGB(255, 170, 210)
+	)
+end
+
+-- Marais : touffe de roseaux.
+local function roseau(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Roseaux"
+	for _ = 1, hasard:NextInteger(3, 6) do
+		local h = hasard:NextNumber(3, 7)
+		local pos = position
+			+ Vector3.new(hasard:NextNumber(-1.5, 1.5), 0, hasard:NextNumber(-1.5, 1.5))
+		local tige = CFrame.new(pos)
+			* CFrame.Angles(
+				math.rad(hasard:NextNumber(-10, 10)),
+				0,
+				math.rad(hasard:NextNumber(-10, 10))
+			)
+		bloc(
+			modele,
+			"Tige",
+			Vector3.new(0.3, h, 0.3),
+			tige * CFrame.new(0, h / 2, 0),
+			Color3.fromRGB(110, 150, 70)
+		)
+		bloc(
+			modele,
+			"Epi",
+			Vector3.new(0.6, 1.2, 0.6),
+			tige * CFrame.new(0, h, 0),
+			Color3.fromRGB(110, 75, 45)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Marais : feu follet qui flotte dans la brume.
+local function feuFollet(parent: Instance, position: Vector3, hasard: Random)
+	local p = bloc(
+		parent,
+		"FeuFollet",
+		Vector3.one * 0.7,
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(2, 8), 0)),
+		Color3.fromRGB(170, 255, 190)
+	)
+	p.Material = Enum.Material.Neon
+	p.CastShadow = false
+end
+
+-- Récif : corail branchu aux couleurs vives.
+local function corail(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Corail"
+	local couleurs = {
+		Color3.fromRGB(255, 110, 120),
+		Color3.fromRGB(255, 170, 70),
+		Color3.fromRGB(190, 110, 230),
+		Color3.fromRGB(80, 210, 200),
+	}
+	local couleur = couleurs[hasard:NextInteger(1, #couleurs)]
+	local e = hasard:NextNumber(1, 2.2)
+	for _ = 1, hasard:NextInteger(3, 6) do
+		local h = hasard:NextNumber(2, 6) * e
+		bloc(
+			modele,
+			"Branche",
+			Vector3.new(0.9, h, 0.9) * Vector3.new(e, 1, e),
+			CFrame.new(
+				position
+					+ Vector3.new(
+						hasard:NextNumber(-1.5, 1.5) * e,
+						h * 0.45,
+						hasard:NextNumber(-1.5, 1.5) * e
+					)
+			)
+				* CFrame.Angles(
+					math.rad(hasard:NextNumber(-25, 25)),
+					0,
+					math.rad(hasard:NextNumber(-25, 25))
+				),
+			couleur,
+			true
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Récif : grande algue qui monte vers la surface.
+local function algue(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Algue"
+	local n = hasard:NextInteger(4, 8)
+	local vert = teinte(Color3.fromRGB(60, 150, 90), 0, hasard:NextNumber(0, 0.3))
+	for i = 0, n - 1 do
+		bloc(
+			modele,
+			"Segment",
+			Vector3.new(0.8, 2, 0.4),
+			CFrame.new(position + Vector3.new(math.sin(i * 0.9) * 0.6, 1 + i * 1.9, 0)),
+			teinte(vert, 1, i * 0.04)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Récif : coquillage géant entrouvert.
+local function coquillage(parent: Instance, position: Vector3, hasard: Random)
+	local e = hasard:NextNumber(1.5, 3)
+	local angle = hasard:NextNumber(0, 6)
+	local base = CFrame.new(position) * CFrame.Angles(0, angle, 0)
+	local nacre = Color3.fromRGB(240, 215, 230)
+	bloc(
+		parent,
+		"Valve",
+		Vector3.new(4, 0.8, 3.4) * e,
+		base * CFrame.new(0, 0.4 * e, 0),
+		nacre,
+		true
+	)
+	bloc(
+		parent,
+		"Couvercle",
+		Vector3.new(4, 0.8, 3.4) * e,
+		base * CFrame.new(0, 1.6 * e, 0.6 * e) * CFrame.Angles(math.rad(-30), 0, 0),
+		nacre
+	)
+	local perle = piece(
+		parent,
+		"Perle",
+		Enum.PartType.Ball,
+		Vector3.one * 1.2 * e,
+		base * CFrame.new(0, 1.3 * e, -0.3 * e),
+		Color3.fromRGB(255, 255, 255)
+	)
+	perle.Material = Enum.Material.Neon
+end
+
+-- Récif : bulle qui flotte.
+local function bulle(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(0.5, 1.4)
+	local p = piece(
+		parent,
+		"Bulle",
+		Enum.PartType.Ball,
+		Vector3.one * t,
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(2, 16), 0)),
+		Color3.fromRGB(200, 240, 255)
+	)
+	p.Material = Enum.Material.Glass
+	p.Transparency = 0.5
+	p.CastShadow = false
+end
+
+-- Bonbon : sucette géante plantée dans le sol.
+local function sucette(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Sucette"
+	local e = hasard:NextNumber(1, 2)
+	local h = 9 * e
+	bloc(
+		modele,
+		"Baton",
+		Vector3.new(0.8, h, 0.8),
+		CFrame.new(position + Vector3.new(0, h / 2, 0)),
+		Color3.fromRGB(255, 255, 255),
+		true
+	)
+	local couleurs =
+		{ Color3.fromRGB(255, 90, 150), Color3.fromRGB(90, 200, 255), Color3.fromRGB(255, 200, 60) }
+	local couleur = couleurs[hasard:NextInteger(1, #couleurs)]
+	local disque = CFrame.new(position + Vector3.new(0, h + 2.5 * e, 0))
+		* CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	bloc(modele, "Disque", Vector3.new(6, 6, 1) * e, disque, couleur, true)
+	bloc(
+		modele,
+		"Spirale",
+		Vector3.new(4, 4, 1.1) * e,
+		disque * CFrame.Angles(0, 0, math.rad(45)),
+		teinte(couleur, 1, 0.5)
+	)
+	bloc(modele, "Coeur", Vector3.new(2, 2, 1.2) * e, disque, couleur)
+	modele.Parent = parent
+end
+
+-- Bonbon : sucre d'orge rayé.
+local function sucreOrge(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "SucreOrge"
+	local h = hasard:NextNumber(6, 12)
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	for i = 0, 5 do
+		bloc(
+			modele,
+			"Segment",
+			Vector3.new(1.2, h / 6, 1.2),
+			base * CFrame.new(0, h / 12 + i * h / 6, 0),
+			if i % 2 == 0 then Color3.fromRGB(255, 255, 255) else Color3.fromRGB(230, 50, 60),
+			true
+		)
+	end
+	bloc(
+		modele,
+		"Crosse",
+		Vector3.new(3, 1.2, 1.2),
+		base * CFrame.new(1, h + 0.6, 0),
+		Color3.fromRGB(230, 50, 60)
+	)
+	bloc(
+		modele,
+		"Bout",
+		Vector3.new(1.2, 1.6, 1.2),
+		base * CFrame.new(2, h - 0.2, 0),
+		Color3.fromRGB(255, 255, 255)
+	)
+	modele.Parent = parent
+end
+
+-- Bonbon : champignon-cupcake au glaçage coulant.
+local function cupcakeGeant(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "CupcakeGeant"
+	local e = hasard:NextNumber(1, 2)
+	bloc(
+		modele,
+		"Moule",
+		Vector3.new(6, 4, 6) * e,
+		CFrame.new(position + Vector3.new(0, 2 * e, 0)),
+		Color3.fromRGB(120, 200, 240),
+		true
+	)
+	local glacages = {
+		Color3.fromRGB(255, 160, 210),
+		Color3.fromRGB(170, 240, 200),
+		Color3.fromRGB(255, 240, 200),
+	}
+	local glacage = glacages[hasard:NextInteger(1, #glacages)]
+	bloc(
+		modele,
+		"Glacage",
+		Vector3.new(7, 2, 7) * e,
+		CFrame.new(position + Vector3.new(0, 5 * e, 0)),
+		glacage,
+		true
+	)
+	bloc(
+		modele,
+		"Glacage2",
+		Vector3.new(4.6, 1.6, 4.6) * e,
+		CFrame.new(position + Vector3.new(0, 6.6 * e, 0)),
+		glacage
+	)
+	local cerise = piece(
+		modele,
+		"Cerise",
+		Enum.PartType.Ball,
+		Vector3.one * 1.6 * e,
+		CFrame.new(position + Vector3.new(0, 8 * e, 0)),
+		Color3.fromRGB(230, 40, 60)
+	)
+	cerise.Material = Enum.Material.SmoothPlastic
+	modele.Parent = parent
+end
+
+-- Bonbon : dragée colorée qui flotte.
+local function dragee(parent: Instance, position: Vector3, hasard: Random)
+	local couleurs = {
+		Color3.fromRGB(255, 120, 160),
+		Color3.fromRGB(140, 220, 255),
+		Color3.fromRGB(255, 230, 120),
+		Color3.fromRGB(170, 240, 170),
+	}
+	local p = piece(
+		parent,
+		"Dragee",
+		Enum.PartType.Ball,
+		Vector3.new(1, 0.7, 0.7),
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(2, 12), 0))
+			* CFrame.Angles(0, hasard:NextNumber(0, 6), 0),
+		couleurs[hasard:NextInteger(1, #couleurs)]
+	)
+	p.CastShadow = false
+end
+
 local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombre: number } } } = {
 	Foret = {
 		{ fonction = arbreBloc, nombre = 70 },
@@ -922,6 +1262,24 @@ local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombr
 		{ fonction = dune, nombre = 24 },
 		{ fonction = palmier, nombre = 8 },
 		{ fonction = pyramide, nombre = 2 },
+	},
+	Marais = {
+		{ fonction = arbreMort, nombre = 40 },
+		{ fonction = flaque, nombre = 30 },
+		{ fonction = roseau, nombre = 50 },
+		{ fonction = feuFollet, nombre = 60 },
+	},
+	Recif = {
+		{ fonction = corail, nombre = 60 },
+		{ fonction = algue, nombre = 45 },
+		{ fonction = coquillage, nombre = 8 },
+		{ fonction = bulle, nombre = 80 },
+	},
+	Bonbon = {
+		{ fonction = sucette, nombre = 35 },
+		{ fonction = sucreOrge, nombre = 35 },
+		{ fonction = cupcakeGeant, nombre = 14 },
+		{ fonction = dragee, nombre = 70 },
 	},
 }
 
