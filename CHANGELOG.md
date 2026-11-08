@@ -6,6 +6,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+
+## 2026-11-08 — Glacier, Volcan, Galaxie ; monstres plus rapides ; socles
+- Biomes 4 (Glacier Givré), 5 (Volcan Ardent) et 6 (Galaxie Étoilée) : 39 nouvelles espèces dessinées à la main, décors en blocs (sapins, igloos, pics de glace ; cônes fumants, mares de lave, obsidienne ; cristaux, astéroïdes, planètes).
+- Monstres de plus en plus rapides à chaque biome : il faut entraîner sa Vitesse pour leur échapper.
+- Force et Vitesse sans aucune limite réelle.
+- Socles d'exposition dans les bases, colorés selon la rareté.
 ## 2026-11-08 — Biomes, niveaux de Forge et bestiaire élargi
 - Moteur de biomes (`Shared.Biomes`) : route de biomes de 600 studs, sols, arches, décors en blocs (Forêt, Désert) et ambiance par biome ; valeur × 1,5 par biome.
 - Biomes 2 (Bois Moussu) et 3 (Dunes Dorées) : 26 nouvelles espèces dessinées à la main (10 créatures + 3 monstres chacun).

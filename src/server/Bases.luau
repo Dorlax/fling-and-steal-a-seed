@@ -33,6 +33,7 @@ local raretes: any = Config.Raretes -- indexé par des noms dynamiques
 local TAILLE_SOL = 40
 local HAUTEUR_BASE = 12 -- « dans la base » : jusqu'à 12 studs au-dessus du sol
 local TAILLE_EXPOSEE = 2 -- diamètre des créatures exposées dans la base
+local HAUTEUR_SOCLE = 1.4 -- les créatures exposées trônent sur un socle
 local BORD_EXPOSITION = 16 -- rangées à 16 studs du centre (sol de 40)
 local ECART = 60 -- distance entre deux bases (studs)
 local NOMBRE_EMPLACEMENTS = 12
@@ -482,7 +483,71 @@ local function positionEmplacement(numero: number): Vector3
 	local x = (if rangee == 0 then -1 else 1) * BORD_EXPOSITION
 	local pas = if parRangee > 1 then (2 * BORD_EXPOSITION) / (parRangee - 1) else 0
 	local z = -BORD_EXPOSITION + rang * pas
-	return Vector3.new(x, TAILLE_EXPOSEE / 2, z)
+	return Vector3.new(x, HAUTEUR_SOCLE + TAILLE_EXPOSEE / 2, z)
+end
+
+-- Socle d'exposition (façon vitrine) sous l'emplacement `numero` : bloc
+-- sombre, plateau, liseré lumineux à la couleur de la créature posée (gris
+-- si vide) et numéro de l'emplacement. Purement visuel.
+local function creerSocle(numero: number, sol: Vector3, couleur: Color3?, parent: Instance)
+	local modele = Instance.new("Model")
+	modele.Name = "Socle" .. numero
+	local function bloc(nom: string, taille: Vector3, y: number, c: Color3, neon: boolean?): Part
+		local p = Instance.new("Part")
+		p.Name = nom
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.Size = taille
+		p.Position = sol + Vector3.new(0, y, 0)
+		p.Color = c
+		p.Material = if neon then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.Parent = modele
+		return p
+	end
+	local occupe = couleur ~= nil
+	bloc(
+		"Pied",
+		Vector3.new(3.4, HAUTEUR_SOCLE - 0.25, 3.4),
+		(HAUTEUR_SOCLE - 0.25) / 2,
+		Color3.fromRGB(70, 60, 90)
+	)
+	bloc(
+		"Lisere",
+		Vector3.new(3.6, 0.15, 3.6),
+		HAUTEUR_SOCLE - 0.2,
+		couleur or Color3.fromRGB(150, 150, 160),
+		occupe
+	)
+	bloc(
+		"Plateau",
+		Vector3.new(3.2, 0.12, 3.2),
+		HAUTEUR_SOCLE - 0.06,
+		Color3.fromRGB(245, 240, 230)
+	)
+	local face = modele:FindFirstChild("Pied") :: Part
+	for _, cote in
+		{ Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
+	do
+		local panneau = Instance.new("SurfaceGui")
+		panneau.Face = cote
+		panneau.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		panneau.PixelsPerStud = 40
+		panneau.Parent = face
+		local texte = Instance.new("TextLabel")
+		texte.Size = UDim2.fromScale(1, 1)
+		texte.BackgroundTransparency = 1
+		texte.Font = Enum.Font.FredokaOne
+		texte.TextScaled = true
+		texte.TextColor3 = Color3.new(1, 1, 1)
+		texte.TextTransparency = if occupe then 0 else 0.5
+		texte.Text = `#{numero}`
+		texte.Parent = panneau
+	end
+	modele.Parent = parent
 end
 
 -- (Re)crée les créatures exposées de la base, une par emplacement.
@@ -498,6 +563,27 @@ function Bases.afficherCreatures(joueur: any, liste: { string })
 	local dossier = Instance.new("Folder")
 	dossier.Name = "CreaturesBase"
 	local centre = base.modele:GetPivot().Position + Vector3.new(0, 0.5, 0) -- surface du sol
+
+	-- Un socle par emplacement, coloré par la rareté de la créature posée.
+	local anciensSocles = base.modele:FindFirstChild("Socles")
+	if anciensSocles then
+		anciensSocles:Destroy()
+	end
+	local socles = Instance.new("Folder")
+	socles.Name = "Socles"
+	for numero = 1, Config.Creatures.MaxCreaturesBase do
+		local fiche = liste[numero]
+		local infos = if type(fiche) == "string" then Fiche.lire(fiche) else nil
+		local couleur: Color3? = nil
+		if infos then
+			local rgb = raretes.Couleurs[infos.Rarete] or { 255, 255, 255 }
+			couleur = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
+		end
+		local position = centre + positionEmplacement(numero)
+		creerSocle(numero, Vector3.new(position.X, centre.Y, position.Z), couleur, socles)
+	end
+	socles.Parent = base.modele
+
 	for numero, rarete in liste do
 		if numero > Config.Creatures.MaxCreaturesBase then
 			break
