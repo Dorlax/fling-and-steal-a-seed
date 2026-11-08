@@ -6,6 +6,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
+local Decor = require(script.Parent.Decor)
 
 local Bases = {}
 
@@ -34,7 +35,7 @@ local BORD_EXPOSITION = 16 -- rangées à 16 studs du centre (sol de 40)
 local ECART = 60 -- distance entre deux bases (studs)
 local NOMBRE_EMPLACEMENTS = 12
 
-local COULEUR_SOL = Color3.fromRGB(96, 128, 72)
+local COULEUR_SOL = Color3.fromRGB(110, 215, 80)
 local COULEUR_FORGE = Color3.fromRGB(214, 102, 38)
 local COULEUR_POTEAU = Color3.fromRGB(255, 120, 200)
 local COULEUR_LINTEAU = Color3.fromRGB(255, 220, 60)
@@ -428,6 +429,8 @@ local function creerCreatureExposee(
 		oeil.CFrame = corps.CFrame * CFrame.new(cote * 0.4, 0.3, -TAILLE_EXPOSEE / 2 + 0.05)
 		oeil.Parent = modele
 	end
+
+	Decor.mignonner(modele, corps, TAILLE_EXPOSEE)
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"

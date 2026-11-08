@@ -21,7 +21,13 @@
 - Raids : voler une créature exposée dans la base d'un autre ; verrou de base de 60 s (100 pièces) avec bouclier et décompte. [[06 Raids de bases]]
 - Pièges : filet, glu, fausse graine (coût en pièces, nombre limité, protection après piégeage, pas dans les bases). [[07 Pièges]]
 
+## Décor et ambiance
+- Décor cartoon généré par le serveur (`Decor`) : éclairage coloré (atmosphère, saturation, éclat), place de sable sous les bases, chemins devant les portes, arbres (dont roses et dorés), rochers, champignons, fleurs, nuages, collines de bordure.
+- Bases ornées : bordure colorée (sans collision) et lampadaires-sucettes ; sol vert vif.
+- Créatures : reflets dans les yeux, joues roses, petits pieds.
+- Interface : boutons de pièges en rangée en bas à gauche (ne recouvrent plus les stats).
+
 ## À faire
 - Passes Robux (x2 Force, x2 Vitesse, x2 Pièces, Ramassage auto), cosmétiques.
-- Peaufinage visuel : style cartoon coloré, animations ; un seul « BOUM ! » au plaquage (deux superposés actuellement).
+- Peaufinage visuel restant : modèles plus détaillés (créatures, monstres), animations de personnages.
 - Test du cycle jour/nuit à la main (vérifié seulement par les tests automatiques).

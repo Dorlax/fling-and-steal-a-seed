@@ -13,6 +13,7 @@ local Jauge = require(ReplicatedStorage.Shared.Jauge)
 local Lancer = require(ReplicatedStorage.Shared.Lancer)
 local Bases = require(script.Parent.Bases)
 local TerresSauvages = require(script.Parent.TerresSauvages)
+local Decor = require(script.Parent.Decor)
 
 export type Resultat = {
 	Distance: number,
@@ -141,6 +142,8 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 		oeil.CFrame = corps.CFrame * CFrame.new(cote * 0.6, 0.4, -TAILLE_CREATURE / 2 + 0.1)
 		oeil.Parent = modele
 	end
+
+	Decor.mignonner(modele, corps, TAILLE_CREATURE)
 
 	if precieuse then
 		local lumiere = Instance.new("PointLight")
