@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif tests en jeu des raids (issue #11)
+- La créature volée est désormais portée dans le personnage du voleur (et oubliée proprement si ce personnage est détruit).
+
 ## 2026-11-08 — Correctif typage CI (issue #11)
 - Corrige les erreurs luau-lsp (valeurs possiblement nil) dans InterfaceRaid, Bases, Portage et Raids, sans changement de comportement.
 

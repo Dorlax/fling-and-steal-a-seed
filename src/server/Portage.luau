@@ -293,8 +293,11 @@ function mettreEnPortage(
 			objet.Anchored = false
 		end
 	end
-	-- Hors du personnage : elle survit à sa destruction et peut retomber.
-	modele.Parent = Workspace
+	-- Créature récoltée : hors du personnage, elle survit à sa destruction et
+	-- peut retomber. Créature volée : dans le personnage du voleur (visible
+	-- comme portée par lui) ; elle est sortie du personnage dès qu'elle tombe.
+	local personnage = racine.Parent :: Instance
+	modele.Parent = if modele:GetAttribute("Volee") == true then personnage else Workspace
 
 	local portee: Portee = {
 		creature = modele,
@@ -322,11 +325,17 @@ function mettreEnPortage(
 			end
 		end)
 	)
-	local personnage = racine.Parent :: Instance
 	table.insert(
 		portee.connexions,
 		personnage.AncestryChanged:Connect(function()
 			if personnage.Parent == nil then
+				-- Créature volée détruite avec le personnage : on l'oublie seulement.
+				if modele:IsDescendantOf(personnage) then
+					if portees[joueur] == portee then
+						oublier(joueur)
+					end
+					return
+				end
 				surMort()
 			end
 		end)
