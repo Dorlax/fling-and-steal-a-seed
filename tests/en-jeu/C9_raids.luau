@@ -443,7 +443,6 @@ return {
 		placer(b, sol.Position + Vector3.new(0, 4, 0))
 		Raids.pas(t + 1)
 		local intrusDedans = Bases.estDansBaseDe(b, a)
-		local proprioDedans = Bases.estDansBaseDe(a, a)
 		-- Après la fin du verrou.
 		placer(b, sol.Position + Vector3.new(0, 4, 0))
 		Raids.pas(t + RAID.DureeVerrou + 1)
@@ -452,7 +451,6 @@ return {
 		local transparence = bouclier.Transparency
 		nettoyer(a, b)
 		assert(intrusDedans == false, "l'intrus doit être expulsé pendant le verrou")
-		assert(proprioDedans or true, "")
 		assert(intrusApres == true, "l'intrus ne doit plus être expulsé après le verrou")
 		assert(transparence == 1, "Bouclier doit être invisible après le verrou")
 	end,
