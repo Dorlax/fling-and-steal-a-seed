@@ -762,14 +762,6 @@ definir("Croquelune", 0.7, function(l)
 	local queue = { 0, 0.05, 0.48 }
 	ajouter(l, { n = "Ventre", t = { 0.55, 0.44, 0.9 }, p = { 0, -0.06, 0.06 }, c = gris })
 	ajouter(l, { n = "Criniere", t = { 0.62, 0.32, 0.22 }, p = { 0, 0.08, -0.3 }, c = clair })
-		n = "PlaqueQueue",
-		t = { 0.05, 0.12, 0.12 },
-		p = { 0, 0.04, 0.62 },
-		c = rouge,
-		a = "Queue",
-		j = queue,
-	})
-	ajouter(l, {
 	ajouter(l, {
 		n = "Tete",
 		t = { 0.42, 0.38, 0.38 },
@@ -1045,6 +1037,14 @@ definir("Brasaurus", 0.8, function(l)
 			c = rouge,
 		})
 	end
+	ajouter(l, {
+		n = "PlaqueQueue",
+		t = { 0.05, 0.12, 0.12 },
+		p = { 0, 0.04, 0.62 },
+		c = rouge,
+		a = "Queue",
+		j = queue,
+	})
 	ajouter(l, {
 		n = "Aile",
 		t = { 0.04, 0.22, 0.3 },
