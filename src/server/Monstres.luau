@@ -234,11 +234,12 @@ local function effetPaf(joueur: any)
 	if typeof(personnage) ~= "Instance" then
 		return
 	end
-	local support = (personnage :: Instance):FindFirstChild("Head")
+	local trouve = (personnage :: Instance):FindFirstChild("Head")
 		or (personnage :: Instance):FindFirstChild("HumanoidRootPart")
-	if support == nil or not support:IsA("BasePart") then
+	if trouve == nil or not trouve:IsA("BasePart") then
 		return
 	end
+	local support = trouve :: BasePart
 	local ancien = support:FindFirstChild("EffetMonstre")
 	if ancien then
 		ancien:Destroy()
