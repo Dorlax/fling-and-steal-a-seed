@@ -125,6 +125,12 @@ function Bases.liberer(joueur: any)
 	base.modele:Destroy()
 end
 
+-- Modèle de la base du joueur (lecture seule), ou nil.
+function Bases.modeleDe(joueur: any): Model?
+	local base = basesParJoueur[joueur]
+	return if base then base.modele else nil
+end
+
 function Bases.forgeDe(joueur: any): BasePart?
 	local base = basesParJoueur[joueur]
 	if base == nil then

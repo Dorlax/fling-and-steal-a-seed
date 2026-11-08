@@ -4,7 +4,29 @@
     "$className": "DataModel",
     "ReplicatedStorage": {
       "Shared": { "$path": "src/shared" },
-      "ChoisirModeForge": { "$className": "RemoteEvent" }
+      "ChoisirModeForge": { "$className": "RemoteEvent" },
+      "DemarrerJauge": { "$className": "RemoteEvent" },
+      "LacherJauge": { "$className": "RemoteEvent" },
+      "ResultatLancer": { "$className": "RemoteEvent" }
+    },
+    "Workspace": {
+      "TerresSauvages": {
+        "$className": "Part",
+        "$properties": {
+          "Anchored": true,
+          "Size": [800, 1, 560],
+          "CFrame": {
+            "CFrame": {
+              "position": [0, -0.5, 300],
+              "orientation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+            }
+          },
+          "Color": [0.353, 0.784, 0.275],
+          "Material": "Grass",
+          "TopSurface": "Smooth"
+        }
+      },
+      "Creatures": { "$className": "Folder" }
     },
     "ServerScriptService": {
       "Server": { "$path": "src/server" },

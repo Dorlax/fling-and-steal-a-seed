@@ -2,6 +2,14 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Lancer et raretés (issue #3)
+- Bouton LANCER (souris, toucher, manette R2, touche F) : 1er appui = jauge de timing, 2e appui = lâcher.
+- Distance = 30 + 0,4 × Force + bonus de jauge (0 / 15 / 35 / 60, « PERFECT ! » en haut), plafond 520 studs.
+- Terres Sauvages devant les bases, avec bornes des zones Proche / Moyenne (150) / Lointaine (300).
+- Une graine vole jusqu'au point d'atterrissage et une créature y pousse ; rareté tirée par le serveur selon la zone, aux taux du Plan.
+- Panneau « Taux de rareté » toujours visible ; 10 créatures au sol max par joueur, retirées à son départ.
+- Tout est calculé côté serveur (délai de 3 s entre lancers, ping compensé au plus de 0,25 s) ; les arguments du client sont ignorés.
+
 ## 2026-11-07 — Correctif CI (RemoteEvent ChoisirModeForge absent en test)
 - Le RemoteEvent `ChoisirModeForge` est déclaré dans `default.project.json` : il existe dès le chargement de la place, même quand les Scripts ne tournent pas (tests Open Cloud). `Principal.server.luau` réutilise l'instance existante.
 
