@@ -9,7 +9,11 @@ local function module(nom: string): any
 end
 
 local function creature(rarete: string): Model
-	return module("Lancers").creerCreaturePortable({ UserId = -950 }, rarete, Vector3.new(0, 5, 200))
+	return module("Lancers").creerCreaturePortable(
+		{ UserId = -950 },
+		rarete,
+		Vector3.new(0, 5, 200)
+	)
 end
 
 return {

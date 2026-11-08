@@ -158,4 +158,51 @@ function Modeleur.aura(corps: BasePart, couleur: Color3, rang: number)
 	end
 end
 
+-- Croissance : la créature sort de terre, petite, et grandit jusqu'à sa
+-- taille (visuel seulement). Son bouton « Récolter » attend la fin.
+-- Attribut EnCroissance = true pendant ce temps (le client n'anime pas).
+local DUREE_POUSSE = 0.7
+local ETAPES_POUSSE = 14
+
+local function rebond(a: number): number
+	-- Dépasse un peu sa taille puis revient (effet « pop »).
+	return 1 - (1 - a) ^ 3 + math.sin(a * math.pi) * 0.15
+end
+
+function Modeleur.pousser(modele: Model)
+	local corpsOuNil = modele.PrimaryPart
+	if corpsOuNil == nil then
+		return
+	end
+	local corps = corpsOuNil :: BasePart
+	local sol = modele:GetPivot().Position - Vector3.new(0, corps.Size.Y / 2, 0)
+	local prompt = corps:FindFirstChildWhichIsA("ProximityPrompt")
+	if prompt then
+		prompt.Enabled = false
+	end
+	modele:SetAttribute("EnCroissance", true)
+	local function placer(echelle: number)
+		modele:ScaleTo(math.max(echelle, 0.05))
+		local demi = corps.Size.Y / 2
+		modele:PivotTo(CFrame.new(sol + Vector3.new(0, demi, 0)))
+	end
+	placer(0.1)
+	task.spawn(function()
+		for i = 1, ETAPES_POUSSE do
+			task.wait(DUREE_POUSSE / ETAPES_POUSSE)
+			if modele.Parent == nil or not corps.Anchored then
+				break
+			end
+			placer(0.1 + 0.9 * rebond(i / ETAPES_POUSSE))
+		end
+		if modele.Parent ~= nil and corps.Anchored then
+			placer(1)
+		end
+		modele:SetAttribute("EnCroissance", nil)
+		if prompt and modele.Parent ~= nil and corps.Anchored then
+			prompt.Enabled = true
+		end
+	end)
+end
+
 return Modeleur

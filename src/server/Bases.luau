@@ -7,6 +7,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
+local Fiche = require(ReplicatedStorage.Shared.Fiche)
 local Modeleur = require(script.Parent.Modeleur)
 
 local Bases = {}
@@ -396,9 +397,15 @@ end
 local function creerCreatureExposee(
 	proprietaire: any,
 	numero: number,
-	rarete: string,
+	fiche: string,
 	position: Vector3
 ): Model
+	local infos = Fiche.lire(fiche) or { Rarete = "Commune", Taille = "Normale", Espece = nil }
+	local rarete = infos.Rarete
+	-- Les grosses sont réduites dans la base pour tenir dans leur emplacement.
+	local diametre = TAILLE_EXPOSEE
+		* math.min(Fiche.echelle(infos.Taille), Config.Tailles.EchelleBaseMax)
+	position += Vector3.new(0, (diametre - TAILLE_EXPOSEE) / 2, 0)
 	local rgb = raretes.Couleurs[rarete] or { 255, 255, 255 }
 	local couleur = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
 	local precieuse = (table.find(raretes.Ordre, rarete) or 1) >= 3
@@ -409,7 +416,7 @@ local function creerCreatureExposee(
 	local corps = Instance.new("Part")
 	corps.Name = "Corps"
 	corps.Shape = Enum.PartType.Ball
-	corps.Size = Vector3.one * TAILLE_EXPOSEE
+	corps.Size = Vector3.one * diametre
 	corps.Anchored = true
 	corps.CanCollide = false
 	corps.Color = couleur
@@ -419,13 +426,14 @@ local function creerCreatureExposee(
 	corps.CFrame = CFrame.lookAt(position, position + Vector3.new(regard, 0, 0))
 	corps.Parent = modele
 
-	Modeleur.construire(modele, corps, Bestiaire.especeCreature(rarete), TAILLE_EXPOSEE, couleur)
+	local espece = Bestiaire.especeCreature(rarete, infos.Espece)
+	Modeleur.construire(modele, corps, espece, diametre, couleur)
 	Modeleur.aura(corps, couleur, table.find(raretes.Ordre, rarete) or 1)
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"
 	panneau.Size = UDim2.fromOffset(90, 30)
-	panneau.StudsOffset = Vector3.new(0, TAILLE_EXPOSEE, 0)
+	panneau.StudsOffset = Vector3.new(0, diametre, 0)
 	panneau.MaxDistance = 120
 	panneau.Parent = corps
 	local texte = Instance.new("TextLabel")
@@ -436,14 +444,14 @@ local function creerCreatureExposee(
 	texte.TextColor3 = couleur
 	texte.TextStrokeTransparency = 0
 	texte.TextStrokeColor3 = Color3.new(0, 0, 0)
-	texte.Text = `+{Revenus.parSeconde(rarete)}/s`
+	texte.Text = `+{Revenus.parSeconde(fiche)}/s`
 	texte.Parent = panneau
 
 	-- Bouton « Voler » (tactile, touche, manette).
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "Voler"
 	prompt.ActionText = "Voler"
-	prompt.ObjectText = raretes.Noms[rarete] or rarete
+	prompt.ObjectText = Fiche.texte(rarete, infos.Taille)
 	prompt.HoldDuration = reglagesRaid.DureeVol
 	prompt.MaxActivationDistance = reglagesRaid.DistanceVol
 	prompt.RequiresLineOfSight = false
@@ -459,6 +467,7 @@ local function creerCreatureExposee(
 
 	modele.PrimaryPart = corps
 	modele:SetAttribute("Rarete", rarete)
+	modele:SetAttribute("Taille", infos.Taille)
 	modele:SetAttribute("Emplacement", numero)
 	return modele
 end

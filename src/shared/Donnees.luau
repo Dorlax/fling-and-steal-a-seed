@@ -6,6 +6,8 @@
 local Config = if script then require(script.Parent.Config) else (require :: any)("./Config")
 -- selene: allow(incorrect_standard_library_use)
 local Forge = if script then require(script.Parent.Forge) else (require :: any)("./Forge")
+-- selene: allow(incorrect_standard_library_use)
+local Fiche = if script then require(script.Parent.Fiche) else (require :: any)("./Fiche")
 
 export type DonneesJoueur = {
 	Force: number,
@@ -55,7 +57,7 @@ local function nettoyerCreatures(valeur: any): { string }
 		if #liste >= Config.Creatures.MaxCreaturesBase then
 			break
 		end
-		if type(rarete) == "string" and table.find(Config.Raretes.Ordre, rarete) then
+		if Fiche.valide(rarete) then
 			table.insert(liste, rarete)
 		end
 	end

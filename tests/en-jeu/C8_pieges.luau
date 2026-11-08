@@ -204,7 +204,10 @@ return {
 		nettoyer(a)
 		assert(ok, "la pose doit réussir")
 		assert(dansDossier, "le piège doit être dans Workspace.Pieges")
-		assert(P.dossier().Name == "Pieges" and P.dossier().Parent == Workspace, "dossier Workspace.Pieges")
+		assert(
+			P.dossier().Name == "Pieges" and P.dossier().Parent == Workspace,
+			"dossier Workspace.Pieges"
+		)
 		assert(pieces == 1000 - PRIX.Filet.Prix, "prix débité, pièces = " .. tostring(pieces))
 		assert(nombre == 1, "un seul modèle attendu")
 		assert(typeAttr == "Filet", "attribut Type")
@@ -215,7 +218,10 @@ return {
 			type(pret) == "number" and math.abs(pret - (t + PIEGES.DelaiPose)) < 0.01,
 			"PiegePretA = maintenant + DelaiPose"
 		)
-		assert(math.abs(pos.X - racine.X) < 1 and math.abs(pos.Z - racine.Z) < 1, "piège sous le poseur")
+		assert(
+			math.abs(pos.X - racine.X) < 1 and math.abs(pos.Z - racine.Z) < 1,
+			"piège sous le poseur"
+		)
 	end,
 
 	["C8 chaque type peut être posé et débite son prix"] = function()
@@ -356,7 +362,10 @@ return {
 		local racine = a.Character.HumanoidRootPart.Position
 		nettoyer(a)
 		assert(#liste == 1, "un piège attendu")
-		assert(math.abs(pos.X - racine.X) < 1 and math.abs(pos.Z - racine.Z) < 1, "piège sous le poseur, pas à la position client")
+		assert(
+			math.abs(pos.X - racine.X) < 1 and math.abs(pos.Z - racine.Z) < 1,
+			"piège sous le poseur, pas à la position client"
+		)
 	end,
 
 	["C10 traiterRequete refuse un type invalide"] = function()
@@ -424,7 +433,10 @@ return {
 		local reste = glu.Parent ~= nil
 		nettoyer(a, b)
 		assert(englue == true, "Englue = true dans la glu")
-		assert(math.abs(dedans - normal * PRIX.Glu.Multiplicateur) < 0.01, "vitesse × Multiplicateur, obtenu " .. dedans)
+		assert(
+			math.abs(dedans - normal * PRIX.Glu.Multiplicateur) < 0.01,
+			"vitesse × Multiplicateur, obtenu " .. dedans
+		)
 		assert(englueApres == nil, "Englue retiré à la sortie")
 		assert(dehors == normal, "vitesse restaurée")
 		assert(reste, "la glu n'est pas consommée")
@@ -445,7 +457,10 @@ return {
 		local viteApres = vitesse(b)
 		nettoyer(a, b)
 		assert(ok == true, "déclenchement accepté")
-		assert(type(immo) == "number" and math.abs(immo - (t + 0.1 + PRIX.FausseGraine.Duree)) < 0.01, "ImmobileJusqua = maintenant + Duree")
+		assert(
+			type(immo) == "number" and math.abs(immo - (t + 0.1 + PRIX.FausseGraine.Duree)) < 0.01,
+			"ImmobileJusqua = maintenant + Duree"
+		)
 		assert(vite == 0, "WalkSpeed = 0")
 		assert(detruit, "fausse graine détruite")
 		assert(viteApres == normal, "WalkSpeed restauré")
@@ -473,7 +488,8 @@ return {
 		local normal = vitesse(a)
 		local filet = poserEn(a, "Filet", 0, t)
 		local glu = poserEn(a, "Glu", ECART + PRIX.Glu.Rayon, t + PIEGES.DelaiPose)
-		local fausse = poserEn(a, "FausseGraine", 2 * (ECART + PRIX.Glu.Rayon), t + 2 * PIEGES.DelaiPose)
+		local fausse =
+			poserEn(a, "FausseGraine", 2 * (ECART + PRIX.Glu.Rayon), t + 2 * PIEGES.DelaiPose)
 		placerSur(a, filet)
 		P.pas(t + 0.1)
 		placerSur(a, glu)
@@ -584,7 +600,10 @@ return {
 
 	["C19 le RemoteEvent PoserPiege est déclaré"] = function()
 		local remote = ReplicatedStorage:WaitForChild("PoserPiege", 5)
-		assert(remote and remote:IsA("RemoteEvent"), "RemoteEvent PoserPiege attendu dans ReplicatedStorage")
+		assert(
+			remote and remote:IsA("RemoteEvent"),
+			"RemoteEvent PoserPiege attendu dans ReplicatedStorage"
+		)
 	end,
 
 	["C19 le module client InterfacePieges est présent"] = function()

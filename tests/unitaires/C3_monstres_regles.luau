@@ -33,16 +33,28 @@ end
 return {
 	["C3 zoneDe : Proche, Moyenne, Lointaine selon Z"] = function()
 		assert(Monstre.zoneDe({ X = 0, Y = 0, Z = M.BordBases + 10 }) == "Proche", "Proche attendu")
-		assert(Monstre.zoneDe({ X = 0, Y = 0, Z = M.BordBases + 200 }) == "Moyenne", "Moyenne attendu")
-		assert(Monstre.zoneDe({ X = 0, Y = 0, Z = M.BordBases + 400 }) == "Lointaine", "Lointaine attendu")
+		assert(
+			Monstre.zoneDe({ X = 0, Y = 0, Z = M.BordBases + 200 }) == "Moyenne",
+			"Moyenne attendu"
+		)
+		assert(
+			Monstre.zoneDe({ X = 0, Y = 0, Z = M.BordBases + 400 }) == "Lointaine",
+			"Lointaine attendu"
+		)
 	end,
 
 	["C4 limiter : Z toujours fini et >= BordBases + MargeBases"] = function()
 		local minimum = M.BordBases + M.MargeBases
 		for _, z in { -500, -1, 0, M.BordBases, M.BordBases + 1, 1e9, 0 / 0, math.huge, -math.huge } do
 			local p = Monstre.limiter({ X = 0, Y = 5, Z = z })
-			assert(p.Z == p.Z and p.Z > -math.huge and p.Z < math.huge, "Z fini attendu pour " .. tostring(z))
-			assert(p.Z >= minimum, "Z >= " .. minimum .. " attendu pour " .. tostring(z) .. ", obtenu " .. p.Z)
+			assert(
+				p.Z == p.Z and p.Z > -math.huge and p.Z < math.huge,
+				"Z fini attendu pour " .. tostring(z)
+			)
+			assert(
+				p.Z >= minimum,
+				"Z >= " .. minimum .. " attendu pour " .. tostring(z) .. ", obtenu " .. p.Z
+			)
 		end
 	end,
 
@@ -97,8 +109,14 @@ return {
 	["C6 choisirCible : nil si aucun valide ou tous hors de portée"] = function()
 		local portee = M.Zones.Proche.PorteeDetection
 		assert(Monstre.choisirCible({}, portee) == nil, "liste vide -> nil")
-		assert(Monstre.choisirCible({ { distance = 1, valide = false } }, portee) == nil, "invalide -> nil")
-		assert(Monstre.choisirCible({ { distance = portee + 5, valide = true } }, portee) == nil, "trop loin -> nil")
+		assert(
+			Monstre.choisirCible({ { distance = 1, valide = false } }, portee) == nil,
+			"invalide -> nil"
+		)
+		assert(
+			Monstre.choisirCible({ { distance = portee + 5, valide = true } }, portee) == nil,
+			"trop loin -> nil"
+		)
 	end,
 
 	["C7 nombreVoulu : NombreJour le jour, NombreNuit la nuit"] = function()
@@ -114,7 +132,10 @@ return {
 		assert((Monstre.phase(C.DureeJour - 1)) == "Jour", "DureeJour - 1 -> Jour")
 		assert((Monstre.phase(C.DureeJour)) == "Nuit", "DureeJour -> Nuit")
 		assert((Monstre.phase(C.DureeJour + C.DureeNuit)) == "Jour", "fin de cycle -> Jour")
-		assert((Monstre.phase(C.DureeJour + C.DureeNuit + C.DureeJour)) == "Nuit", "2e cycle -> Nuit")
+		assert(
+			(Monstre.phase(C.DureeJour + C.DureeNuit + C.DureeJour)) == "Nuit",
+			"2e cycle -> Nuit"
+		)
 	end,
 
 	["C8 phase : temps restant dans la phase"] = function()

@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Fiche = require(ReplicatedStorage.Shared.Fiche)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 local Bases = require(script.Parent.Bases)
 local Entrainement = require(script.Parent.Entrainement)
@@ -16,7 +17,7 @@ local TerresSauvages = require(script.Parent.TerresSauvages)
 
 type Portee = {
 	creature: Model,
-	rarete: string,
+	fiche: string, -- « Rarete[:Taille[:Espece]] » (voir Shared.Fiche)
 	connexions: { RBXScriptConnection },
 	pleineSignalee: boolean, -- « Base pleine ! » déjà envoyé pour cette visite
 }
@@ -26,7 +27,7 @@ local Portage = {}
 local reglages = Config.Creatures
 local NOM_SOUDURE = "SoudurePortage"
 local HAUTEUR_PORTAGE = 4.5 -- studs au-dessus du centre du personnage
-local DEMI_TAILLE_CREATURE = 1.5 -- rayon de la créature au sol
+local DEMI_TAILLE_CREATURE = 1.5 -- rayon d'une créature de taille Normale
 
 local portees: { [any]: Portee } = {}
 
@@ -34,7 +35,7 @@ local portees: { [any]: Portee } = {}
 local mettreEnPortage: (
 	joueur: any,
 	modele: Model,
-	rarete: string,
+	fiche: string,
 	racine: BasePart,
 	humanoide: Humanoid,
 	corps: BasePart
@@ -96,7 +97,9 @@ local function poserAuSol(creature: Model, position: Vector3)
 			objet.Massless = false
 		end
 	end
-	local hauteur = math.max(position.Y - DEMI_TAILLE_CREATURE, DEMI_TAILLE_CREATURE)
+	local corps = creature.PrimaryPart
+	local demi = if corps then corps.Size.Y / 2 else DEMI_TAILLE_CREATURE
+	local hauteur = math.max(position.Y - DEMI_TAILLE_CREATURE, demi)
 	creature:PivotTo(CFrame.new(position.X, hauteur, position.Z))
 	local prompt = promptDe(creature)
 	if prompt then
@@ -204,11 +207,23 @@ function Portage.recolter(joueur: any, creature: any): boolean
 	if portees[joueur] ~= nil or joueur:GetAttribute("Porte") ~= nil then
 		return false
 	end
+	if modele:GetAttribute("EnCroissance") == true then
+		return false -- elle sort encore de terre
+	end
 	local attributRarete = modele:GetAttribute("Rarete")
-	if type(attributRarete) ~= "string" or not table.find(Config.Raretes.Ordre, attributRarete) then
+	local attributTaille = modele:GetAttribute("Taille")
+	local attributEspece = modele:GetAttribute("Espece")
+	if type(attributRarete) ~= "string" then
 		return false
 	end
-	local rarete = attributRarete :: string
+	local fiche = Fiche.ecrire(
+		attributRarete :: string,
+		if type(attributTaille) == "string" then attributTaille :: string else nil,
+		if type(attributEspece) == "string" then attributEspece :: string else nil
+	)
+	if not Fiche.valide(fiche) then
+		return false
+	end
 	local racineOuNil, humanoideOuNil = racineEtHumanoide(joueur)
 	if racineOuNil == nil or humanoideOuNil == nil then
 		return false
@@ -234,14 +249,14 @@ function Portage.recolter(joueur: any, creature: any): boolean
 		modele:SetAttribute("Proprietaire", joueur.UserId)
 	end
 	Lancers.retirerDuSol(joueur, modele)
-	mettreEnPortage(joueur, modele, rarete, racine, humanoide, corps)
+	mettreEnPortage(joueur, modele, fiche, racine, humanoide, corps)
 	return true
 end
 
 -- Raid : le voleur porte aussitôt une créature identique à une créature
 -- récoltée (attribut Volee). Refusé s'il porte déjà ou s'il est mort.
-function Portage.porterVolee(voleur: any, rarete: any): boolean
-	if type(rarete) ~= "string" or not table.find(Config.Raretes.Ordre, rarete) then
+function Portage.porterVolee(voleur: any, fiche: any): boolean
+	if not Fiche.valide(fiche) then
 		return false
 	end
 	if portees[voleur] ~= nil or voleur:GetAttribute("Porte") ~= nil then
@@ -252,13 +267,13 @@ function Portage.porterVolee(voleur: any, rarete: any): boolean
 		return false
 	end
 	local racine = racineOuNil :: BasePart
-	local modele = Lancers.creerCreaturePortable(voleur, rarete, racine.Position)
+	local modele = Lancers.creerCreaturePortable(voleur, fiche, racine.Position)
 	local corps = modele.PrimaryPart
 	if corps == nil then
 		modele:Destroy()
 		return false
 	end
-	mettreEnPortage(voleur, modele, rarete, racine, humanoideOuNil :: Humanoid, corps :: BasePart)
+	mettreEnPortage(voleur, modele, fiche, racine, humanoideOuNil :: Humanoid, corps :: BasePart)
 	return true
 end
 
@@ -267,7 +282,7 @@ end
 function mettreEnPortage(
 	joueur: any,
 	modele: Model,
-	rarete: string,
+	fiche: string,
 	racine: BasePart,
 	humanoide: Humanoid,
 	corps: BasePart
@@ -276,7 +291,9 @@ function mettreEnPortage(
 	if prompt then
 		prompt.Enabled = false
 	end
-	modele:PivotTo(racine.CFrame * CFrame.new(0, HAUTEUR_PORTAGE, 0))
+	-- Les grosses créatures sont portées plus haut (au-dessus de la tête).
+	local hauteur = HAUTEUR_PORTAGE + corps.Size.Y / 2 - DEMI_TAILLE_CREATURE
+	modele:PivotTo(racine.CFrame * CFrame.new(0, hauteur, 0))
 	for _, objet in modele:GetDescendants() do
 		if objet:IsA("BasePart") then
 			objet.CanCollide = false
@@ -301,12 +318,12 @@ function mettreEnPortage(
 
 	local portee: Portee = {
 		creature = modele,
-		rarete = rarete,
+		fiche = fiche,
 		connexions = {},
 		pleineSignalee = false,
 	}
 	portees[joueur] = portee
-	joueur:SetAttribute("Porte", rarete)
+	joueur:SetAttribute("Porte", fiche)
 	Entrainement.appliquerVitesse(joueur)
 
 	-- Mort (ou personnage retiré) en portant : la créature retombe.
@@ -352,7 +369,7 @@ function Portage.verifierDepot(joueur: any)
 		portee.pleineSignalee = false
 		return
 	end
-	if not Sauvegarde.ajouterCreature(joueur, portee.rarete) then
+	if not Sauvegarde.ajouterCreature(joueur, portee.fiche) then
 		if not portee.pleineSignalee then
 			portee.pleineSignalee = true
 			envoyerMessage(joueur, "Base pleine !")

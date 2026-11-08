@@ -10,6 +10,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Fiche = require(ReplicatedStorage.Shared.Fiche)
 local Raid = require(ReplicatedStorage.Shared.Raid)
 local Bases = require(script.Parent.Bases)
 local Portage = require(script.Parent.Portage)
@@ -266,8 +267,10 @@ function Raids.voler(voleur: any, proprietaire: any, numero: any, maintenant: nu
 	Bases.afficherCreatures(proprietaire, Sauvegarde.creaturesDe(proprietaire))
 
 	afficherEffet(voleur)
-	envoyerAlerte(proprietaire, "victime", rarete, tostring(voleur.Name))
-	envoyerAlerte(voleur, "voleur", rarete, tostring(proprietaire.Name))
+	local infos = Fiche.lire(rarete)
+	local nomRarete = if infos then infos.Rarete else rarete
+	envoyerAlerte(proprietaire, "victime", nomRarete, tostring(voleur.Name))
+	envoyerAlerte(voleur, "voleur", nomRarete, tostring(proprietaire.Name))
 	return true
 end
 

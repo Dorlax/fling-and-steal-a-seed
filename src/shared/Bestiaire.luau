@@ -1439,15 +1439,465 @@ definir("Brasaurus", 0.8, function(l)
 	}, true)
 end)
 
+---------------------------------------------------------------------------
+-- Créatures « graine » (deuxième espèce de chaque rareté, thème plante)
+
+-- Commune : petit champignon à chapeau rouge à pois.
+definir("Champichou", 0.68, function(l)
+	local creme = { 245, 230, 205 }
+	local rouge = { 230, 60, 55 }
+	local tete = { 0, -0.05, 0 }
+	ajouter(l, { n = "Pied", t = { 0.36, 0.36, 0.34 }, p = { 0, -0.22, 0 }, c = creme })
+	ajouter(l, {
+		n = "Chapeau",
+		t = { 0.7, 0.24, 0.66 },
+		p = { 0, 0.1, 0 },
+		c = rouge,
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "ChapeauHaut",
+		t = { 0.5, 0.14, 0.46 },
+		p = { 0, 0.28, 0 },
+		c = rouge,
+		a = "Tete",
+		j = tete,
+	})
+	for i, pos in
+		{
+			{ 0.16, 0.355, 0.1 },
+			{ -0.14, 0.355, -0.08 },
+			{ 0.02, 0.355, 0.16 },
+			{ -0.04, 0.355, -0.18 },
+		}
+	do
+		ajouter(
+			l,
+			{ n = "Pois" .. i, t = { 0.1, 0.02, 0.1 }, p = pos, c = BLANC, a = "Tete", j = tete }
+		)
+	end
+	for i, pos in
+		{
+			{ 0.22, 0.12, -0.335 },
+			{ -0.12, 0.08, -0.335 },
+			{ 0.36, 0.1, 0.1 },
+			{ -0.36, 0.12, 0.05 },
+		}
+	do
+		local t = if math.abs(pos[1]) > 0.3 then { 0.02, 0.1, 0.1 } else { 0.1, 0.1, 0.02 }
+		ajouter(l, { n = "PoisCote" .. i, t = t, p = pos, c = BLANC, a = "Tete", j = tete })
+	end
+	yeux(l, 0.08, -0.15, -0.18, 0.09)
+	ajouter(
+		l,
+		{ n = "Joue", t = { 0.06, 0.035, 0.02 }, p = { 0.13, -0.22, -0.175 }, c = ROSE },
+		true
+	)
+	ajouter(
+		l,
+		{ n = "Bouche", t = { 0.07, 0.03, 0.02 }, p = { 0, -0.25, -0.175 }, c = { 120, 40, 50 } }
+	)
+	ajouter(l, {
+		n = "Bras",
+		t = { 0.06, 0.12, 0.06 },
+		p = { 0.21, -0.22, 0 },
+		c = creme,
+		a = "Bras",
+		j = { 0.2, -0.17, 0 },
+		ph = 0,
+	}, true)
+	ajouter(l, {
+		n = "Pied",
+		t = { 0.12, 0.08, 0.14 },
+		p = { 0.1, -0.46, -0.02 },
+		c = { 220, 200, 170 },
+		a = "Patte",
+		j = { 0.1, -0.42, -0.02 },
+		ph = 0,
+	}, true)
+end)
+
+-- Rare : tortue dont la carapace est un buisson fleuri.
+definir("Tortipousse", 0.6, function(l)
+	local peau = { 150, 205, 120 }
+	local buisson = { 80, 170, 70 }
+	local tete = { 0, -0.1, -0.3 }
+	ajouter(l, { n = "Carapace", t = { 0.66, 0.32, 0.7 }, p = { 0, -0.06, 0.04 }, c = buisson })
+	ajouter(
+		l,
+		{ n = "CarapaceHaut", t = { 0.46, 0.14, 0.5 }, p = { 0, 0.16, 0.04 }, c = { 100, 190, 80 } }
+	)
+	ajouter(
+		l,
+		{ n = "Ventre", t = { 0.6, 0.08, 0.64 }, p = { 0, -0.25, 0.04 }, c = { 225, 205, 150 } }
+	)
+	local fleurs = {
+		{ x = 0.12, z = 0.1, c = { 255, 140, 190 } },
+		{ x = -0.14, z = -0.06, c = { 255, 225, 70 } },
+		{ x = 0.02, z = 0.22, c = BLANC },
+	}
+	for i, f in fleurs do
+		ajouter(l, { n = "Fleur" .. i, t = { 0.1, 0.06, 0.1 }, p = { f.x, 0.25, f.z }, c = f.c })
+		ajouter(l, {
+			n = "Coeur" .. i,
+			t = { 0.04, 0.03, 0.04 },
+			p = { f.x, 0.29, f.z },
+			c = { 255, 200, 40 },
+		})
+	end
+	ajouter(l, {
+		n = "FleurRare",
+		t = { 0.1, 0.06, 0.1 },
+		p = { -0.05, 0.26, 0.14 },
+		c = "Rarete",
+		m = "Neon",
+	})
+	ajouter(l, {
+		n = "Tete",
+		t = { 0.28, 0.24, 0.26 },
+		p = { 0, -0.08, -0.42 },
+		c = peau,
+		a = "Tete",
+		j = tete,
+	})
+	yeux(l, 0.07, -0.03, -0.555, 0.08, "Tete", tete)
+	ajouter(l, {
+		n = "Sourire",
+		t = { 0.1, 0.025, 0.02 },
+		p = { 0, -0.14, -0.555 },
+		c = { 60, 90, 50 },
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Joue",
+		t = { 0.05, 0.03, 0.02 },
+		p = { 0.1, -0.11, -0.555 },
+		c = ROSE,
+		a = "Tete",
+		j = tete,
+	}, true)
+	pattes4(l, 0.24, -0.22, 0.3, { 0.14, 0.16, 0.14 }, peau)
+	ajouter(l, {
+		n = "Queue",
+		t = { 0.08, 0.06, 0.12 },
+		p = { 0, -0.2, 0.44 },
+		c = peau,
+		a = "Queue",
+		j = { 0, -0.2, 0.4 },
+	})
+end)
+
+-- Épique : chouette ronde coiffée d'une couronne de fleurs.
+definir("Hibouflor", 0.82, function(l)
+	local prune = { 160, 110, 200 }
+	local fonce = { 115, 75, 160 }
+	local creme = { 250, 235, 210 }
+	local tete = { 0, 0.18, 0 }
+	ajouter(l, { n = "Corps", t = { 0.56, 0.6, 0.5 }, p = { 0, -0.15, 0 }, c = prune })
+	ajouter(l, { n = "Ventre", t = { 0.38, 0.42, 0.03 }, p = { 0, -0.2, -0.26 }, c = creme })
+	for i, pos in
+		{ { -0.08, -0.08 }, { 0.08, -0.08 }, { 0, -0.2 }, { -0.1, -0.32 }, { 0.1, -0.32 } }
+	do
+		ajouter(l, {
+			n = "Plumette" .. i,
+			t = { 0.08, 0.03, 0.02 },
+			p = { pos[1], pos[2], -0.28 },
+			c = { 210, 180, 160 },
+		})
+	end
+	ajouter(l, {
+		n = "Tete",
+		t = { 0.62, 0.36, 0.52 },
+		p = { 0, 0.32, -0.02 },
+		c = prune,
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Masque",
+		t = { 0.5, 0.26, 0.03 },
+		p = { 0, 0.3, -0.29 },
+		c = { 225, 200, 240 },
+		a = "Tete",
+		j = tete,
+	})
+	yeux(l, 0.12, 0.32, -0.31, 0.16, "Tete", tete)
+	ajouter(l, {
+		n = "Bec",
+		t = { 0.08, 0.1, 0.06 },
+		p = { 0, 0.22, -0.32 },
+		c = { 255, 170, 50 },
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Aigrette",
+		t = { 0.1, 0.16, 0.08 },
+		p = { 0.24, 0.56, -0.02 },
+		r = { 0, 0, -20 },
+		c = fonce,
+		a = "Oreille",
+		j = { 0.22, 0.5, -0.02 },
+	}, true)
+	for i, x in { -0.18, 0, 0.18 } do
+		local petale = if i == 2 then { 255, 120, 170 } else { 255, 200, 230 }
+		ajouter(l, {
+			n = "Petale" .. i,
+			t = { 0.12, 0.05, 0.12 },
+			p = { x, 0.525, -0.16 },
+			c = petale,
+			a = "Tete",
+			j = tete,
+		})
+		ajouter(l, {
+			n = "Pistil" .. i,
+			t = { 0.05, 0.03, 0.05 },
+			p = { x, 0.56, -0.16 },
+			c = if i == 2 then "Rarete" else { 255, 220, 60 },
+			m = if i == 2 then "Neon" else nil,
+			a = "Tete",
+			j = tete,
+		})
+		ajouter(l, {
+			n = "Feuille" .. i,
+			t = { 0.08, 0.03, 0.06 },
+			p = { x + 0.09, 0.52, -0.12 },
+			r = { 0, 30, 0 },
+			c = { 90, 190, 80 },
+			a = "Tete",
+			j = tete,
+		})
+	end
+	ajouter(l, {
+		n = "Aile",
+		t = { 0.08, 0.44, 0.34 },
+		p = { 0.31, -0.12, 0.02 },
+		c = fonce,
+		a = "Aile",
+		j = { 0.28, 0.08, 0.02 },
+	}, true)
+	ajouter(l, {
+		n = "Patte",
+		t = { 0.1, 0.08, 0.14 },
+		p = { 0.12, -0.46, -0.04 },
+		c = { 255, 170, 50 },
+		a = "Patte",
+		j = { 0.12, -0.42, -0.04 },
+		ph = 0,
+	}, true)
+end)
+
+-- Légendaire : lionceau à crinière de feuilles et petite couronne d'or.
+definir("Lionfeuille", 0.82, function(l)
+	local fauve = { 235, 185, 95 }
+	local vert = { 70, 170, 70 }
+	local vertClair = { 120, 210, 90 }
+	local or_ = { 255, 205, 50 }
+	local tete = { 0, 0.02, -0.22 }
+	ajouter(l, { n = "Corps", t = { 0.42, 0.34, 0.62 }, p = { 0, -0.12, 0.1 }, c = fauve })
+	ajouter(l, {
+		n = "Criniere",
+		t = { 0.6, 0.56, 0.24 },
+		p = { 0, 0.12, -0.28 },
+		c = vert,
+		a = "Tete",
+		j = tete,
+	})
+	for i = 1, 8 do
+		local angle = (i / 8) * 2 * PI
+		ajouter(l, {
+			n = "Feuille" .. i,
+			t = { 0.16, 0.16, 0.06 },
+			p = { math.cos(angle) * 0.32, 0.12 + math.sin(angle) * 0.3, -0.39 },
+			r = { 0, 0, math.deg(angle) + 45 },
+			c = if i % 2 == 0 then vertClair else vert,
+			a = "Tete",
+			j = tete,
+		})
+	end
+	ajouter(l, {
+		n = "Tete",
+		t = { 0.36, 0.32, 0.26 },
+		p = { 0, 0.1, -0.42 },
+		c = fauve,
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Museau",
+		t = { 0.2, 0.12, 0.08 },
+		p = { 0, 0.03, -0.58 },
+		c = CREME,
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Nez",
+		t = { 0.08, 0.05, 0.03 },
+		p = { 0, 0.08, -0.625 },
+		c = { 120, 60, 50 },
+		a = "Tete",
+		j = tete,
+	})
+	yeux(l, 0.09, 0.16, -0.555, 0.09, "Tete", tete)
+	ajouter(l, {
+		n = "Couronne",
+		t = { 0.22, 0.06, 0.18 },
+		p = { 0, 0.29, -0.42 },
+		c = or_,
+		m = "Foil",
+		a = "Tete",
+		j = tete,
+	})
+	for i, x in { -0.08, 0, 0.08 } do
+		ajouter(l, {
+			n = "Pointe" .. i,
+			t = { 0.04, 0.07, 0.04 },
+			p = { x, 0.35, -0.48 },
+			c = if i == 2 then "Rarete" else or_,
+			m = if i == 2 then "Neon" else "Foil",
+			a = "Tete",
+			j = tete,
+		})
+	end
+	pattes4(l, 0.14, -0.1, 0.3, { 0.12, 0.22, 0.12 }, fauve)
+	ajouter(l, {
+		n = "Queue",
+		t = { 0.06, 0.06, 0.3 },
+		p = { 0, 0.0, 0.52 },
+		r = { -35, 0, 0 },
+		c = fauve,
+		a = "Queue",
+		j = { 0, -0.06, 0.4 },
+	})
+	ajouter(l, {
+		n = "Touffe",
+		t = { 0.12, 0.12, 0.12 },
+		p = { 0, 0.1, 0.66 },
+		c = vert,
+		a = "Queue",
+		j = { 0, -0.06, 0.4 },
+	})
+end)
+
+-- Mythique : bébé phénix aux ailes et à la queue de flammes.
+definir("Phenigraine", 0.82, function(l)
+	local feu = { 255, 110, 50 }
+	local orange = { 255, 160, 40 }
+	local jaune = { 255, 230, 80 }
+	local tete = { 0, 0.06, -0.06 }
+	local queue = { 0, -0.12, 0.22 }
+	ajouter(l, { n = "Corps", t = { 0.4, 0.42, 0.42 }, p = { 0, -0.14, 0.02 }, c = feu })
+	ajouter(l, { n = "Ventre", t = { 0.28, 0.3, 0.03 }, p = { 0, -0.16, -0.2 }, c = jaune })
+	ajouter(l, {
+		n = "Tete",
+		t = { 0.34, 0.3, 0.32 },
+		p = { 0, 0.2, -0.12 },
+		c = feu,
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Bec",
+		t = { 0.1, 0.08, 0.1 },
+		p = { 0, 0.16, -0.32 },
+		c = { 255, 200, 60 },
+		a = "Tete",
+		j = tete,
+	})
+	yeux(l, 0.09, 0.24, -0.285, 0.1, "Tete", tete)
+	ajouter(l, {
+		n = "Flamme1",
+		t = { 0.06, 0.18, 0.08 },
+		p = { 0, 0.42, -0.14 },
+		r = { 15, 0, 0 },
+		c = jaune,
+		m = "Neon",
+		a = "Antenne",
+		j = { 0, 0.34, -0.12 },
+	})
+	ajouter(l, {
+		n = "Flamme2",
+		t = { 0.05, 0.14, 0.07 },
+		p = { 0, 0.4, -0.03 },
+		r = { 30, 0, 0 },
+		c = orange,
+		m = "Neon",
+		a = "Antenne",
+		j = { 0, 0.34, -0.12 },
+	})
+	ajouter(l, {
+		n = "Flamme3",
+		t = { 0.05, 0.12, 0.06 },
+		p = { 0, 0.38, 0.05 },
+		r = { 45, 0, 0 },
+		c = "Rarete",
+		m = "Neon",
+		a = "Antenne",
+		j = { 0, 0.34, -0.12 },
+	})
+	ajouter(l, {
+		n = "Aile",
+		t = { 0.04, 0.36, 0.44 },
+		p = { 0.3, 0.04, 0.06 },
+		r = { 0, 0, -25 },
+		c = orange,
+		a = "Aile",
+		j = { 0.2, 0.04, 0.04 },
+	}, true)
+	ajouter(l, {
+		n = "BoutAile",
+		t = { 0.045, 0.14, 0.2 },
+		p = { 0.38, 0.2, 0.2 },
+		r = { 0, 0, -25 },
+		c = jaune,
+		m = "Neon",
+		a = "Aile",
+		j = { 0.2, 0.04, 0.04 },
+	}, true)
+	for i, x in { -0.08, 0, 0.08 } do
+		ajouter(l, {
+			n = "Plume" .. i,
+			t = { 0.08, 0.06, 0.34 },
+			p = { x, -0.1, 0.4 },
+			r = { -25, -x * 200, 0 },
+			c = if i == 2 then jaune else orange,
+			m = "Neon",
+			a = "Queue",
+			j = queue,
+		})
+	end
+	ajouter(l, {
+		n = "Patte",
+		t = { 0.06, 0.1, 0.06 },
+		p = { 0.1, -0.42, -0.02 },
+		c = { 255, 200, 60 },
+		a = "Patte",
+		j = { 0.1, -0.36, -0.02 },
+		ph = 0,
+	}, true)
+	ajouter(l, {
+		n = "Doigts",
+		t = { 0.12, 0.03, 0.12 },
+		p = { 0.1, -0.485, -0.05 },
+		c = { 255, 200, 60 },
+		a = "Patte",
+		j = { 0.1, -0.36, -0.02 },
+		ph = 0,
+	}, true)
+end)
+
 Bestiaire.Especes = especes
 
 -- Espèce de créature pour chaque rareté.
 Bestiaire.Creatures = {
-	Commune = "Poussigraine",
-	Rare = "Lapinou",
-	Epique = "Renardelle",
-	Legendaire = "Cerfaurore",
-	Mythique = "Dragonnet",
+	Commune = { "Poussigraine", "Champichou" },
+	Rare = { "Lapinou", "Tortipousse" },
+	Epique = { "Renardelle", "Hibouflor" },
+	Legendaire = { "Cerfaurore", "Lionfeuille" },
+	Mythique = { "Dragonnet", "Phenigraine" },
 }
 
 -- Espèces de monstres par zone (la première porte le nom de Config).
@@ -1457,8 +1907,21 @@ Bestiaire.Monstres = {
 	Lointaine = { "Grobidou", "Brasaurus" },
 }
 
-function Bestiaire.especeCreature(rarete: string): Espece
-	return especes[Bestiaire.Creatures[rarete] or "Poussigraine"]
+-- Espèce d'une créature : `nom` si c'est bien une espèce de cette rareté,
+-- sinon la première espèce de la rareté.
+function Bestiaire.especeCreature(rarete: string, nom: string?): Espece
+	local liste = (Bestiaire.Creatures :: any)[rarete] or Bestiaire.Creatures.Commune
+	if nom ~= nil and table.find(liste, nom) then
+		return especes[nom :: string]
+	end
+	return especes[liste[1]]
+end
+
+-- Espèce tirée au hasard parmi celles de la rareté (`tirage` dans [0, 1[).
+function Bestiaire.tirerEspece(rarete: string, tirage: number): Espece
+	local liste = (Bestiaire.Creatures :: any)[rarete] or Bestiaire.Creatures.Commune
+	local i = math.clamp(math.floor(tirage * #liste) + 1, 1, #liste)
+	return especes[liste[i]]
 end
 
 -- Espèce de monstre d'une zone ; `tirage` dans [0, 1[ choisit la variante.

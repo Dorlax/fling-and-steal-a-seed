@@ -19,7 +19,8 @@ end
 
 -- Faux joueur : table avec attributs, suffisante pour la logique serveur testée.
 local function fauxJoueur(): any
-	local attributs: { [string]: any } = { Force = 0, Vitesse = 0, ModeForge = "Force", SurForge = false }
+	local attributs: { [string]: any } =
+		{ Force = 0, Vitesse = 0, ModeForge = "Force", SurForge = false }
 	return {
 		Name = "FauxJoueurTest",
 		UserId = -1,
@@ -59,7 +60,10 @@ return {
 		for _, valeur in { "Triche", 123 } do
 			local ok = pcall(Entrainement.traiterChoixMode, joueur, valeur)
 			assert(ok, "erreur pour " .. tostring(valeur))
-			assert(joueur:GetAttribute("ModeForge") == "Vitesse", "mode changé par " .. tostring(valeur))
+			assert(
+				joueur:GetAttribute("ModeForge") == "Vitesse",
+				"mode changé par " .. tostring(valeur)
+			)
 		end
 		local ok = pcall(Entrainement.traiterChoixMode, joueur, nil)
 		assert(ok, "erreur pour nil")
@@ -83,6 +87,9 @@ return {
 		local joueur = fauxJoueur()
 		joueur:SetAttribute("Vitesse", 250)
 		local walkSpeed = Entrainement.appliquerVitesse(joueur)
-		assert(walkSpeed == Forge.walkSpeedPour(250), "WalkSpeed incorrect : " .. tostring(walkSpeed))
+		assert(
+			walkSpeed == Forge.walkSpeedPour(250),
+			"WalkSpeed incorrect : " .. tostring(walkSpeed)
+		)
 	end,
 }

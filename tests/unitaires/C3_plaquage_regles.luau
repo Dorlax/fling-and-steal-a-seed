@@ -60,8 +60,14 @@ return {
 	end,
 
 	["C5 accepté quand maintenant >= pretA"] = function()
-		assert(Plaquage.verifier(contexte({ maintenant = 100, pretA = 100 })) == true, "égalité acceptée")
-		assert(Plaquage.verifier(contexte({ maintenant = 101, pretA = 100 })) == true, "après pretA accepté")
+		assert(
+			Plaquage.verifier(contexte({ maintenant = 100, pretA = 100 })) == true,
+			"égalité acceptée"
+		)
+		assert(
+			Plaquage.verifier(contexte({ maintenant = 101, pretA = 100 })) == true,
+			"après pretA accepté"
+		)
 	end,
 
 	["C6 refus « protegee » tant que maintenant < protegeeJusqua"] = function()
@@ -69,8 +75,14 @@ return {
 	end,
 
 	["C6 accepté une fois la protection terminée"] = function()
-		assert(Plaquage.verifier(contexte({ maintenant = 100, protegeeJusqua = 100 })) == true, "égalité acceptée")
-		assert(Plaquage.verifier(contexte({ maintenant = 105, protegeeJusqua = 100 })) == true, "après acceptée")
+		assert(
+			Plaquage.verifier(contexte({ maintenant = 100, protegeeJusqua = 100 })) == true,
+			"égalité acceptée"
+		)
+		assert(
+			Plaquage.verifier(contexte({ maintenant = 105, protegeeJusqua = 100 })) == true,
+			"après acceptée"
+		)
 	end,
 
 	["C7 refus « base » si le plaqueur est dans sa base"] = function()

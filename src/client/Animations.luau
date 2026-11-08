@@ -113,13 +113,26 @@ local function releverPieces(modele: Model, base: CFrame): { Piece }
 	return pieces
 end
 
-local function suivre(objet: Instance)
+local suivre: (objet: Instance) -> ()
+function suivre(objet: Instance)
 	local sorte = sorteDe(objet)
 	if sorte == nil or suivis[objet :: Model] ~= nil then
 		return
 	end
 	local modele = objet :: Model
 	if modele.PrimaryPart == nil then
+		return
+	end
+	if modele:GetAttribute("EnCroissance") == true then
+		-- Elle sort de terre (le serveur la fait grandir) : on attend la fin
+		-- pour relever ses pièces à leur vraie taille.
+		local connexion: RBXScriptConnection
+		connexion = modele:GetAttributeChangedSignal("EnCroissance"):Connect(function()
+			if modele:GetAttribute("EnCroissance") ~= true then
+				connexion:Disconnect()
+				suivre(modele)
+			end
+		end)
 		return
 	end
 	local base = modele:GetPivot()

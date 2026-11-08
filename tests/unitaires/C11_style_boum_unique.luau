@@ -5,7 +5,10 @@ return {
 		local src = fs.readFile("src/client/Panneaux.luau")
 		assert(string.find(src, "EffetPlaquage", 1, true), "Panneaux doit gérer EffetPlaquage")
 		assert(string.find(src, "Boum", 1, true), "Panneaux doit gérer le label Boum")
-		assert(string.find(src, "Visible = false", 1, true), "Panneaux doit cacher le label (Visible = false)")
+		assert(
+			string.find(src, "Visible = false", 1, true),
+			"Panneaux doit cacher le label (Visible = false)"
+		)
 	end,
 
 	["C11 InterfacePieces n'envoie pas BOUM ! aux bandeaux"] = function()

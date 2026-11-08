@@ -82,6 +82,24 @@ local Config = {
 		PiecesMax = 1e15, -- plafond de sécurité
 	},
 
+	-- Tailles des créatures (tirées par le serveur à la pousse, indépendantes
+	-- de la rareté et de la jauge). Plus elle est grosse, plus elle rapporte :
+	-- revenu = revenu de la rareté × Multiplicateur. Taux affichés au joueur.
+	Tailles = {
+		Ordre = { "Normale", "Grande", "Geante", "Colossale", "Titan" },
+		Noms = {
+			Normale = "Normale",
+			Grande = "Grande",
+			Geante = "Géante",
+			Colossale = "Colossale",
+			Titan = "Titan",
+		},
+		Taux = { Normale = 60, Grande = 25, Geante = 10, Colossale = 4, Titan = 1 }, -- %
+		Echelle = { Normale = 1, Grande = 1.3, Geante = 1.65, Colossale = 2.1, Titan = 2.8 },
+		Multiplicateur = { Normale = 1, Grande = 2, Geante = 4, Colossale = 8, Titan = 20 },
+		EchelleBaseMax = 1.8, -- dans la base, les plus grosses sont réduites pour tenir
+	},
+
 	-- Plaquage d'un joueur qui porte une créature (vérifié par le serveur).
 	Plaquage = {
 		Portee = 8, -- studs max entre les deux HumanoidRootPart

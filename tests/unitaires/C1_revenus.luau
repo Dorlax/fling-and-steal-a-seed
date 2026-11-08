@@ -51,7 +51,10 @@ return {
 
 	["C3 un gain NaN, infini ou non numérique laisse les pièces inchangées"] = function()
 		for _, gain in { 0 / 0, math.huge, -math.huge, "abc", true, {} } do
-			assert(Revenus.ajouter(10, gain :: any) == 10, "pièces changées par " .. tostring(gain))
+			assert(
+				Revenus.ajouter(10, gain :: any) == 10,
+				"pièces changées par " .. tostring(gain)
+			)
 		end
 		assert(Revenus.ajouter(10, nil :: any) == 10, "pièces changées par nil")
 	end,

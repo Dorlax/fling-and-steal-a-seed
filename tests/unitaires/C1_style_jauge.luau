@@ -15,19 +15,37 @@ end
 
 return {
 	["C1 couleurJauge : points exacts du dégradé"] = function()
-		assert(egal(Style.couleurJauge(0), VERT), "0 doit donner Vert : " .. texte(Style.couleurJauge(0)))
-		assert(egal(Style.couleurJauge(1 / 3), JAUNE), "1/3 doit donner Jaune : " .. texte(Style.couleurJauge(1 / 3)))
-		assert(egal(Style.couleurJauge(2 / 3), ORANGE), "2/3 doit donner Orange : " .. texte(Style.couleurJauge(2 / 3)))
-		assert(egal(Style.couleurJauge(1), ROUGE), "1 doit donner Rouge : " .. texte(Style.couleurJauge(1)))
+		assert(
+			egal(Style.couleurJauge(0), VERT),
+			"0 doit donner Vert : " .. texte(Style.couleurJauge(0))
+		)
+		assert(
+			egal(Style.couleurJauge(1 / 3), JAUNE),
+			"1/3 doit donner Jaune : " .. texte(Style.couleurJauge(1 / 3))
+		)
+		assert(
+			egal(Style.couleurJauge(2 / 3), ORANGE),
+			"2/3 doit donner Orange : " .. texte(Style.couleurJauge(2 / 3))
+		)
+		assert(
+			egal(Style.couleurJauge(1), ROUGE),
+			"1 doit donner Rouge : " .. texte(Style.couleurJauge(1))
+		)
 	end,
 
 	["C1 couleurJauge : 1/6 est strictement entre Vert et Jaune"] = function()
 		local c = Style.couleurJauge(1 / 6)
 		for i = 1, 3 do
 			local bas, haut = math.min(VERT[i], JAUNE[i]), math.max(VERT[i], JAUNE[i])
-			assert(c[i] >= bas and c[i] <= haut, "composante " .. i .. " hors de l'intervalle : " .. texte(c))
+			assert(
+				c[i] >= bas and c[i] <= haut,
+				"composante " .. i .. " hors de l'intervalle : " .. texte(c)
+			)
 		end
-		assert(not egal(c, VERT) and not egal(c, JAUNE), "1/6 ne doit être ni Vert ni Jaune : " .. texte(c))
+		assert(
+			not egal(c, VERT) and not egal(c, JAUNE),
+			"1/6 ne doit être ni Vert ni Jaune : " .. texte(c)
+		)
 	end,
 
 	["C1 couleurJauge : ratio borné et valeurs invalides"] = function()
@@ -42,6 +60,9 @@ return {
 		local d = Style.Degrade
 		assert(#d == 4, "4 points attendus")
 		assert(d[1][1] == 0 and d[4][1] == 1, "le dégradé doit aller de 0 à 1")
-		assert(math.abs(d[2][1] - 1 / 3) < 1e-9 and math.abs(d[3][1] - 2 / 3) < 1e-9, "points à 1/3 et 2/3")
+		assert(
+			math.abs(d[2][1] - 1 / 3) < 1e-9 and math.abs(d[3][1] - 2 / 3) < 1e-9,
+			"points à 1/3 et 2/3"
+		)
 	end,
 }
