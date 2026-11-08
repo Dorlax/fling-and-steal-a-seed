@@ -109,7 +109,7 @@ return {
 	["C3 refus « pieces » si pièces < prix ou NaN"] = function()
 		refusPose({ pieces = PIEGES.Types.Filet.Prix - 1 }, "pieces")
 		refusPose({ pieces = NAN }, "pieces")
-		refusPose({ pieces = nil }, "pieces")
+		refusPose({ pieces = false }, "pieces")
 		local ok = Piege.verifierPose(contexteHors({ pieces = PIEGES.Types.Filet.Prix }))
 		assert(ok == true, "pièces = prix : pose permise")
 	end,
@@ -131,7 +131,7 @@ return {
 	end,
 
 	["C3 ordre des raisons : type avant indisponible avant delai avant limite"] = function()
-		refusPose({ typePiege = nil, vivant = false }, "type")
+		refusPose({ typePiege = false, vivant = false }, "type")
 		refusPose({ vivant = false, pretA = 1000, actifs = 99 }, "indisponible")
 		refusPose({ pretA = 1000, actifs = 99, pieces = 0 }, "delai")
 		refusPose({ actifs = 99, pieces = 0 }, "limite")
