@@ -71,7 +71,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           allowed_bots: "claude"
-          claude_args: --model ${{ env.MODELE_FORT }} --max-turns 50 --allowedTools "${{ env.OUTILS }}"
+          claude_args: --model ${{ env.MODELE_FORT }} --max-turns 80 --allowedTools "${{ env.OUTILS }}"
           prompt: |
             Suis .claude/agents/batisseur.md avec Maquettes/issue-${{ github.event.issue.number }}.md.
             Ouvre ensuite la pull request liée à l'issue #${{ github.event.issue.number }}.
