@@ -171,7 +171,7 @@ return {
 				c2 = c
 			end
 		end
-		assert(c2, "seconde créature introuvable")
+		assert(c2, "seconde créature introuvable");
 		(c2 :: Model):PivotTo(CFrame.new(POSITION_SAUVAGE + Vector3.new(0, 0, 2)))
 		local ok = Portage.recolter(j, c2)
 		local apres = j:GetAttribute("Porte")

@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif chargement des tests en jeu (issue #5)
+- `tests/en-jeu/C7_portage.luau` ne compilait pas dans Roblox (« Ambiguous syntax » ligne 175 : une instruction commençant par `(` après un appel). Ajout d'un `;` séparateur, sans changement de logique du test.
+
 ## 2026-11-08 — Correctif typage Portage, suite (issue #5)
 - Corrige la dernière erreur luau-lsp de `src/server/Portage.luau` (ligne 157 : `PrimaryPart` typé `BasePart?` dans la soudure), sans changement de comportement.
 
