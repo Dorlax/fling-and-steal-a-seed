@@ -76,16 +76,8 @@ local function oublier(joueur: any): Portee?
 	return portee
 end
 
--- La créature retombe au sol à la position du personnage et redevient
--- récoltable par son propriétaire.
-local function lacherAuSol(joueur: any)
-	local racine = racineEtHumanoide(joueur)
-	local porteeOuNil = oublier(joueur)
-	if porteeOuNil == nil then
-		return
-	end
-	local creature = (porteeOuNil :: Portee).creature
-	local position = if racine then racine.Position else creature:GetPivot().Position
+-- Désoude la créature et la pose au sol sous `position`, « Récolter » réactivé.
+local function poserAuSol(creature: Model, position: Vector3)
 	for _, objet in creature:GetDescendants() do
 		if objet.Name == NOM_SOUDURE and objet:IsA("WeldConstraint") then
 			objet:Destroy()
@@ -100,7 +92,83 @@ local function lacherAuSol(joueur: any)
 	if prompt then
 		prompt.Enabled = true
 	end
+end
+
+-- La créature retombe au sol à la position du personnage et redevient
+-- récoltable par son propriétaire.
+local function lacherAuSol(joueur: any)
+	local racine = racineEtHumanoide(joueur)
+	local porteeOuNil = oublier(joueur)
+	if porteeOuNil == nil then
+		return
+	end
+	local creature = (porteeOuNil :: Portee).creature
+	local position = if racine then racine.Position else creature:GetPivot().Position
+	poserAuSol(creature, position)
 	Lancers.remettreAuSol(joueur, creature)
+end
+
+local function estNombreFini(valeur: any): boolean
+	return type(valeur) == "number"
+		and valeur == valeur
+		and valeur > -math.huge
+		and valeur < math.huge
+end
+
+-- Vrai si le joueur porte une créature (état serveur et attribut).
+function Portage.porte(joueur: any): boolean
+	return portees[joueur] ~= nil and joueur:GetAttribute("Porte") ~= nil
+end
+
+-- Plaquage : la créature portée tombe à DistanceChute studs du joueur, du côté
+-- opposé à `depuis` (position du plaqueur). Elle devient « libre » : récoltable
+-- par n'importe qui, hors des créatures au sol de tout joueur, et disparaît
+-- après DureeVieLachee si personne ne la ramasse. Renvoie la créature, ou nil.
+function Portage.lacherParPlaquage(joueur: any, depuis: Vector3?, maintenant: number?): Model?
+	local racine = racineEtHumanoide(joueur)
+	local porteeOuNil = oublier(joueur)
+	if porteeOuNil == nil then
+		return nil
+	end
+	local creature = (porteeOuNil :: Portee).creature
+	local centre = if racine then racine.Position else creature:GetPivot().Position
+
+	local direction: Vector3? = nil
+	if depuis ~= nil then
+		local ecart = centre - depuis
+		local plat = Vector3.new(ecart.X, 0, ecart.Z)
+		if plat.Magnitude > 0.01 then
+			direction = plat.Unit
+		end
+	end
+	if direction == nil and racine ~= nil then
+		local regard = racine.CFrame.LookVector
+		local plat = Vector3.new(-regard.X, 0, -regard.Z)
+		if plat.Magnitude > 0.01 then
+			direction = plat.Unit
+		end
+	end
+	local sens = direction or Vector3.zAxis
+	poserAuSol(creature, centre + sens * Config.Plaquage.DistanceChute)
+
+	local duree = Config.Plaquage.DureeVieLachee
+	local instant = if estNombreFini(maintenant)
+		then maintenant :: number
+		else Workspace:GetServerTimeNow()
+	local disparaitA = instant + duree
+	creature:SetAttribute("Libre", true)
+	creature:SetAttribute("DisparaitA", disparaitA)
+	creature.Parent = TerresSauvages.dossierCreatures()
+	task.delay(duree, function()
+		if
+			creature.Parent == TerresSauvages.dossierCreatures()
+			and creature:GetAttribute("Libre") == true
+			and creature:GetAttribute("DisparaitA") == disparaitA
+		then
+			creature:Destroy()
+		end
+	end)
+	return creature
 end
 
 -- Récolte une créature au sol. Renvoie true si le joueur la porte désormais.
@@ -112,7 +180,9 @@ function Portage.recolter(joueur: any, creature: any): boolean
 	if modele.Parent ~= TerresSauvages.dossierCreatures() then
 		return false -- déjà portée ou disparue
 	end
-	if modele:GetAttribute("Proprietaire") ~= joueur.UserId then
+	-- Créature libre (lâchée par un plaquage) : n'importe qui ; sinon le propriétaire.
+	local libre = modele:GetAttribute("Libre") == true
+	if not libre and modele:GetAttribute("Proprietaire") ~= joueur.UserId then
 		return false
 	end
 	if portees[joueur] ~= nil or joueur:GetAttribute("Porte") ~= nil then
@@ -142,6 +212,11 @@ function Portage.recolter(joueur: any, creature: any): boolean
 	end
 
 	-- Portage : au-dessus de la tête, soudée au personnage.
+	if libre then
+		modele:SetAttribute("Libre", nil)
+		modele:SetAttribute("DisparaitA", nil)
+		modele:SetAttribute("Proprietaire", joueur.UserId)
+	end
 	Lancers.retirerDuSol(joueur, modele)
 	local prompt = promptDe(modele)
 	if prompt then

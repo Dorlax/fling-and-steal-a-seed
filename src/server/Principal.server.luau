@@ -6,6 +6,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Bases = require(script.Parent.Bases)
 local Entrainement = require(script.Parent.Entrainement)
 local Lancers = require(script.Parent.Lancers)
+local Plaquages = require(script.Parent.Plaquages)
 local Portage = require(script.Parent.Portage)
 local Sauvegarde = require(script.Parent.Sauvegarde)
 local TerresSauvages = require(script.Parent.TerresSauvages)
@@ -53,6 +54,14 @@ Lancers.surRecolte(function(joueur: Player, creature: Model)
 	end
 end)
 
+-- Plaquage : le client signale seulement « Plaquer » ; ses arguments sont
+-- ignorés, la cible et toutes les vérifications sont décidées par le serveur.
+remote("Plaquer").OnServerEvent:Connect(function(joueur: Player)
+	if Sauvegarde.estCharge(joueur) then
+		Plaquages.traiterRequete(joueur)
+	end
+end)
+
 TerresSauvages.creer()
 
 local function placerDansSaBase(joueur: Player, personnage: Model)
@@ -94,6 +103,7 @@ end
 
 Players.PlayerRemoving:Connect(function(joueur)
 	Portage.nettoyer(joueur)
+	Plaquages.nettoyer(joueur)
 	Lancers.nettoyer(joueur)
 	Bases.liberer(joueur)
 	Sauvegarde.terminer(joueur)
