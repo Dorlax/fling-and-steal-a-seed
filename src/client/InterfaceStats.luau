@@ -38,7 +38,7 @@ function InterfaceStats.demarrer()
 	local cadre = Instance.new("Frame")
 	cadre.Name = "Cadre"
 	cadre.AnchorPoint = Vector2.new(0, 0.5)
-	cadre.Position = UDim2.new(0, 12, 0.5, 0)
+	cadre.Position = UDim2.new(0, 12, 0.42, 0)
 	cadre.Size = UDim2.fromOffset(LARGEUR + 20, 0)
 	cadre.AutomaticSize = Enum.AutomaticSize.Y
 	cadre.BackgroundColor3 = Habillage.nommee("Fond")

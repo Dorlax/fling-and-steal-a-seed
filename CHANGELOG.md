@@ -2,6 +2,13 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Décor cartoon et ambiance
+
+- Nouveau module serveur `Decor` : éclairage coloré (Atmosphere, ColorCorrection, Bloom, SunRays) appliqué avant le cycle jour/nuit ; place de sable sous les bases ; chemins devant les portes ; arbres, rochers, champignons, fleurs, nuages et collines de bordure (graine fixe, purement visuel, `CanQuery = false`).
+- Bases : sol vert vif, bordure colorée sans collision et quatre lampadaires-sucettes (dossier `Ornements`).
+- Créatures (au sol et exposées) : reflets dans les yeux, joues roses, petits pieds (`Decor.mignonner`).
+- Interface : boutons de pièges en rangée en bas à gauche, panneau des stats légèrement remonté (plus de chevauchement).
+
 ## 2026-11-08 — Correctif typage interface (issue #15)
 
 - InterfacePieges : le champ `jauge` utilise le type `Habillage.Jauge`.

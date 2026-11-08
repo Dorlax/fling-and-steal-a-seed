@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Bases = require(script.Parent.Bases)
 local CycleJourNuit = require(script.Parent.CycleJourNuit)
+local Decor = require(script.Parent.Decor)
 local Entrainement = require(script.Parent.Entrainement)
 local Lancers = require(script.Parent.Lancers)
 local Monstres = require(script.Parent.Monstres)
@@ -90,6 +91,10 @@ Bases.surVerrou(function(declencheur: Player, proprietaire: any)
 end)
 
 TerresSauvages.creer()
+-- Décor cartoon et éclairage : avant le cycle jour/nuit, qui mémorise l'éclairage de jour.
+Decor.eclairer()
+Decor.creer()
+Decor.suivreBases()
 
 -- Cycle jour/nuit puis monstres : tout est décidé par le serveur, aucun
 -- RemoteEvent (le client n'envoie rien pour les monstres).

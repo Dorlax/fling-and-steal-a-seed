@@ -41,13 +41,15 @@ function InterfacePieges.demarrer()
 
 	local colonne = Instance.new("Frame")
 	colonne.Name = "Colonne"
-	colonne.AnchorPoint = Vector2.new(0, 0.5)
-	colonne.Position = UDim2.new(0, 16, 0.5, 0)
+	-- Rangée en bas à gauche : ne recouvre pas le panneau des stats (à gauche, au milieu).
+	colonne.AnchorPoint = Vector2.new(0, 1)
+	colonne.Position = UDim2.new(0, 16, 1, -16)
 	local n = #reglages.Ordre
-	colonne.Size = UDim2.fromOffset(TAILLE, n * TAILLE + (n - 1) * ECART)
+	colonne.Size = UDim2.fromOffset(n * TAILLE + (n - 1) * ECART, TAILLE)
 	colonne.BackgroundTransparency = 1
 	colonne.Parent = ecran
 	local liste = Instance.new("UIListLayout")
+	liste.FillDirection = Enum.FillDirection.Horizontal
 	liste.Padding = UDim.new(0, ECART)
 	liste.SortOrder = Enum.SortOrder.LayoutOrder
 	liste.Parent = colonne
