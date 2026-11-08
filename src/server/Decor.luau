@@ -152,7 +152,8 @@ function Decor.eclairer()
 	atmosphere.Glare = 0.2
 	atmosphere.Haze = 0.6
 
-	local couleurs = enfantLighting("CouleursCartoon", "ColorCorrectionEffect") :: ColorCorrectionEffect
+	local couleurs =
+		enfantLighting("CouleursCartoon", "ColorCorrectionEffect") :: ColorCorrectionEffect
 	couleurs.Saturation = 0.25
 	couleurs.Contrast = 0.08
 	couleurs.Brightness = 0.02
@@ -188,7 +189,14 @@ local function arbre(parent: Instance, position: Vector3, hasard: Random)
 		then FEUILLAGES[hasard:NextInteger(4, 5)]
 		else FEUILLAGES[hasard:NextInteger(1, 3)]
 	local sommet = position + Vector3.new(0, hauteur, 0)
-	piece(modele, "Feuillage", Enum.PartType.Ball, Vector3.one * 9 * echelle, CFrame.new(sommet), feuillage)
+	piece(
+		modele,
+		"Feuillage",
+		Enum.PartType.Ball,
+		Vector3.one * 9 * echelle,
+		CFrame.new(sommet),
+		feuillage
+	)
 	for i = 1, 2 do
 		local angle = hasard:NextNumber(0, 2 * math.pi)
 		local decalage = Vector3.new(math.cos(angle) * 3.5, -1 + i, math.sin(angle) * 3.5) * echelle
@@ -355,7 +363,11 @@ function Decor.creer(): Folder
 				return Vector3.new(x, 0, z)
 			end
 		end
-		return Vector3.new(hasard:NextNumber(-DEMI_LARGEUR + 10, DEMI_LARGEUR - 10), 0, FOND_SAUVAGE - 20)
+		return Vector3.new(
+			hasard:NextNumber(-DEMI_LARGEUR + 10, DEMI_LARGEUR - 10),
+			0,
+			FOND_SAUVAGE - 20
+		)
 	end
 	for _ = 1, 70 do
 		arbre(nature, pointLibre(), hasard)
@@ -371,7 +383,11 @@ function Decor.creer(): Folder
 		-- Petits massifs de 3 à 5 fleurs.
 		local centre = pointLibre()
 		for _ = 1, hasard:NextInteger(3, 5) do
-			fleur(fleurs, centre + Vector3.new(hasard:NextNumber(-3, 3), 0, hasard:NextNumber(-3, 3)), hasard)
+			fleur(
+				fleurs,
+				centre + Vector3.new(hasard:NextNumber(-3, 3), 0, hasard:NextNumber(-3, 3)),
+				hasard
+			)
 		end
 	end
 
