@@ -323,7 +323,9 @@ function mettreEnPortage(
 		pleineSignalee = false,
 	}
 	portees[joueur] = portee
-	joueur:SetAttribute("Porte", fiche)
+	-- Attribut Porte = rareté seule (la fiche complète reste côté serveur).
+	local infos = Fiche.lire(fiche)
+	joueur:SetAttribute("Porte", if infos then infos.Rarete else fiche)
 	Entrainement.appliquerVitesse(joueur)
 
 	-- Mort (ou personnage retiré) en portant : la créature retombe.
