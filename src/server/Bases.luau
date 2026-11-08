@@ -351,10 +351,11 @@ end
 
 -- Point devant la porte, DistanceExpulsion studs à l'extérieur du bord Z+.
 function Bases.pointExpulsion(proprietaire: any): CFrame?
-	local sol = Bases.solDe(proprietaire)
-	if sol == nil then
+	local solOuNil = Bases.solDe(proprietaire)
+	if solOuNil == nil then
 		return nil
 	end
+	local sol = solOuNil :: BasePart
 	local dessus = sol.Position + Vector3.new(0, sol.Size.Y / 2, 0)
 	local position = dessus + Vector3.new(0, 3, sol.Size.Z / 2 + reglagesRaid.DistanceExpulsion)
 	return CFrame.lookAt(position, position + Vector3.zAxis)

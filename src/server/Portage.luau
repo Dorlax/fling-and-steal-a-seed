@@ -258,7 +258,7 @@ function Portage.porterVolee(voleur: any, rarete: any): boolean
 		modele:Destroy()
 		return false
 	end
-	mettreEnPortage(voleur, modele, rarete, racine, humanoideOuNil :: Humanoid, corps)
+	mettreEnPortage(voleur, modele, rarete, racine, humanoideOuNil :: Humanoid, corps :: BasePart)
 	return true
 end
 

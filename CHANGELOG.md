@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage CI (issue #11)
+- Corrige les erreurs luau-lsp (valeurs possiblement nil) dans InterfaceRaid, Bases, Portage et Raids, sans changement de comportement.
+
 ## 2026-11-08 — Raids de bases (issue #11)
 - Action « Voler » (ProximityPrompt, E / ButtonX, bouton tactile) sur chaque créature exposée d'une autre base : la créature quitte la base de la victime (sauvegarde et revenus compris) et passe en portage chez le voleur, à déposer dans sa propre base. Impossible si le voleur porte déjà une créature.
 - Alerte cartoon « VOLÉ ! » (billboard rebondissant au-dessus du voleur, message à l'écran pour la victime et le voleur, RemoteEvent `AlerteVol`).

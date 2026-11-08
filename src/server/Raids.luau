@@ -96,7 +96,7 @@ local function creatureExposee(proprietaire: any, numero: number): Model?
 	if dossier == nil then
 		return nil
 	end
-	for _, creature in dossier:GetChildren() do
+	for _, creature in (dossier :: Instance):GetChildren() do
 		if creature:IsA("Model") and creature:GetAttribute("Emplacement") == numero then
 			return creature
 		end
@@ -252,10 +252,11 @@ function Raids.voler(voleur: any, proprietaire: any, numero: any, maintenant: nu
 		return false
 	end
 
-	local rarete = Sauvegarde.retirerCreature(proprietaire, numero)
-	if rarete == nil then
+	local rareteOuNil = Sauvegarde.retirerCreature(proprietaire, numero)
+	if rareteOuNil == nil then
 		return false
 	end
+	local rarete = rareteOuNil :: string
 	if not Portage.porterVolee(voleur, rarete) then
 		-- Ne devrait pas arriver (déjà vérifié) : la créature revient.
 		Sauvegarde.ajouterCreature(proprietaire, rarete)

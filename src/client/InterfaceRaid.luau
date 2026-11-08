@@ -55,7 +55,7 @@ local function ajusterPrompt(objet: Instance, dossier: Instance, joueur: Player)
 	if base == nil then
 		return
 	end
-	local estMaBase = base:GetAttribute("ProprietaireId") == joueur.UserId
+	local estMaBase = (base :: Instance):GetAttribute("ProprietaireId") == joueur.UserId
 	if prompt.Name == "Voler" then
 		prompt.Enabled = not estMaBase
 	else
