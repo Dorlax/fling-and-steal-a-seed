@@ -8,6 +8,7 @@ local CycleJourNuit = require(script.Parent.CycleJourNuit)
 local Entrainement = require(script.Parent.Entrainement)
 local Lancers = require(script.Parent.Lancers)
 local Monstres = require(script.Parent.Monstres)
+local Pieges = require(script.Parent.Pieges)
 local Plaquages = require(script.Parent.Plaquages)
 local Portage = require(script.Parent.Portage)
 local Raids = require(script.Parent.Raids)
@@ -65,6 +66,14 @@ remote("Plaquer").OnServerEvent:Connect(function(joueur: Player)
 	end
 end)
 
+-- Pièges : le client n'envoie que le nom du type ; tout autre argument est
+-- ignoré, la position et toutes les vérifications sont décidées par le serveur.
+remote("PoserPiege").OnServerEvent:Connect(function(joueur: Player, typePiege: any)
+	if Sauvegarde.estCharge(joueur) then
+		Pieges.traiterRequete(joueur, typePiege)
+	end
+end)
+
 -- Raids : alertes serveur -> client uniquement (aucun OnServerEvent).
 -- « Voler » et « Verrouiller » passent par les ProximityPrompts des bases ;
 -- le serveur ne se fie qu'au joueur fourni par Triggered.
@@ -86,6 +95,7 @@ TerresSauvages.creer()
 -- RemoteEvent (le client n'envoie rien pour les monstres).
 CycleJourNuit.demarrer()
 Monstres.demarrer()
+Pieges.demarrer()
 
 local function placerDansSaBase(joueur: Player, personnage: Model)
 	local racine = personnage:WaitForChild("HumanoidRootPart", 5)
@@ -127,6 +137,7 @@ end
 Players.PlayerRemoving:Connect(function(joueur)
 	Portage.nettoyer(joueur)
 	Plaquages.nettoyer(joueur)
+	Pieges.nettoyer(joueur)
 	Monstres.nettoyer(joueur)
 	Lancers.nettoyer(joueur)
 	Raids.nettoyer(joueur)
