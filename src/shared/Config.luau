@@ -82,6 +82,19 @@ local Config = {
 		PiecesMax = 1e15, -- plafond de sécurité
 	},
 
+	-- Plaquage d'un joueur qui porte une créature (vérifié par le serveur).
+	Plaquage = {
+		Portee = 8, -- studs max entre les deux HumanoidRootPart
+		DelaiRecuperation = 6, -- secondes entre deux plaquages réussis du même joueur
+		DureeAuSol = 1.5, -- secondes au sol pour la cible
+		DureeProtection = 4, -- secondes sans pouvoir être replaqué (>= DureeAuSol)
+		DistanceChute = 4, -- studs entre la cible et la créature lâchée
+		DureeVieLachee = 60, -- secondes avant disparition d'une créature lâchée
+		IntervalleMinRequetes = 0.2, -- anti-spam : requêtes plus rapprochées ignorées
+		-- Noms d'Enum.KeyCode (E et ButtonX servent déjà à « Récolter »).
+		Touches = { Clavier = "F", Manette = "ButtonY" },
+	},
+
 	-- Sauvegarde des joueurs (DataStore).
 	Sauvegarde = {
 		NomDataStore = "JoueursV1",

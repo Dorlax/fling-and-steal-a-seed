@@ -2,6 +2,12 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Plaquage (issue #7)
+- Gros bouton rond « PLAQUER ! » en bas à droite (tactile), touche F au clavier et Y à la manette ; le serveur choisit la cible (porteur valide le plus proche, 8 studs max).
+- La cible lâche sa créature à 4 studs (côté opposé au plaqueur) : elle devient « libre », récoltable par n'importe qui, et disparaît après 60 s si personne ne la prend.
+- La cible tombe au sol 1,5 s (« BOUM ! » et étoiles qui tournent au-dessus de la tête), puis est protégée 4 s ; le plaqueur attend 6 s avant le prochain plaquage (compte à rebours sur le bouton).
+- Pas de plaquage depuis sa propre base, ni d'une cible dans sa propre base ; anti-spam des requêtes (0,2 s).
+
 ## 2026-11-08 — Correctif chargement des tests en jeu (issue #5)
 - `tests/en-jeu/C7_portage.luau` ne compilait pas dans Roblox (« Ambiguous syntax » ligne 175 : une instruction commençant par `(` après un appel). Ajout d'un `;` séparateur, sans changement de logique du test.
 
