@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage CI (issue #7)
+- Typage strict corrigé dans InterfacePlaquage (client) et Plaquages (serveur) : valeurs optionnelles explicitement vérifiées pour luau-lsp. Aucun changement de comportement.
+
 ## 2026-11-08 — Plaquage (issue #7)
 - Gros bouton rond « PLAQUER ! » en bas à droite (tactile), touche F au clavier et Y à la manette ; le serveur choisit la cible (porteur valide le plus proche, 8 studs max).
 - La cible lâche sa créature à 4 studs (côté opposé au plaqueur) : elle devient « libre », récoltable par n'importe qui, et disparaît après 60 s si personne ne la prend.

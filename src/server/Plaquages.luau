@@ -212,7 +212,7 @@ function Plaquages.plaquer(plaqueur: any, candidats: { any }?, maintenant: numbe
 		envoyerMessage(plaqueur, "Personne à plaquer !")
 		return nil
 	end
-	local cible = liste[choix]
+	local cible = liste[choix :: number]
 
 	Portage.lacherParPlaquage(
 		cible,

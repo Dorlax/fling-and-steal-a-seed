@@ -30,7 +30,7 @@ local function racineDe(joueur: Player): BasePart?
 	if personnage == nil then
 		return nil
 	end
-	local racine = personnage:FindFirstChild("HumanoidRootPart")
+	local racine = (personnage :: Model):FindFirstChild("HumanoidRootPart")
 	if racine and racine:IsA("BasePart") then
 		return racine
 	end
@@ -86,15 +86,15 @@ function InterfacePlaquage.demarrer()
 		if maRacine == nil then
 			return false
 		end
+		local maPosition = (maRacine :: BasePart).Position
 		for _, autre in Players:GetPlayers() do
 			if autre ~= joueur and autre:GetAttribute("Porte") ~= nil then
 				local racine = racineDe(autre)
-				if
-					racine
-					and (racine.Position - maRacine.Position).Magnitude
-						<= Config.Plaquage.Portee + MARGE_PORTEE
-				then
-					return true
+				if racine ~= nil then
+					local distance = ((racine :: BasePart).Position - maPosition).Magnitude
+					if distance <= Config.Plaquage.Portee + MARGE_PORTEE then
+						return true
+					end
 				end
 			end
 		end
