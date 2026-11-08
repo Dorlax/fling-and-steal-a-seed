@@ -148,6 +148,13 @@ local function creatureAuSol(joueur: any, position: Vector3): Model
 end
 
 -- Victime qui porte une créature, placée loin.
+-- Victime suivie par le serveur (comme porteur()) : Pieges.pas doit pouvoir la retrouver.
+local function victime(): any
+	local b = fauxJoueur()
+	module("Bases").creer(b)
+	return b
+end
+
 local function porteur(): any
 	local b = fauxJoueur()
 	module("Bases").creer(b)
@@ -366,7 +373,7 @@ return {
 
 	["C11 filet : la victime est immobilisée puis libérée, le filet détruit"] = function()
 		local P = module("Pieges")
-		local a, b = poseur(), fauxJoueur()
+		local a, b = poseur(), victime()
 		local t = maintenant()
 		local normal = vitesse(b)
 		local filet = poserEn(a, "Filet", 0, t)
@@ -402,7 +409,7 @@ return {
 
 	["C12 glu : ralentie tant que dedans, restaurée en sortant, glu conservée"] = function()
 		local P = module("Pieges")
-		local a, b = poseur(), fauxJoueur()
+		local a, b = poseur(), victime()
 		local t = maintenant()
 		local normal = vitesse(b)
 		local glu = poserEn(a, "Glu", 0, t)
@@ -487,7 +494,7 @@ return {
 
 	["C15 protection : second filet sans effet juste après, actif ensuite"] = function()
 		local P = module("Pieges")
-		local a, b = poseur(), fauxJoueur()
+		local a, b = poseur(), victime()
 		local t = maintenant()
 		local f1 = poserEn(a, "Filet", 0, t)
 		local f2 = poserEn(a, "Filet", ECART, t + PIEGES.DelaiPose)
@@ -556,7 +563,7 @@ return {
 
 	["C18 nettoyer efface les effets de la victime"] = function()
 		local P = module("Pieges")
-		local a, b = poseur(), fauxJoueur()
+		local a, b = poseur(), victime()
 		local t = maintenant()
 		local glu = poserEn(a, "Glu", 0, t)
 		local filet = poserEn(a, "Filet", PRIX.Glu.Rayon + ECART, t + PIEGES.DelaiPose)
