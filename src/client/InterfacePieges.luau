@@ -6,19 +6,20 @@
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Piege = require(Shared:WaitForChild("Piege"))
+local Style = require(Shared:WaitForChild("Style"))
+local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local InterfacePieges = {}
 
 local reglages = Config.Pieges
-local TAILLE = 96 -- pixels : assez grand pour le tactile
+local TAILLE = math.max(96, Style.TailleBoutonMin) -- pixels : assez grand pour le tactile
 local ECART = 12
-local COULEUR_ATTENTE = Color3.fromRGB(130, 130, 130)
+local COULEUR_ATTENTE = Habillage.nommee("Gris")
 local ICONES: { [string]: string } = { Filet = "#", Glu = "~", FausseGraine = "●" }
 
 -- Noms d'Enum.KeyCode venant de Config.
@@ -27,15 +28,7 @@ local function codeTouche(nom: string): Enum.KeyCode
 end
 
 local function couleurDe(rgb: { number }): Color3
-	return Color3.fromRGB(rgb[1], rgb[2], rgb[3])
-end
-
-local function contour(element: GuiObject, epaisseur: number, mode: Enum.ApplyStrokeMode)
-	local trait = Instance.new("UIStroke")
-	trait.Thickness = epaisseur
-	trait.Color = Color3.new(0, 0, 0)
-	trait.ApplyStrokeMode = mode
-	trait.Parent = element
+	return Habillage.couleur(rgb)
 end
 
 function InterfacePieges.demarrer()
@@ -63,69 +56,37 @@ function InterfacePieges.demarrer()
 		typePiege: string,
 		bouton: TextButton,
 		texte: TextLabel,
-		echelle: UIScale,
+		jauge: { maj: (number) -> () },
 		couleur: Color3,
 	}
 	local boutons: { Bouton } = {}
-
-	local function rebondir(echelle: UIScale)
-		echelle.Scale = 0.8
-		TweenService:Create(
-			echelle,
-			TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-			{ Scale = 1 }
-		):Play()
-	end
 
 	for ordre, typePiege in reglages.Ordre do
 		local infos = reglages.Types[typePiege]
 		local couleur = couleurDe(infos.Couleur)
 
-		local bouton = Instance.new("TextButton")
-		bouton.Name = "Bouton" .. typePiege
+		local bouton, texte = Habillage.bouton(colonne, "Bouton" .. typePiege, {
+			couleur = couleur,
+			taille = Vector2.new(TAILLE, TAILLE),
+		})
 		bouton.LayoutOrder = ordre
-		bouton.Size = UDim2.fromOffset(TAILLE, TAILLE)
-		bouton.BackgroundColor3 = couleur
-		bouton.Font = Enum.Font.FredokaOne
-		bouton.TextScaled = true
-		bouton.TextColor3 = Color3.new(1, 1, 1)
-		bouton.Text = ""
-		bouton.Selectable = true
-		bouton.AutoButtonColor = true
-		bouton.Parent = colonne
-		local arrondi = Instance.new("UICorner")
-		arrondi.CornerRadius = UDim.new(0.25, 0)
-		arrondi.Parent = bouton
-		contour(bouton, 4, Enum.ApplyStrokeMode.Border)
-		local echelle = Instance.new("UIScale")
-		echelle.Parent = bouton
-
-		local icone = Instance.new("TextLabel")
-		icone.Name = "Icone"
-		icone.Size = UDim2.fromScale(1, 0.55)
-		icone.BackgroundTransparency = 1
-		icone.Font = Enum.Font.FredokaOne
-		icone.TextScaled = true
-		icone.TextColor3 = Color3.new(1, 1, 1)
-		icone.Text = ICONES[typePiege] or "?"
-		icone.Parent = bouton
-		contour(icone, 3, Enum.ApplyStrokeMode.Contextual)
-
-		local texte = Instance.new("TextLabel")
-		texte.Name = "Texte"
 		texte.AnchorPoint = Vector2.new(0.5, 1)
 		texte.Position = UDim2.new(0.5, 0, 1, -6)
 		texte.Size = UDim2.new(1, -10, 0.38, 0)
-		texte.BackgroundTransparency = 1
-		texte.Font = Enum.Font.FredokaOne
-		texte.TextScaled = true
-		texte.TextColor3 = Color3.new(1, 1, 1)
 		texte.Text = Piege.texteBouton(typePiege, 0, nil, 0)
-		texte.Parent = bouton
-		contour(texte, 2, Enum.ApplyStrokeMode.Contextual)
+
+		local icone = Habillage.texte(bouton, "Icone", { contour = Style.Contour.Petit })
+		icone.Position = UDim2.fromOffset(0, 8)
+		icone.Size = UDim2.new(1, 0, 0.5, -4)
+		icone.Text = ICONES[typePiege] or "?"
+
+		-- Jauge de recharge (délai de pose), en haut du bouton.
+		local jauge = Habillage.jauge(bouton, "Recharge", UDim2.new(1, -16, 0, 10))
+		jauge.cadre.AnchorPoint = Vector2.new(0.5, 0)
+		jauge.cadre.Position = UDim2.new(0.5, 0, 0, 4)
 
 		local function poser()
-			rebondir(echelle)
+			Habillage.rebondir(bouton)
 			remote:FireServer(typePiege)
 		end
 		bouton.Activated:Connect(poser)
@@ -148,27 +109,23 @@ function InterfacePieges.demarrer()
 			typePiege = typePiege,
 			bouton = bouton,
 			texte = texte,
-			echelle = echelle,
+			jauge = jauge,
 			couleur = couleur,
 		})
 	end
 
 	-- « PIÉGÉ ! » rebondissant au centre pendant l'immobilisation.
-	local piege = Instance.new("TextLabel")
-	piege.Name = "Piege"
+	local piege = Habillage.texte(
+		ecran,
+		"Piege",
+		{ couleur = Habillage.nommee("Orange"), contour = Style.Contour.Gros }
+	)
 	piege.AnchorPoint = Vector2.new(0.5, 0.5)
 	piege.Position = UDim2.fromScale(0.5, 0.35)
 	piege.Size = UDim2.fromOffset(420, 110)
-	piege.BackgroundTransparency = 1
-	piege.Font = Enum.Font.FredokaOne
-	piege.TextScaled = true
-	piege.TextColor3 = Color3.fromRGB(255, 140, 30)
 	piege.Text = "PIÉGÉ !"
 	piege.Visible = false
-	piege.Parent = ecran
-	contour(piege, 5, Enum.ApplyStrokeMode.Contextual)
-	local echellePiege = Instance.new("UIScale")
-	echellePiege.Parent = piege
+	local echellePiege = Habillage.echelle(piege)
 
 	-- Mise à jour : prix, délai restant, « MAX », grisé, « PIÉGÉ ! ».
 	task.spawn(function()
@@ -180,9 +137,11 @@ function InterfacePieges.demarrer()
 			local nombre = if type(actifs) == "number" then actifs else 0
 			local enAttente = type(pretA) == "number" and maintenant < pretA
 			local disponible = not enAttente and nombre < reglages.MaxParJoueur
+			local recharge = Style.ratioRecharge(maintenant, pretA :: number?, reglages.DelaiPose)
 			for _, b in boutons do
 				b.texte.Text = Piege.texteBouton(b.typePiege, maintenant, pretA :: number?, nombre)
 				b.bouton.BackgroundColor3 = if disponible then b.couleur else COULEUR_ATTENTE
+				b.jauge.maj(recharge)
 			end
 			local immobile = joueur:GetAttribute("ImmobileJusqua")
 			piege.Visible = type(immobile) == "number"

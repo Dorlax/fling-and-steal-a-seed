@@ -4,46 +4,26 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Style = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Style"))
+local Habillage = require(script.Parent:WaitForChild("Habillage"))
+
 local InterfaceStats = {}
 
-local COULEUR_FOND = Color3.fromRGB(30, 30, 40)
-local COULEUR_ACTIF = Color3.fromRGB(214, 102, 38)
-local COULEUR_INACTIF = Color3.fromRGB(70, 70, 85)
-
-local function arrondi(element: GuiObject, rayon: number)
-	local coin = Instance.new("UICorner")
-	coin.CornerRadius = UDim.new(0, rayon)
-	coin.Parent = element
-end
+local COULEUR_ACTIF = Habillage.nommee("Orange")
+local COULEUR_INACTIF = Habillage.nommee("Gris")
+-- Couleurs franches des boutons de la Forge.
+local COULEURS_MODES: { [string]: Color3 } = {
+	Force = Habillage.nommee("Rouge"),
+	Vitesse = Habillage.nommee("Bleu"),
+}
+local LARGEUR = 2 * Style.TailleBoutonMin + 8
 
 local function etiquette(parent: Instance, nom: string, ordre: number): TextLabel
-	local label = Instance.new("TextLabel")
-	label.Name = nom
+	local label = Habillage.texte(parent, nom)
 	label.LayoutOrder = ordre
 	label.Size = UDim2.new(1, 0, 0, 30)
-	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.GothamBold
-	label.TextScaled = true
-	label.TextColor3 = Color3.new(1, 1, 1)
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = parent
 	return label
-end
-
-local function bouton(parent: Instance, mode: string): TextButton
-	local b = Instance.new("TextButton")
-	b.Name = "Mode" .. mode
-	b.Text = mode
-	b.Size = UDim2.new(0.5, -4, 1, 0)
-	b.Font = Enum.Font.GothamBold
-	b.TextScaled = true
-	b.TextColor3 = Color3.new(1, 1, 1)
-	b.BackgroundColor3 = COULEUR_INACTIF
-	b.AutoButtonColor = true
-	b.Selectable = true -- manette
-	b.Parent = parent
-	arrondi(b, 8)
-	return b
 end
 
 function InterfaceStats.demarrer()
@@ -59,11 +39,13 @@ function InterfaceStats.demarrer()
 	cadre.Name = "Cadre"
 	cadre.AnchorPoint = Vector2.new(0, 0.5)
 	cadre.Position = UDim2.new(0, 12, 0.5, 0)
-	cadre.Size = UDim2.fromOffset(220, 170)
-	cadre.BackgroundColor3 = COULEUR_FOND
+	cadre.Size = UDim2.fromOffset(LARGEUR + 20, 0)
+	cadre.AutomaticSize = Enum.AutomaticSize.Y
+	cadre.BackgroundColor3 = Habillage.nommee("Fond")
 	cadre.BackgroundTransparency = 0.2
 	cadre.Parent = ecran
-	arrondi(cadre, 12)
+	Habillage.arrondi(cadre, 0.08)
+	Habillage.contour(cadre, Style.Contour.Petit, Enum.ApplyStrokeMode.Border)
 
 	local marge = Instance.new("UIPadding")
 	marge.PaddingTop = UDim.new(0, 10)
@@ -78,7 +60,9 @@ function InterfaceStats.demarrer()
 	liste.Parent = cadre
 
 	local labelForce = etiquette(cadre, "Force", 1)
+	labelForce.TextColor3 = COULEURS_MODES.Force
 	local labelVitesse = etiquette(cadre, "Vitesse", 2)
+	labelVitesse.TextColor3 = COULEURS_MODES.Vitesse
 	local labelEntrainement = etiquette(cadre, "Entrainement", 3)
 	labelEntrainement.Text = "Entraînement en cours…"
 	labelEntrainement.TextColor3 = COULEUR_ACTIF
@@ -86,22 +70,26 @@ function InterfaceStats.demarrer()
 	local rangee = Instance.new("Frame")
 	rangee.Name = "Modes"
 	rangee.LayoutOrder = 4
-	rangee.Size = UDim2.new(1, 0, 0, 44)
+	rangee.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
 	rangee.BackgroundTransparency = 1
 	rangee.Parent = cadre
 	local disposition = Instance.new("UIListLayout")
 	disposition.FillDirection = Enum.FillDirection.Horizontal
+	disposition.SortOrder = Enum.SortOrder.LayoutOrder
 	disposition.Padding = UDim.new(0, 8)
 	disposition.Parent = rangee
 
-	local boutons: { [string]: TextButton } = {
-		Force = bouton(rangee, "Force"),
-		Vitesse = bouton(rangee, "Vitesse"),
-	}
-	for mode, b in boutons do
+	local boutons: { [string]: TextButton } = {}
+	for ordre, mode in { "Force", "Vitesse" } do
+		local b = Habillage.bouton(rangee, "Mode" .. mode, {
+			texte = mode,
+			couleur = COULEURS_MODES[mode],
+		})
+		b.LayoutOrder = ordre
 		b.Activated:Connect(function()
 			remote:FireServer(mode)
 		end)
+		boutons[mode] = b
 	end
 
 	local function nombre(nom: string): number
@@ -115,7 +103,7 @@ function InterfaceStats.demarrer()
 		labelEntrainement.Visible = joueur:GetAttribute("SurForge") == true
 		local modeActif = joueur:GetAttribute("ModeForge")
 		for mode, b in boutons do
-			b.BackgroundColor3 = if mode == modeActif then COULEUR_ACTIF else COULEUR_INACTIF
+			b.BackgroundColor3 = if mode == modeActif then COULEURS_MODES[mode] else COULEUR_INACTIF
 		end
 	end
 
