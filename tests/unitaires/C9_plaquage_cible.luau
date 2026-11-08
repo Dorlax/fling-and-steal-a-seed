@@ -31,13 +31,10 @@ return {
 
 	["C9 choisirCible : nil pour liste vide ou sans valide"] = function()
 		assert(Plaquage.choisirCible({}) == nil, "liste vide -> nil")
-		assert(
-			Plaquage.choisirCible({
-				{ distance = 1, valide = false },
-				{ distance = 2, valide = false },
-			}) == nil,
-			"aucun valide -> nil"
-		)
+		assert(Plaquage.choisirCible({
+			{ distance = 1, valide = false },
+			{ distance = 2, valide = false },
+		}) == nil, "aucun valide -> nil")
 	end,
 
 	["C10 texteBouton : PLAQUER ! si prêt"] = function()
