@@ -5,6 +5,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Style = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Style"))
+local Forge = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forge"))
+local Nombres = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Nombres"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local InterfaceStats = {}
@@ -92,14 +94,35 @@ function InterfaceStats.demarrer()
 		boutons[mode] = b
 	end
 
+	-- Achat du niveau de Forge suivant (vérifié par le serveur).
+	local ameliorer = ReplicatedStorage:WaitForChild("AmeliorerForge") :: RemoteEvent
+	local boutonNiveau = Habillage.bouton(cadre, "AmeliorerForge", {
+		texte = "Forge niv. 1",
+		couleur = Color3.fromRGB(255, 170, 40),
+	})
+	boutonNiveau.LayoutOrder = 5
+	boutonNiveau.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
+	boutonNiveau.Activated:Connect(function()
+		ameliorer:FireServer()
+	end)
+
 	local function nombre(nom: string): number
 		local valeur = joueur:GetAttribute(nom)
 		return if type(valeur) == "number" then valeur else 0
 	end
 
 	local function rafraichir()
-		labelForce.Text = `Force : {math.floor(nombre("Force"))}`
-		labelVitesse.Text = `Vitesse : {math.floor(nombre("Vitesse"))}`
+		labelForce.Text = `Force : {Nombres.abreger(nombre("Force"))}`
+		labelVitesse.Text = `Vitesse : {Nombres.abreger(nombre("Vitesse"))}`
+		local niveau = math.max(1, math.floor(nombre("NiveauForge")))
+		local cout = Forge.coutNiveau(niveau)
+		boutonNiveau.Text =
+			`⬆ Forge niv. {niveau + 1} : {Nombres.abreger(cout)} 🪙 (×{Nombres.abreger(
+				Forge.gainPour(niveau + 1)
+			)}/s)`
+		boutonNiveau.BackgroundColor3 = if nombre("Pieces") >= cout
+			then Color3.fromRGB(255, 170, 40)
+			else COULEUR_INACTIF
 		labelEntrainement.Visible = joueur:GetAttribute("SurForge") == true
 		local modeActif = joueur:GetAttribute("ModeForge")
 		for mode, b in boutons do
@@ -107,7 +130,7 @@ function InterfaceStats.demarrer()
 		end
 	end
 
-	for _, nom in { "Force", "Vitesse", "ModeForge", "SurForge" } do
+	for _, nom in { "Force", "Vitesse", "ModeForge", "SurForge", "NiveauForge", "Pieces" } do
 		joueur:GetAttributeChangedSignal(nom):Connect(rafraichir)
 	end
 	rafraichir()

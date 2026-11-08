@@ -55,13 +55,30 @@ function Entrainement.tick(joueur: any)
 		Vitesse = joueur:GetAttribute("Vitesse"),
 	}
 	local avant = stats[mode]
-	Forge.appliquerGain(stats, mode, Config.Forge)
+	Forge.appliquerGain(stats, mode, Config.Forge, joueur:GetAttribute("NiveauForge"))
 	if stats[mode] ~= avant then
 		joueur:SetAttribute(mode, stats[mode])
 		if mode == "Vitesse" then
 			Entrainement.appliquerVitesse(joueur)
 		end
 	end
+end
+
+-- Achat du niveau de Forge suivant avec des pièces (tout vérifié ici).
+-- Renvoie true si le niveau a été acheté.
+function Entrainement.ameliorer(joueur: any): boolean
+	local niveau = joueur:GetAttribute("NiveauForge")
+	if type(niveau) ~= "number" or niveau ~= niveau or niveau < 1 then
+		niveau = 1
+	end
+	local cout = Forge.coutNiveau(niveau)
+	local pieces = joueur:GetAttribute("Pieces")
+	if type(pieces) ~= "number" or pieces ~= pieces or pieces < cout then
+		return false
+	end
+	joueur:SetAttribute("Pieces", pieces - cout)
+	joueur:SetAttribute("NiveauForge", math.floor(niveau) + 1)
+	return true
 end
 
 return Entrainement

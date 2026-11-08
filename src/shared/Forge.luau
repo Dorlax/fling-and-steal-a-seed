@@ -24,9 +24,36 @@ function Forge.estModeValide(mode: any): boolean
 	return false
 end
 
--- Ajoute GainParTick à la stat du mode, sans dépasser PlafondStat.
--- Modifie `stats` et la renvoie ; un mode invalide ne change rien.
-function Forge.appliquerGain(stats: { [string]: any }, mode: any, config: any?): { [string]: any }
+-- Niveau de Forge valide (entier >= 1).
+local function niveauValide(niveau: any): number
+	if type(niveau) ~= "number" or niveau ~= niveau or niveau < 1 or niveau == math.huge then
+		return 1
+	end
+	return math.floor(niveau)
+end
+
+-- Gain par tick au niveau n : GainParTick × CroissanceGain^(n - 1), arrondi.
+function Forge.gainPour(niveau: any, config: any?): number
+	local cfg = config or Config.Forge
+	local croissance = if cfg.Niveaux then cfg.Niveaux.CroissanceGain else 1
+	return math.floor(cfg.GainParTick * croissance ^ (niveauValide(niveau) - 1) + 0.5)
+end
+
+-- Coût en pièces pour passer du niveau n au niveau n + 1.
+function Forge.coutNiveau(niveau: any): number
+	local n = Config.Forge.Niveaux
+	return math.floor(n.CoutBase * n.CroissanceCout ^ (niveauValide(niveau) - 1) + 0.5)
+end
+
+-- Ajoute le gain du niveau (GainParTick au niveau 1) à la stat du mode, sans
+-- dépasser PlafondStat. Modifie `stats` et la renvoie ; un mode invalide ne
+-- change rien.
+function Forge.appliquerGain(
+	stats: { [string]: any },
+	mode: any,
+	config: any?,
+	niveau: any?
+): { [string]: any }
 	local cfg = config or Config.Forge
 	if not Forge.estModeValide(mode) then
 		return stats
@@ -38,7 +65,7 @@ function Forge.appliquerGain(stats: { [string]: any }, mode: any, config: any?):
 	if actuelle >= cfg.PlafondStat then
 		return stats
 	end
-	stats[mode] = math.min(actuelle + cfg.GainParTick, cfg.PlafondStat)
+	stats[mode] = math.min(actuelle + Forge.gainPour(niveau, cfg), cfg.PlafondStat)
 	return stats
 end
 
@@ -48,7 +75,12 @@ function Forge.walkSpeedPour(vitesse: any): number
 	if not estNombreValide(vitesse) or vitesse <= 0 then
 		return cfg.WalkSpeedBase
 	end
-	local resultat = cfg.WalkSpeedBase + vitesse * cfg.WalkSpeedParPointVitesse
+	local lineaire = math.min(vitesse, cfg.StatLineaire)
+	local resultat = cfg.WalkSpeedBase + lineaire * cfg.WalkSpeedParPointVitesse
+	if vitesse > cfg.StatLineaire and vitesse < math.huge then
+		-- Chaque doublement au-delà ajoute un palier de vitesse (sans limite).
+		resultat += math.log(vitesse / cfg.StatLineaire, 2) * cfg.WalkSpeedParDoublement
+	end
 	return math.clamp(resultat, cfg.WalkSpeedBase, cfg.WalkSpeedMax)
 end
 

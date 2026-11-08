@@ -10,10 +10,17 @@ local Config = {
 		ModeParDefaut = "Force",
 		IntervalleSecondes = 1, -- un gain par seconde passée sur la Forge
 		GainParTick = 1,
-		PlafondStat = 1000,
+		PlafondStat = 1e15, -- sécurité : la progression est sans limite (biomes)
 		WalkSpeedBase = 16,
 		WalkSpeedParPointVitesse = 0.02,
-		WalkSpeedMax = 50,
+		-- Au-delà de StatLineaire, chaque doublement de la stat ajoute un palier
+		-- (distance : un biome ; vitesse : WalkSpeedParDoublement).
+		StatLineaire = 1000,
+		WalkSpeedParDoublement = 20,
+		WalkSpeedMax = 2000, -- sécurité physique
+		-- Niveaux de Forge achetés en pièces : gain × CroissanceGain par niveau,
+		-- coût du niveau n -> n + 1 = CoutBase × CroissanceCout^(n - 1).
+		Niveaux = { CoutBase = 100, CroissanceCout = 1.9, CroissanceGain = 1.6 },
 		-- Zone « sur la Forge » : au-dessus de la plateforme (studs).
 		DistanceForge = {
 			Largeur = 8,
@@ -25,7 +32,7 @@ local Config = {
 	Lancer = {
 		DistanceMin = 30, -- studs, Force 0 et jauge verte
 		DistanceParForce = 0.4, -- studs par point de Force (Force 1000 -> +400)
-		DistanceMax = 520, -- plafond absolu
+		DistanceMax = 1e6, -- plafond de sécurité (la vraie limite : la fin du dernier biome)
 		DelaiEntreLancers = 3, -- secondes, contrôlé par le serveur
 		MaxCreaturesAuSol = 10, -- par joueur ; au-delà, la plus ancienne disparaît
 		CompensationPingMax = 0.25, -- secondes de latence retirées au maximum
@@ -132,7 +139,7 @@ local Config = {
 				PorteeCoup = 5,
 				Recharge = 2.0,
 				NombreJour = 2,
-				NombreNuit = 4,
+				NombreNuit = 3, -- au plus 12 monstres par biome la nuit (anti-lag)
 			},
 			Moyenne = {
 				Nom = "Ronchonbulle",
@@ -144,7 +151,7 @@ local Config = {
 				PorteeCoup = 6,
 				Recharge = 1.6,
 				NombreJour = 3,
-				NombreNuit = 6,
+				NombreNuit = 4,
 			},
 			Lointaine = {
 				Nom = "Grobidou",
@@ -156,7 +163,7 @@ local Config = {
 				PorteeCoup = 7,
 				Recharge = 1.2,
 				NombreJour = 4,
-				NombreNuit = 9,
+				NombreNuit = 5,
 			},
 		},
 		IntervalleVague = 30, -- la nuit, une vague complète les zones toutes les 30 s

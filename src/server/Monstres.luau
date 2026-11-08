@@ -10,6 +10,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
+local Biomes = require(ReplicatedStorage.Shared.Biomes)
 local Monstre = require(ReplicatedStorage.Shared.Monstre)
 local Bases = require(script.Parent.Bases)
 local Modeleur = require(script.Parent.Modeleur)
@@ -17,6 +18,7 @@ local Portage = require(script.Parent.Portage)
 
 type Etat = {
 	zone: string,
+	biome: number,
 	apparition: Vector3,
 	pretA: number?, -- fin de la recharge
 	cible: any?, -- joueur poursuivi
@@ -92,14 +94,14 @@ local function hauteurSol(zone: string): number
 	return Monstre.reglagesZone(zone).Taille / 2
 end
 
--- Point aléatoire de la bande d'une zone, au niveau du sol.
-local function pointAleatoire(zone: string): Vector3
-	local zMin, zMax = Monstre.bandeZone(zone)
+-- Point aléatoire de la bande d'une zone du biome n, au niveau du sol.
+local function pointAleatoire(zone: string, biome: number): Vector3
+	local zMin, zMax = Monstre.bandeZone(zone, biome)
 	local p = Monstre.limiter({
 		X = aleatoire:NextNumber(-380, 380),
 		Y = hauteurSol(zone),
 		Z = aleatoire:NextNumber(zMin, zMax),
-	}, zone)
+	}, zone, biome)
 	return Vector3.new(p.X, p.Y, p.Z)
 end
 
@@ -116,7 +118,7 @@ local function appliquerYeux(modele: Model, nuit: boolean)
 	end
 end
 
-local function creerModele(zone: string, position: Vector3): Model
+local function creerModele(zone: string, position: Vector3, biome: number): Model
 	local r = Monstre.reglagesZone(zone)
 	local t = r.Taille
 	local modele = Instance.new("Model")
@@ -133,7 +135,7 @@ local function creerModele(zone: string, position: Vector3): Model
 	corps.CFrame = CFrame.new()
 	corps.Parent = modele
 	modele.PrimaryPart = corps
-	local espece = Bestiaire.especeMonstre(zone, aleatoire:NextNumber())
+	local espece = Bestiaire.especeMonstre(zone, aleatoire:NextNumber(), biome)
 	Modeleur.construire(modele, corps, espece, t, couleurDe(r.Couleur))
 
 	local panneau = Instance.new("BillboardGui")
@@ -156,6 +158,7 @@ local function creerModele(zone: string, position: Vector3): Model
 
 	modele:SetAttribute("Monstre", true)
 	modele:SetAttribute("Zone", zone)
+	modele:SetAttribute("Biome", biome)
 	appliquerYeux(modele, Workspace:GetAttribute("Nuit") == true)
 	local angle = aleatoire:NextNumber(0, 2 * math.pi)
 	modele:PivotTo(CFrame.new(position) * CFrame.Angles(0, angle, 0))
@@ -229,11 +232,12 @@ end
 -- ----------------------------------------------------------------------------
 -- Apparition et disparition
 
-local function apparaitre(zone: string): Model
-	local position = pointAleatoire(zone)
-	local modele = creerModele(zone, position)
+local function apparaitre(zone: string, biome: number): Model
+	local position = pointAleatoire(zone, biome)
+	local modele = creerModele(zone, position, biome)
 	etats[modele] = {
 		zone = zone,
+		biome = biome,
 		apparition = position,
 		pretA = nil,
 		cible = nil,
@@ -253,33 +257,51 @@ local function retirer(modele: Model)
 	modele:Destroy()
 end
 
--- Monstres vivants d'une zone (oublie ceux détruits ailleurs).
-local function monstresDe(zone: string): { Model }
+-- Monstres vivants d'une zone d'un biome (oublie ceux détruits ailleurs).
+local function monstresDe(zone: string, biome: number): { Model }
 	local dossier = Monstres.dossier()
 	local liste = {}
 	for modele, etat in etats do
 		if modele.Parent ~= dossier then
 			etats[modele] = nil
-		elseif etat.zone == zone then
+		elseif etat.zone == zone and etat.biome == biome then
 			table.insert(liste, modele)
 		end
 	end
 	return liste
 end
 
--- Complète (ou réduit) chaque zone jusqu'au nombre voulu pour la phase de
--- `maintenant` : NombreJour le jour, NombreNuit la nuit (vague).
+-- Biomes « actifs » : le premier (toujours) et ceux où se trouve au moins un
+-- joueur. Les autres n'ont aucun monstre (anti-lag).
+local function biomesActifs(): { [number]: boolean }
+	local actifs = { [1] = true }
+	for _, joueur in Players:GetPlayers() do
+		local racine = racineEtHumanoide(joueur)
+		if racine then
+			local p = racine.Position
+			actifs[Monstre.biomeDe({ X = p.X, Y = p.Y, Z = p.Z })] = true
+		end
+	end
+	return actifs
+end
+
+-- Complète (ou réduit) chaque zone de chaque biome actif jusqu'au nombre voulu
+-- pour la phase de `maintenant` : NombreJour le jour, NombreNuit la nuit
+-- (vague). Les biomes sans joueur sont vidés.
 function Monstres.completer(maintenant: number?)
 	local nuit = Monstre.phase(instantDe(maintenant)) == "Nuit"
-	for _, z in Config.Lancer.Zones do
-		local zone = z.Nom
-		local liste = monstresDe(zone)
-		local voulu = Monstre.nombreVoulu(zone, nuit)
-		for _ = #liste + 1, voulu do
-			apparaitre(zone)
-		end
-		for i = #liste, voulu + 1, -1 do
-			retirer(liste[i])
+	local actifs = biomesActifs()
+	for biome = 1, Biomes.nombre() do
+		for _, z in Config.Lancer.Zones do
+			local zone = z.Nom
+			local liste = monstresDe(zone, biome)
+			local voulu = if actifs[biome] then Monstre.nombreVoulu(zone, nuit) else 0
+			for _ = #liste + 1, voulu do
+				apparaitre(zone, biome)
+			end
+			for i = #liste, voulu + 1, -1 do
+				retirer(liste[i])
+			end
 		end
 	end
 end
@@ -397,7 +419,7 @@ local function avancer(modele: Model, etat: Etat, infos: { InfoJoueur }, instant
 		etat.cible = nil
 		local destination = etat.destination
 		if destination == nil or horizontal(position - destination).Magnitude <= ARRIVE then
-			destination = pointAleatoire(etat.zone)
+			destination = pointAleatoire(etat.zone, etat.biome)
 			etat.destination = destination
 		end
 		but = destination :: Vector3
@@ -414,7 +436,7 @@ local function avancer(modele: Model, etat: Etat, infos: { InfoJoueur }, instant
 	-- Rebond vertical (visuel seulement).
 	local hauteur = hauteurSol(etat.zone) + math.abs(math.sin(etat.rebond)) * r.Taille * 0.15
 	-- Chaque pas passe par la limite : jamais dans une base, jamais hors de sa zone.
-	local p = Monstre.limiter({ X = suivant.X, Y = hauteur, Z = suivant.Z }, etat.zone)
+	local p = Monstre.limiter({ X = suivant.X, Y = hauteur, Z = suivant.Z }, etat.zone, etat.biome)
 	local nouvelle = Vector3.new(p.X, p.Y, p.Z)
 	local regard = if direction then direction else modele:GetPivot().LookVector
 	modele:PivotTo(CFrame.lookAt(nouvelle, nouvelle + horizontal(regard)))
@@ -466,14 +488,35 @@ function Monstres.demarrer()
 	task.spawn(function()
 		local dernierePhase = Monstre.phase(Workspace:GetServerTimeNow())
 		local derniereVague = Workspace:GetServerTimeNow()
+		local dernierControle = 0
+		local derniersBiomes = "1"
 		while true do
 			task.wait(reglages.IntervalleIA)
 			local instant = Workspace:GetServerTimeNow()
 			Monstres.pas(instant)
 			-- Tombée de la nuit (vague), lever du jour (« pouf »), puis
 			-- complément régulier toutes les IntervalleVague secondes.
+			-- Un joueur change de biome : on peuple le nouveau, on vide l'ancien.
 			local phase = Monstre.phase(instant)
-			if phase ~= dernierePhase or instant - derniereVague >= reglages.IntervalleVague then
+			local cle = ""
+			if instant - dernierControle >= 2 then
+				dernierControle = instant
+				local liste = {}
+				for biome in biomesActifs() do
+					table.insert(liste, biome)
+				end
+				table.sort(liste)
+				cle = table.concat(liste, ",")
+			end
+			local biomesChanges = cle ~= "" and cle ~= derniersBiomes
+			if biomesChanges then
+				derniersBiomes = cle
+			end
+			if
+				phase ~= dernierePhase
+				or biomesChanges
+				or instant - derniereVague >= reglages.IntervalleVague
+			then
 				dernierePhase = phase
 				derniereVague = instant
 				Monstres.completer(instant)

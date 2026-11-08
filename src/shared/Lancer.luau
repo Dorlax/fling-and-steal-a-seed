@@ -4,6 +4,8 @@
 -- Roblox : require(script.Parent.X) ; Lune (tests) : require("./X").
 -- selene: allow(incorrect_standard_library_use)
 local Config = if script then require(script.Parent.Config) else (require :: any)("./Config")
+-- selene: allow(incorrect_standard_library_use)
+local Biomes = if script then require(script.Parent.Biomes) else (require :: any)("./Biomes")
 
 local Lancer = {}
 
@@ -14,7 +16,8 @@ local function estNombreFini(valeur: any): boolean
 		and valeur < math.huge
 end
 
--- Distance en studs : la Force et le bonus de jauge s'additionnent, plafond DistanceMax.
+-- Distance en studs : la Force et le bonus de jauge s'additionnent. Plafonds :
+-- DistanceMax (sécurité) et la fin du dernier biome.
 function Lancer.distance(force: number, bonusJauge: number): number
 	local reglages = Config.Lancer
 	local forceNettoyee = 0
@@ -22,17 +25,24 @@ function Lancer.distance(force: number, bonusJauge: number): number
 		forceNettoyee = math.min(force, Config.Forge.PlafondStat)
 	end
 	local bonus = if estNombreFini(bonusJauge) and bonusJauge > 0 then bonusJauge else 0
-	local brute = reglages.DistanceMin + forceNettoyee * reglages.DistanceParForce + bonus
-	return math.min(reglages.DistanceMax, brute)
+	local lineaire = math.min(forceNettoyee, Config.Forge.StatLineaire)
+	local brute = reglages.DistanceMin + lineaire * reglages.DistanceParForce + bonus
+	if forceNettoyee > Config.Forge.StatLineaire then
+		-- Au-delà, chaque doublement de la Force fait avancer d'un biome.
+		brute += math.log(forceNettoyee / Config.Forge.StatLineaire, 2) * Biomes.Longueur
+	end
+	return math.min(reglages.DistanceMax, Biomes.distanceMax(), brute)
 end
 
--- Zone d'atterrissage : celle dont le Min est le plus grand <= distance.
-function Lancer.zone(distance: number): string
+-- Sous-zone d'atterrissage dans son biome : celle dont le Min est le plus
+-- grand <= distance dans le biome (chaque biome a ses Proche/Moyenne/Lointaine).
+function Lancer.zone(distanceTotale: number): string
 	local zones = Config.Lancer.Zones
 	local choisie = zones[1]
-	if not estNombreFini(distance) then
+	if not estNombreFini(distanceTotale) then
 		return choisie.Nom
 	end
+	local distance = Biomes.dansBiome(distanceTotale)
 	for _, zone in zones do
 		if zone.Min <= distance and zone.Min >= choisie.Min then
 			choisie = zone

@@ -15,6 +15,7 @@ local Bases = require(script.Parent.Bases)
 local TerresSauvages = require(script.Parent.TerresSauvages)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Fiche = require(ReplicatedStorage.Shared.Fiche)
+local Biomes = require(ReplicatedStorage.Shared.Biomes)
 local Modeleur = require(script.Parent.Modeleur)
 
 export type Resultat = {
@@ -291,6 +292,7 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 	local zone = Lancer.zone(distance)
 	local tirage = if estNombreFini(aleatoire) then aleatoire :: number else hasard:NextNumber()
 	local rarete = Lancer.tirerRarete(zone, tirage)
+	local biome = Biomes.index(distance)
 	local resultat: Resultat = {
 		Distance = distance,
 		Couleur = palier.Couleur,
@@ -299,7 +301,7 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 		Rarete = rarete,
 		-- Taille et espèce : tirages serveur indépendants de la rareté.
 		Taille = Fiche.tirerTaille(hasard:NextNumber()),
-		Espece = Bestiaire.tirerEspece(rarete, hasard:NextNumber()).Nom,
+		Espece = Bestiaire.tirerEspece(rarete, hasard:NextNumber(), biome).Nom,
 	}
 
 	local bord = bordDeBase(modele :: Model)

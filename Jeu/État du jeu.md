@@ -7,6 +7,14 @@
 - La Vitesse change la vitesse de course ; porter une créature la réduit (× 0,8).
 - Pièces et créatures de la base sauvegardées ; revenus par seconde selon la rareté (1/3/10/30/100).
 
+## Biomes et progression
+- Les Terres Sauvages sont une route de biomes de 600 studs (`Shared.Biomes`) : 1 Prairie Pétillante, 2 Bois Moussu, 3 Dunes Dorées. Chaque biome garde Proche / Moyenne / Lointaine et les taux du Plan ; sol, arche d'entrée, décor en blocs et ambiance (client `Ambiances`) propres.
+- Valeur des créatures × 1,5 par biome (espèce -> biome) ; chaque biome a 2 créatures par rareté et 1 monstre par sous-zone (fichiers `EspecesBoisMoussu`, `EspecesDunes`).
+- Monstres seulement dans les biomes où il y a un joueur (et le biome 1), 12 au plus par biome la nuit.
+- Force et Vitesse sans limite : linéaires jusqu'à 1 000, puis chaque doublement = un biome de plus au lancer / +20 de vitesse (sécurité 2 000).
+- Niveaux de Forge achetés en pièces (bouton sous les stats, RemoteEvent `AmeliorerForge`) : gain × 1,6 par niveau, coût 100 × 1,9^(n-1) ; sauvegardés (`NiveauForge`).
+- Grands nombres raccourcis (`Shared.Nombres` : 1,23 M, 4,5 T).
+
 ## Lancer et raretés
 - Lancer une graine avec jauge de timing (Force + bonus de jauge) vers les Terres Sauvages ; zones Proche / Moyenne / Lointaine ; taux de rareté du Plan affichés. [[02 Lancer et raretés]]
 - Les créatures atterrissent au sol (max 10), récoltables ; elles disparaissent si on les laisse.

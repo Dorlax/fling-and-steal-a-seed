@@ -59,6 +59,7 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("Force", donnees.Force)
 	joueur:SetAttribute("Vitesse", donnees.Vitesse)
 	joueur:SetAttribute("ModeForge", donnees.ModeForge)
+	joueur:SetAttribute("NiveauForge", donnees.NiveauForge)
 	joueur:SetAttribute("SurForge", false)
 	joueur:SetAttribute("Pieces", donnees.Pieces)
 	creaturesParJoueur[joueur] = table.clone(donnees.CreaturesBase)
@@ -112,7 +113,8 @@ function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
 		Force = joueur:GetAttribute("Force"),
 		Vitesse = joueur:GetAttribute("Vitesse"),
 		ModeForge = joueur:GetAttribute("ModeForge"),
-		NiveauForge = if session then session.donnees.NiveauForge else 1,
+		NiveauForge = joueur:GetAttribute("NiveauForge")
+			or (if session then session.donnees.NiveauForge else 1),
 		Pieces = joueur:GetAttribute("Pieces"),
 		CreaturesBase = creaturesParJoueur[joueur],
 	})
