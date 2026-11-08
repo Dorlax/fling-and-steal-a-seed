@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage Portage (issue #5)
+- Corrige les erreurs luau-lsp de `src/server/Portage.luau` (conversions `BasePart?`, `Portee?`, rareté `string`), sans changement de comportement.
+
 ## 2026-11-08 — Porter et revenus (issue #5)
 - Bouton « Récolter » (ProximityPrompt, maintien 0,5 s, 10 studs) sur chaque créature : seul son propriétaire peut la récolter, vérifié par le serveur.
 - La créature portée flotte au-dessus de la tête ; le joueur marche à 80 % de sa vitesse.

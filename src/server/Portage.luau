@@ -40,7 +40,7 @@ local function racineEtHumanoide(joueur: any): (BasePart?, Humanoid?)
 	if racine == nil or not racine:IsA("BasePart") then
 		return nil, humanoide
 	end
-	return racine, humanoide
+	return racine :: BasePart, humanoide
 end
 
 local function promptDe(creature: Model): ProximityPrompt?
@@ -80,11 +80,11 @@ end
 -- récoltable par son propriétaire.
 local function lacherAuSol(joueur: any)
 	local racine = racineEtHumanoide(joueur)
-	local portee = oublier(joueur)
-	if portee == nil then
+	local porteeOuNil = oublier(joueur)
+	if porteeOuNil == nil then
 		return
 	end
-	local creature = portee.creature
+	local creature = (porteeOuNil :: Portee).creature
 	local position = if racine then racine.Position else creature:GetPivot().Position
 	for _, objet in creature:GetDescendants() do
 		if objet.Name == NOM_SOUDURE and objet:IsA("WeldConstraint") then
@@ -118,12 +118,18 @@ function Portage.recolter(joueur: any, creature: any): boolean
 	if portees[joueur] ~= nil or joueur:GetAttribute("Porte") ~= nil then
 		return false
 	end
-	local rarete = modele:GetAttribute("Rarete")
-	if type(rarete) ~= "string" or not table.find(Config.Raretes.Ordre, rarete) then
+	local attributRarete = modele:GetAttribute("Rarete")
+	if type(attributRarete) ~= "string" or not table.find(Config.Raretes.Ordre, attributRarete) then
 		return false
 	end
-	local racine, humanoide = racineEtHumanoide(joueur)
-	if racine == nil or humanoide == nil or humanoide.Health <= 0 then
+	local rarete = attributRarete :: string
+	local racineOuNil, humanoideOuNil = racineEtHumanoide(joueur)
+	if racineOuNil == nil or humanoideOuNil == nil then
+		return false
+	end
+	local racine = racineOuNil :: BasePart
+	local humanoide = humanoideOuNil :: Humanoid
+	if humanoide.Health <= 0 then
 		return false
 	end
 	local corps = modele.PrimaryPart
