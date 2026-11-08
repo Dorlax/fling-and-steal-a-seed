@@ -596,12 +596,326 @@ local function pyramide(parent: Instance, position: Vector3, hasard: Random)
 	modele.Parent = parent
 end
 
+-- Glace : sapin carré enneigé.
+local function sapin(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Sapin"
+	local e = hasard:NextNumber(1, 1.8)
+	bloc(
+		modele,
+		"Tronc",
+		Vector3.new(1.6, 4, 1.6) * e,
+		CFrame.new(position + Vector3.new(0, 2 * e, 0)),
+		Color3.fromRGB(110, 75, 55),
+		true
+	)
+	for i = 0, 3 do
+		local largeur = (10 - i * 2.4) * e
+		local y = (4 + i * 3) * e
+		bloc(
+			modele,
+			"Branches",
+			Vector3.new(largeur, 2.6 * e, largeur),
+			CFrame.new(position + Vector3.new(0, y, 0)),
+			Color3.fromRGB(40, 110, 80)
+		)
+		bloc(
+			modele,
+			"Neige",
+			Vector3.new(largeur * 0.9, 0.6 * e, largeur * 0.9),
+			CFrame.new(position + Vector3.new(0, y + 1.5 * e, 0)),
+			Color3.fromRGB(245, 250, 255)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Glace : pics de glace translucides.
+local function picGlace(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "PicGlace"
+	for _ = 1, hasard:NextInteger(2, 4) do
+		local h = hasard:NextNumber(5, 14)
+		local p = bloc(
+			modele,
+			"Pic",
+			Vector3.new(h * 0.3, h, h * 0.3),
+			CFrame.new(
+				position + Vector3.new(hasard:NextNumber(-3, 3), h * 0.45, hasard:NextNumber(-3, 3))
+			)
+				* CFrame.Angles(
+					math.rad(hasard:NextNumber(-12, 12)),
+					math.rad(hasard:NextNumber(0, 90)),
+					math.rad(hasard:NextNumber(-12, 12))
+				),
+			Color3.fromRGB(150, 215, 255),
+			true
+		)
+		p.Material = Enum.Material.Glass
+		p.Transparency = 0.25
+	end
+	modele.Parent = parent
+end
+
+-- Glace : igloo en blocs.
+local function igloo(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Igloo"
+	local e = hasard:NextNumber(1.2, 1.8)
+	for i = 0, 2 do
+		local largeur = (12 - i * 3.4) * e
+		bloc(
+			modele,
+			"Rang",
+			Vector3.new(largeur, 2.6 * e, largeur),
+			CFrame.new(position + Vector3.new(0, (1.3 + i * 2.6) * e, 0)),
+			Color3.fromRGB(235, 245, 255),
+			true
+		)
+	end
+	bloc(
+		modele,
+		"Porte",
+		Vector3.new(3, 3.4, 2) * e,
+		CFrame.new(position + Vector3.new(0, 1.7 * e, -6 * e)),
+		Color3.fromRGB(60, 80, 120)
+	)
+	modele.Parent = parent
+end
+
+-- Glace : congère de neige (ne bloque pas).
+local function congere(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(10, 22)
+	piece(
+		parent,
+		"Congere",
+		Enum.PartType.Ball,
+		Vector3.new(t * 1.4, t * 0.4, t),
+		CFrame.new(position - Vector3.new(0, t * 0.12, 0)),
+		Color3.fromRGB(240, 248, 255)
+	)
+end
+
+-- Volcan : cône de volcan fumant, lave au sommet.
+local function cone(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Cone"
+	local e = hasard:NextNumber(1.2, 2.4)
+	for i = 0, 4 do
+		local largeur = (20 - i * 3.6) * e
+		bloc(
+			modele,
+			"Roche",
+			Vector3.new(largeur, 3 * e, largeur),
+			CFrame.new(position + Vector3.new(0, (1.5 + i * 3) * e, 0)),
+			teinte(Color3.fromRGB(70, 55, 60), 0, (i % 2) * 0.15),
+			true
+		)
+	end
+	local lave = bloc(
+		modele,
+		"Lave",
+		Vector3.new(4, 1, 4) * e,
+		CFrame.new(position + Vector3.new(0, 15.2 * e, 0)),
+		Color3.fromRGB(255, 120, 30)
+	)
+	lave.Material = Enum.Material.Neon
+	local fumee = Instance.new("ParticleEmitter")
+	fumee.Color = ColorSequence.new(Color3.fromRGB(90, 80, 80))
+	fumee.Size = NumberSequence.new(3, 8)
+	fumee.Transparency = NumberSequence.new(0.4, 1)
+	fumee.Lifetime = NumberRange.new(3, 5)
+	fumee.Speed = NumberRange.new(4, 7)
+	fumee.Rate = 3
+	fumee.Parent = lave
+	modele.Parent = parent
+end
+
+-- Volcan : mare de lave (lumineuse, ne bloque pas).
+local function mareLave(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(8, 18)
+	local mare = bloc(
+		parent,
+		"MareLave",
+		Vector3.new(t, 0.3, t * 0.7),
+		CFrame.new(position + Vector3.new(0, 0.1, 0)) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0),
+		Color3.fromRGB(255, 110, 25)
+	)
+	mare.Material = Enum.Material.Neon
+	bloc(
+		parent,
+		"Bord",
+		Vector3.new(t + 2, 0.5, t * 0.7 + 2),
+		CFrame.new(position + Vector3.new(0, 0.05, 0))
+			* CFrame.Angles(0, mare.Orientation.Y * math.pi / 180, 0),
+		Color3.fromRGB(45, 35, 40)
+	)
+end
+
+-- Volcan : pilier d'obsidienne.
+local function obsidienne(parent: Instance, position: Vector3, hasard: Random)
+	local h = hasard:NextNumber(6, 16)
+	local p = bloc(
+		parent,
+		"Obsidienne",
+		Vector3.new(h * 0.35, h, h * 0.35),
+		CFrame.new(position + Vector3.new(0, h * 0.45, 0))
+			* CFrame.Angles(0, hasard:NextNumber(0, 6), math.rad(hasard:NextNumber(-10, 10))),
+		Color3.fromRGB(30, 20, 45),
+		true
+	)
+	p.Material = Enum.Material.Glass
+end
+
+-- Volcan : braise qui flotte.
+local function braise(parent: Instance, position: Vector3, hasard: Random)
+	local p = bloc(
+		parent,
+		"Braise",
+		Vector3.one * 0.6,
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(2, 10), 0)),
+		Color3.fromRGB(255, 180, 60)
+	)
+	p.Material = Enum.Material.Neon
+	p.CastShadow = false
+end
+
+-- Galaxie : cristal géant lumineux.
+local function cristal(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Cristal"
+	local couleurs = {
+		Color3.fromRGB(150, 90, 255),
+		Color3.fromRGB(80, 230, 255),
+		Color3.fromRGB(255, 120, 220),
+	}
+	local couleur = couleurs[hasard:NextInteger(1, #couleurs)]
+	for _ = 1, hasard:NextInteger(2, 4) do
+		local h = hasard:NextNumber(5, 16)
+		local p = bloc(
+			modele,
+			"Eclat",
+			Vector3.new(h * 0.28, h, h * 0.28),
+			CFrame.new(
+				position + Vector3.new(hasard:NextNumber(-3, 3), h * 0.45, hasard:NextNumber(-3, 3))
+			)
+				* CFrame.Angles(
+					math.rad(hasard:NextNumber(-20, 20)),
+					math.rad(hasard:NextNumber(0, 90)),
+					math.rad(hasard:NextNumber(-20, 20))
+				),
+			couleur,
+			true
+		)
+		p.Material = Enum.Material.Neon
+		p.Transparency = 0.15
+	end
+	modele.Parent = parent
+end
+
+-- Galaxie : astéroïde qui flotte dans le ciel.
+local function asteroide(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(4, 12)
+	bloc(
+		parent,
+		"Asteroide",
+		Vector3.new(t, t * 0.8, t * 0.9),
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(25, 70), 0))
+			* CFrame.Angles(hasard:NextNumber(0, 6), hasard:NextNumber(0, 6), 0),
+		Color3.fromRGB(100, 90, 120)
+	)
+end
+
+-- Galaxie : plante extraterrestre à bulbe lumineux.
+local function planteAlien(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "PlanteAlien"
+	local h = hasard:NextNumber(3, 7)
+	bloc(
+		modele,
+		"Tige",
+		Vector3.new(0.6, h, 0.6),
+		CFrame.new(position + Vector3.new(0, h / 2, 0)),
+		Color3.fromRGB(90, 200, 160)
+	)
+	local bulbe = bloc(
+		modele,
+		"Bulbe",
+		Vector3.one * hasard:NextNumber(1.4, 2.4),
+		CFrame.new(position + Vector3.new(0, h + 0.8, 0)),
+		Color3.fromRGB(255, 120, 220)
+	)
+	bulbe.Material = Enum.Material.Neon
+	modele.Parent = parent
+end
+
+-- Galaxie : planète au loin (dans le ciel, ne bloque pas).
+local function planete(parent: Instance, position: Vector3, hasard: Random)
+	local couleurs = {
+		Color3.fromRGB(255, 150, 90),
+		Color3.fromRGB(120, 200, 255),
+		Color3.fromRGB(200, 120, 255),
+	}
+	local t = hasard:NextNumber(40, 90)
+	local centre = Vector3.new(position.X, hasard:NextNumber(140, 220), position.Z)
+	piece(
+		parent,
+		"Planete",
+		Enum.PartType.Ball,
+		Vector3.one * t,
+		CFrame.new(centre),
+		couleurs[hasard:NextInteger(1, #couleurs)]
+	)
+	local anneau = bloc(
+		parent,
+		"Anneau",
+		Vector3.new(t * 1.8, 1, t * 1.8),
+		CFrame.new(centre) * CFrame.Angles(math.rad(hasard:NextNumber(10, 30)), 0, 0),
+		Color3.fromRGB(255, 240, 160)
+	)
+	anneau.Material = Enum.Material.Neon
+	anneau.Transparency = 0.4
+end
+
+-- Galaxie : étoile scintillante au ras du sol.
+local function etoile(parent: Instance, position: Vector3, hasard: Random)
+	local p = bloc(
+		parent,
+		"Etoile",
+		Vector3.one * 0.5,
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(1, 14), 0))
+			* CFrame.Angles(0, 0, math.rad(45)),
+		Color3.fromRGB(255, 240, 160)
+	)
+	p.Material = Enum.Material.Neon
+	p.CastShadow = false
+end
+
 local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombre: number } } } = {
 	Foret = {
 		{ fonction = arbreBloc, nombre = 70 },
 		{ fonction = champignonGeant, nombre = 22 },
 		{ fonction = rocherMousse, nombre = 30 },
 		{ fonction = luciole, nombre = 60 },
+	},
+	Glace = {
+		{ fonction = sapin, nombre = 60 },
+		{ fonction = picGlace, nombre = 25 },
+		{ fonction = igloo, nombre = 5 },
+		{ fonction = congere, nombre = 30 },
+	},
+	Volcan = {
+		{ fonction = cone, nombre = 8 },
+		{ fonction = mareLave, nombre = 22 },
+		{ fonction = obsidienne, nombre = 30 },
+		{ fonction = braise, nombre = 60 },
+	},
+	Galaxie = {
+		{ fonction = cristal, nombre = 35 },
+		{ fonction = asteroide, nombre = 30 },
+		{ fonction = planteAlien, nombre = 40 },
+		{ fonction = planete, nombre = 4 },
+		{ fonction = etoile, nombre = 80 },
 	},
 	Desert = {
 		{ fonction = cactusBloc, nombre = 50 },

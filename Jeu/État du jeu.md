@@ -8,10 +8,11 @@
 - Pièces et créatures de la base sauvegardées ; revenus par seconde selon la rareté (1/3/10/30/100).
 
 ## Biomes et progression
-- Les Terres Sauvages sont une route de biomes de 600 studs (`Shared.Biomes`) : 1 Prairie Pétillante, 2 Bois Moussu, 3 Dunes Dorées. Chaque biome garde Proche / Moyenne / Lointaine et les taux du Plan ; sol, arche d'entrée, décor en blocs et ambiance (client `Ambiances`) propres.
-- Valeur des créatures × 1,5 par biome (espèce -> biome) ; chaque biome a 2 créatures par rareté et 1 monstre par sous-zone (fichiers `EspecesBoisMoussu`, `EspecesDunes`).
+- Les Terres Sauvages sont une route de biomes de 600 studs (`Shared.Biomes`) : 1 Prairie Pétillante, 2 Bois Moussu, 3 Dunes Dorées, 4 Glacier Givré, 5 Volcan Ardent, 6 Galaxie Étoilée. Chaque biome garde Proche / Moyenne / Lointaine et les taux du Plan ; sol, arche d'entrée, décor en blocs et ambiance (client `Ambiances`) propres.
+- Valeur des créatures × 1,5 par biome (espèce -> biome) ; chaque biome a 2 créatures par rareté et 1 monstre par sous-zone (un fichier `Especes<Biome>` par biome).
+- Monstres plus rapides à chaque biome (`Monstre.vitesse`) : biome 1 = vitesse de Config ; ensuite vitesse d'un joueur au seuil du biome × 0,9 / 1,05 / 1,2 (Proche / Moyenne / Lointaine).
 - Monstres seulement dans les biomes où il y a un joueur (et le biome 1), 12 au plus par biome la nuit.
-- Force et Vitesse sans limite : linéaires jusqu'à 1 000, puis chaque doublement = un biome de plus au lancer / +20 de vitesse (sécurité 2 000).
+- Force et Vitesse sans limite : linéaires jusqu'à 1 000, puis chaque doublement = un biome de plus au lancer / +20 de vitesse ; aucune limite réelle (PlafondStat 1e300, WalkSpeedMax 1e9).
 - Niveaux de Forge achetés en pièces (bouton sous les stats, RemoteEvent `AmeliorerForge`) : gain × 1,6 par niveau, coût 100 × 1,9^(n-1) ; sauvegardés (`NiveauForge`).
 - Grands nombres raccourcis (`Shared.Nombres` : 1,23 M, 4,5 T).
 
@@ -25,6 +26,7 @@
 - La créature pousse depuis la graine (croissance animée de 0,7 s, récolte possible ensuite).
 
 ## Porter et revenus
+- Bases façon vitrine : un socle numéroté par emplacement, liseré lumineux à la couleur de la rareté posée ; les créatures trônent dessus.
 - Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (10 emplacements, « Base pleine ! »). [[03 Porter et revenus]]
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 

@@ -10,14 +10,14 @@ local Config = {
 		ModeParDefaut = "Force",
 		IntervalleSecondes = 1, -- un gain par seconde passée sur la Forge
 		GainParTick = 1,
-		PlafondStat = 1e15, -- sécurité : la progression est sans limite (biomes)
+		PlafondStat = 1e300, -- aucune limite réelle (seulement les nombres valides)
 		WalkSpeedBase = 16,
 		WalkSpeedParPointVitesse = 0.02,
 		-- Au-delà de StatLineaire, chaque doublement de la stat ajoute un palier
 		-- (distance : un biome ; vitesse : WalkSpeedParDoublement).
 		StatLineaire = 1000,
 		WalkSpeedParDoublement = 20,
-		WalkSpeedMax = 2000, -- sécurité physique
+		WalkSpeedMax = 1e9, -- aucune limite réelle : le joueur va aussi vite qu'il veut
 		-- Niveaux de Forge achetés en pièces : gain × CroissanceGain par niveau,
 		-- coût du niveau n -> n + 1 = CoutBase × CroissanceCout^(n - 1).
 		Niveaux = { CoutBase = 100, CroissanceCout = 1.9, CroissanceGain = 1.6 },

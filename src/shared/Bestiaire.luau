@@ -1921,8 +1921,23 @@ local BoisMoussu = if script
 local Dunes = if script
 	then require(script.Parent.EspecesDunes)
 	else (require :: any)("./EspecesDunes")
+-- selene: allow(incorrect_standard_library_use)
+local Glacier = if script
+	then require(script.Parent.EspecesGlacier)
+	else (require :: any)("./EspecesGlacier")
+-- selene: allow(incorrect_standard_library_use)
+local Volcan = if script
+	then require(script.Parent.EspecesVolcan)
+	else (require :: any)("./EspecesVolcan")
+-- selene: allow(incorrect_standard_library_use)
+local Galaxie = if script
+	then require(script.Parent.EspecesGalaxie)
+	else (require :: any)("./EspecesGalaxie")
 BoisMoussu(outils)
 Dunes(outils)
+Glacier(outils)
+Volcan(outils)
+Galaxie(outils)
 
 Bestiaire.Especes = especes
 

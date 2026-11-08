@@ -401,7 +401,7 @@ local function avancer(modele: Model, etat: Etat, infos: { InfoJoueur }, instant
 	local loin = horizontal(position - etat.apparition).Magnitude > reglages.DistanceDisparition
 
 	local but: Vector3
-	local vitesse = r.Vitesse
+	local vitesse = Monstre.vitesse(etat.zone, etat.biome)
 	if etat.retour or (choix ~= nil and loin) then
 		-- Trop loin de chez lui : il abandonne et rentre.
 		etat.retour = true

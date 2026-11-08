@@ -8,6 +8,8 @@ local Config = if script then require(script.Parent.Config) else (require :: any
 local Lancer = if script then require(script.Parent.Lancer) else (require :: any)("./Lancer")
 -- selene: allow(incorrect_standard_library_use)
 local Biomes = if script then require(script.Parent.Biomes) else (require :: any)("./Biomes")
+-- selene: allow(incorrect_standard_library_use)
+local Forge = if script then require(script.Parent.Forge) else (require :: any)("./Forge")
 
 export type Position = { X: number, Y: number, Z: number }
 
@@ -147,6 +149,24 @@ end
 function Monstre.nombreVoulu(zone: string, nuit: boolean): number
 	local r = Monstre.reglagesZone(zone)
 	return if nuit then r.NombreNuit else r.NombreJour
+end
+
+-- Vitesse d'un monstre dans le biome n. Biome 1 : la vitesse de Config
+-- (tutoriel, plus lent que le joueur). Ensuite, les monstres courent autour
+-- de la vitesse d'un joueur qui vient d'arriver dans le biome (Vitesse égale
+-- au seuil du biome) : Proche un peu moins vite, Moyenne un peu plus,
+-- Lointaine nettement plus. Pour fuir, il faut entraîner sa Vitesse.
+Monstre.FacteursVitesse = { Proche = 0.9, Moyenne = 1.05, Lointaine = 1.2 }
+
+function Monstre.vitesse(zone: string, biome: number?): number
+	local n = biome or 1
+	if n <= 1 then
+		return Monstre.reglagesZone(zone).Vitesse
+	end
+	local seuil = Config.Forge.StatLineaire * 2 ^ (n - 1)
+	local reference = Forge.walkSpeedPour(seuil)
+	local facteur = (Monstre.FacteursVitesse :: any)[zone] or 1
+	return reference * facteur
 end
 
 -- Phase du cycle à l'instant `t` et secondes restantes dans cette phase.
