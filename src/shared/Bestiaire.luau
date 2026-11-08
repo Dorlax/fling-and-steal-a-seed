@@ -136,9 +136,70 @@ end
 
 local especes: { [string]: Espece } = {}
 
+-- Fait tourner un vecteur comme CFrame.Angles(rx, ry, rz) (degrés).
+local function tourner(v: { number }, r: { number }?): { number }
+	if r == nil then
+		return v
+	end
+	local rr = r :: { number }
+	local x, y, z = v[1], v[2], v[3]
+	-- Rz, puis Ry, puis Rx (CFrame.Angles = Rx * Ry * Rz)
+	local c, s = math.cos(math.rad(rr[3])), math.sin(math.rad(rr[3]))
+	x, y = x * c - y * s, x * s + y * c
+	c, s = math.cos(math.rad(rr[2])), math.sin(math.rad(rr[2]))
+	x, z = x * c + z * s, -x * s + z * c
+	c, s = math.cos(math.rad(rr[1])), math.sin(math.rad(rr[1]))
+	y, z = y * c - z * s, y * s + z * c
+	return { x, y, z }
+end
+
+local function nuance(rgb: { number }, vers: number, part: number): { number }
+	return {
+		math.floor(rgb[1] + (vers - rgb[1]) * part + 0.5),
+		math.floor(rgb[2] + (vers - rgb[2]) * part + 0.5),
+		math.floor(rgb[3] + (vers - rgb[3]) * part + 0.5),
+	}
+end
+
+local DEBORD = 0.012 -- les bandes dépassent un peu pour couvrir les côtés
+
+-- Ombrage en trois tons des gros blocs unis : bande sombre en bas, dessus
+-- clair. Les bandes suivent la rotation et l'animation de leur bloc.
+local function ombrer(liste: { Bloc })
+	local ajouts: { Bloc } = {}
+	for _, b in liste do
+		local t = b.t
+		local premier = string.sub(b.n, 1, 4)
+		local uni = type(b.c) == "table" and b.tr == nil and b.m == nil and b.f == nil
+		if uni and math.min(t[1], t[3]) >= 0.1 and t[2] >= 0.15 and premier ~= "Oeil" then
+			local rgb = b.c :: { number }
+			local function bande(
+				suffixe: string,
+				hauteur: number,
+				decalage: number,
+				couleur: { number }
+			)
+				local d = tourner({ 0, decalage, 0 }, b.r)
+				local copie: Bloc = table.clone(b)
+				copie.n = b.n .. suffixe
+				copie.t = { t[1] + DEBORD, hauteur, t[3] + DEBORD }
+				copie.p = { b.p[1] + d[1], b.p[2] + d[2], b.p[3] + d[3] }
+				copie.c = couleur
+				table.insert(ajouts, copie)
+			end
+			bande("Ombre", t[2] * 0.22, -t[2] * 0.39 - 0.003, nuance(rgb, 0, 0.3))
+			bande("Lumiere", 0.035, t[2] / 2 - 0.0145, nuance(rgb, 255, 0.22))
+		end
+	end
+	for _, b in ajouts do
+		table.insert(liste, b)
+	end
+end
+
 local function definir(nom: string, hauteur: number, remplir: (liste: { Bloc }) -> ())
 	local liste: { Bloc } = {}
 	remplir(liste)
+	ombrer(liste)
 	especes[nom] = { Nom = nom, Hauteur = hauteur, Blocs = liste }
 end
 
@@ -230,6 +291,29 @@ definir("Poussigraine", 0.7, function(l)
 		a = "Antenne",
 		j = pousse,
 	})
+
+	-- Détails : plumes de queue, ventre clair, petite crête.
+	ajouter(
+		l,
+		{ n = "Plastron", t = { 0.36, 0.3, 0.03 }, p = { 0, -0.18, -0.29 }, c = { 255, 240, 160 } }
+	)
+	ajouter(l, {
+		n = "Plume",
+		t = { 0.1, 0.16, 0.06 },
+		p = { 0.07, 0.04, 0.33 },
+		r = { 30, 0, -20 },
+		c = { 240, 180, 50 },
+		a = "Queue",
+		j = { 0, -0.02, 0.3 },
+	}, true)
+	ajouter(l, {
+		n = "Crete",
+		t = { 0.12, 0.06, 0.2 },
+		p = { 0, 0.52, -0.12 },
+		c = { 255, 110, 80 },
+		a = "Tete",
+		j = tete,
+	})
 end)
 
 -- Rare : lapin aux grandes oreilles, collier de la couleur de rareté.
@@ -297,6 +381,35 @@ definir("Lapinou", 0.65, function(l)
 		a = "Queue",
 		j = { 0, -0.14, 0.34 },
 	})
+
+	-- Détails : ventre clair, coussinets, moustaches, dents.
+	ajouter(l, { n = "Plastron", t = { 0.32, 0.22, 0.03 }, p = { 0, -0.22, -0.245 }, c = BLANC })
+	ajouter(l, {
+		n = "Dents",
+		t = { 0.07, 0.05, 0.02 },
+		p = { 0, -0.07, -0.47 },
+		c = BLANC,
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Moustache",
+		t = { 0.14, 0.015, 0.015 },
+		p = { 0.16, 0.0, -0.46 },
+		r = { 0, 0, -10 },
+		c = { 120, 130, 160 },
+		a = "Tete",
+		j = tete,
+	}, true)
+	ajouter(l, {
+		n = "Coussinet",
+		t = { 0.08, 0.03, 0.04 },
+		p = { 0.15, -0.47, -0.245 },
+		c = ROSE,
+		a = "Patte",
+		j = { 0.15, -0.37, -0.16 },
+		ph = 0,
+	}, true)
 end)
 
 -- Épique : renard à la grande queue, écharpe de la couleur de rareté.
@@ -367,6 +480,33 @@ definir("Renardelle", 0.7, function(l)
 		c = BLANC,
 		a = "Queue",
 		j = queue,
+	})
+
+	-- Détails : intérieur des oreilles, rayure de queue, griffes.
+	ajouter(l, {
+		n = "OreilleInterieur",
+		t = { 0.06, 0.1, 0.02 },
+		p = { 0.12, 0.32, -0.335 },
+		c = CREME,
+		a = "Oreille",
+		j = { 0.12, 0.26, -0.3 },
+	}, true)
+	ajouter(l, {
+		n = "Rayure",
+		t = { 0.21, 0.21, 0.04 },
+		p = { 0, -0.01, 0.6 },
+		r = { -15, 0, 0 },
+		c = { 200, 95, 25 },
+		a = "Queue",
+		j = queue,
+	})
+	ajouter(l, {
+		n = "Front",
+		t = { 0.2, 0.06, 0.03 },
+		p = { 0, 0.22, -0.49 },
+		c = { 255, 160, 70 },
+		a = "Tete",
+		j = tete,
 	})
 end)
 
@@ -477,6 +617,21 @@ definir("Cerfaurore", 0.95, function(l)
 		a = "Queue",
 		j = { 0, 0.08, 0.35 },
 	})
+
+	-- Détails : ventre crème, sabots, collier de feuilles dorées.
+	ajouter(l, { n = "Plastron", t = { 0.3, 0.12, 0.5 }, p = { 0, -0.2, 0.06 }, c = CREME })
+	for i, x in { -0.1, 0, 0.1 } do
+		ajouter(l, {
+			n = "FeuilleOr" .. i,
+			t = { 0.07, 0.03, 0.05 },
+			p = { x, 0.06, -0.28 },
+			r = { 0, 0, x * 200 },
+			c = { 255, 205, 50 },
+			m = "Foil",
+			a = "Tete",
+			j = tete,
+		})
+	end
 end)
 
 -- Mythique : bébé dragon ailé, crête et bout de queue lumineux.
@@ -565,6 +720,34 @@ definir("Dragonnet", 0.75, function(l)
 		a = "Queue",
 		j = queue,
 	})
+
+	-- Détails : bandes du ventre, nervures d'ailes, griffes.
+	for i = 1, 3 do
+		ajouter(l, {
+			n = "BandeVentre" .. i,
+			t = { 0.31, 0.03, 0.05 },
+			p = { 0, -0.1 - i * 0.06, -0.22 },
+			c = { 255, 210, 170 },
+		})
+	end
+	ajouter(l, {
+		n = "Nervure",
+		t = { 0.05, 0.34, 0.04 },
+		p = { 0.3, 0.1, -0.08 },
+		r = { 0, 0, -20 },
+		c = { 140, 70, 210 },
+		a = "Aile",
+		j = { 0.22, 0, 0.06 },
+	}, true)
+	ajouter(l, {
+		n = "Griffe",
+		t = { 0.04, 0.03, 0.04 },
+		p = { 0.18, -0.485, -0.2 },
+		c = BLANC,
+		a = "Patte",
+		j = { 0.14, -0.38, -0.12 },
+		ph = 0,
+	}, true)
 end)
 
 ---------------------------------------------------------------------------
@@ -619,6 +802,27 @@ definir("Gloupinou", 0.55, function(l)
 			{ n = "Goutte" .. i, t = { 0.1, 0.14, 0.1 }, p = pos, c = gelee, tr = 0.3, m = "Glass" }
 		)
 	end
+
+	-- Détails : reflet brillant, sourcils ronds, petites dents.
+	ajouter(l, {
+		n = "Brillance",
+		t = { 0.16, 0.08, 0.02 },
+		p = { -0.3, 0.2, -0.455 },
+		c = BLANC,
+		tr = 0.2,
+	})
+	ajouter(l, {
+		n = "Sourcil",
+		t = { 0.16, 0.04, 0.03 },
+		p = { 0.2, 0.26, -0.46 },
+		r = { 0, 0, 12 },
+		c = { 30, 60, 110 },
+	}, true)
+	ajouter(
+		l,
+		{ n = "Dent", t = { 0.05, 0.05, 0.02 }, p = { 0.08, -0.13, -0.47 }, c = BLANC },
+		true
+	)
 end)
 
 -- Proche : hérisson grognon couvert de piquants.
@@ -673,6 +877,26 @@ definir("Piquerelle", 0.62, function(l)
 		end
 	end
 	pattes4(l, 0.2, -0.18, 0.3, { 0.14, 0.14, 0.14 }, fonce)
+
+	-- Détails : ventre clair, griffes, joues.
+	ajouter(l, { n = "Ventre", t = { 0.5, 0.06, 0.6 }, p = { 0, -0.36, 0.06 }, c = CREME })
+	ajouter(l, {
+		n = "Joue",
+		t = { 0.07, 0.04, 0.02 },
+		p = { 0.19, -0.1, -0.49 },
+		c = ROSE,
+		a = "Tete",
+		j = tete,
+	}, true)
+	ajouter(l, {
+		n = "Griffe",
+		t = { 0.04, 0.03, 0.05 },
+		p = { 0.2, -0.485, -0.265 },
+		c = CREME,
+		a = "Patte",
+		j = { 0.2, -0.38, -0.18 },
+		ph = 0,
+	}, true)
 end)
 
 -- Moyenne : sanglier ronchon, défenses et crinière.
@@ -751,6 +975,43 @@ definir("Ronchonbulle", 0.62, function(l)
 		c = roux,
 		a = "Queue",
 		j = { 0, 0.04, 0.48 },
+	})
+
+	-- Détails : taches, sabots, cicatrice, rangée de dents.
+	for i, pos in { { 0.3, 0.0, 0.1 }, { -0.3, -0.08, 0.28 }, { 0.3, -0.15, 0.32 } } do
+		ajouter(l, {
+			n = "Tache" .. i,
+			t = { 0.12, 0.14, 0.14 },
+			p = { pos[1] + (if pos[1] > 0 then 0.06 else -0.06), pos[2], pos[3] },
+			c = { 170, 85, 40 },
+		})
+	end
+	ajouter(l, {
+		n = "Sabot",
+		t = { 0.16, 0.06, 0.16 },
+		p = { 0.22, -0.47, -0.22 },
+		c = { 50, 30, 20 },
+		a = "Patte",
+		j = { 0.22, -0.3, -0.22 },
+		ph = 0,
+	}, true)
+	ajouter(l, {
+		n = "Sabot2",
+		t = { 0.16, 0.06, 0.16 },
+		p = { 0.22, -0.47, 0.32 },
+		c = { 50, 30, 20 },
+		a = "Patte",
+		j = { 0.22, -0.3, 0.32 },
+		ph = PI,
+	}, true)
+	ajouter(l, {
+		n = "Cicatrice",
+		t = { 0.03, 0.14, 0.02 },
+		p = { -0.15, 0.17, -0.695 },
+		r = { 0, 0, 25 },
+		c = { 255, 200, 200 },
+		a = "Tete",
+		j = tete,
 	})
 end)
 
@@ -840,6 +1101,36 @@ definir("Croquelune", 0.7, function(l)
 		a = "Queue",
 		j = queue,
 	})
+
+	-- Détails : rayure dorsale, intérieur des oreilles, griffes, lune au front.
+	ajouter(l, { n = "Rayure", t = { 0.2, 0.03, 0.7 }, p = { 0, 0.17, 0.12 }, c = { 70, 75, 120 } })
+	ajouter(l, {
+		n = "OreilleInterieur",
+		t = { 0.06, 0.1, 0.02 },
+		p = { 0.13, 0.42, -0.535 },
+		c = ROSE,
+		a = "Oreille",
+		j = { 0.13, 0.35, -0.5 },
+	}, true)
+	ajouter(l, {
+		n = "Lune",
+		t = { 0.08, 0.08, 0.02 },
+		p = { 0, 0.3, -0.715 },
+		r = { 0, 0, 45 },
+		c = { 255, 240, 150 },
+		m = "Neon",
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Griffe",
+		t = { 0.04, 0.03, 0.05 },
+		p = { 0.18, -0.485, -0.355 },
+		c = BLANC,
+		a = "Patte",
+		j = { 0.18, -0.24, -0.28 },
+		ph = 0,
+	}, true)
 end)
 
 -- Lointaine : ogre-ours violet debout, cornes et gros poings.
@@ -932,6 +1223,44 @@ definir("Grobidou", 0.82, function(l)
 	for i, pos in { { -0.2, 0.15, 0.305 }, { 0.18, -0.12, 0.305 }, { 0.05, 0.2, 0.305 } } do
 		ajouter(l, { n = "Tache" .. i, t = { 0.14, 0.14, 0.02 }, p = pos, c = lilas })
 	end
+
+	-- Détails : griffes, rangée de dents, bandes du ventre, sourcil épais.
+	for i, x in { -0.08, 0, 0.08 } do
+		ajouter(l, {
+			n = "Griffe" .. i,
+			t = { 0.05, 0.08, 0.05 },
+			p = { 0.5 + x, -0.43, -0.12 },
+			c = CREME,
+			a = "Bras",
+			j = { 0.5, 0.22, -0.02 },
+			ph = 0,
+		}, true)
+		ajouter(l, {
+			n = "Orteil" .. i,
+			t = { 0.06, 0.05, 0.05 },
+			p = { 0.2 + x, -0.475, -0.235 },
+			c = CREME,
+			a = "Patte",
+			j = { 0.2, -0.26, 0 },
+			ph = PI,
+		}, true)
+	end
+	for i = 1, 3 do
+		ajouter(l, {
+			n = "BandeVentre" .. i,
+			t = { 0.5, 0.03, 0.05 },
+			p = { 0, -0.24 + i * 0.1, -0.31 },
+			c = { 185, 150, 240 },
+		})
+	end
+	ajouter(l, {
+		n = "Croc",
+		t = { 0.05, 0.1, 0.03 },
+		p = { 0.17, 0.4, -0.28 },
+		c = BLANC,
+		a = "Tete",
+		j = tete,
+	}, true)
 end)
 
 -- Lointaine : mini-dinosaure cracheur, plaques dorsales et petites ailes.
@@ -1054,6 +1383,43 @@ definir("Brasaurus", 0.8, function(l)
 		tr = 0.1,
 		a = "Aile",
 		j = { 0.27, 0.18, 0.12 },
+	}, true)
+
+	-- Détails : rangée de dents du bas, rayures, griffes, taches dorsales.
+	for i, x in { -0.14, -0.05, 0.05, 0.14 } do
+		ajouter(l, {
+			n = "DentBas" .. i,
+			t = { 0.04, 0.05, 0.03 },
+			p = { x, 0.18, -0.61 },
+			c = BLANC,
+			a = "Machoire",
+			j = { 0, 0.14, -0.2 },
+		})
+	end
+	for i, z in { -0.05, 0.15, 0.35 } do
+		ajouter(l, {
+			n = "Rayure" .. i,
+			t = { 0.04, 0.3, 0.08 },
+			p = { 0.28, 0.0, z },
+			c = { 60, 140, 60 },
+		}, true)
+	end
+	ajouter(l, {
+		n = "Griffe",
+		t = { 0.05, 0.04, 0.06 },
+		p = { 0.2, -0.48, -0.08 },
+		c = CREME,
+		a = "Patte",
+		j = { 0.2, -0.26, 0.15 },
+		ph = 0,
+	}, true)
+	ajouter(l, {
+		n = "Narine",
+		t = { 0.04, 0.03, 0.02 },
+		p = { 0.08, 0.36, -0.615 },
+		c = NOIR,
+		a = "Tete",
+		j = tete,
 	}, true)
 end)
 

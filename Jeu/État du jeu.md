@@ -26,6 +26,7 @@
 - Bases ornées : bordure colorée (sans collision) et lampadaires-sucettes ; sol vert vif.
 - Bestiaire en blocs (`Shared.Bestiaire`, construit par `Modeleur`) : une espèce de créature par rareté (Poussigraine, Lapinou, Renardelle, Cerfaurore, Dragonnet) ; deux monstres par zone (Gloupinou/Piquerelle, Ronchonbulle/Croquelune, Grobidou/Brasaurus). Le `Corps` reste la racine invisible (taille et règles inchangées).
 - Auras de rareté : étincelles dès Épique, halo arc-en-ciel en Mythique.
+- Finition : ombrage automatique en 3 tons des gros blocs (bande sombre, dessus clair), détails par espèce (griffes, dents, rayures…), contours cartoon (Highlight) sur les 20 modèles les plus proches.
 - Animations client (`Animations`, calculs dans `Shared.Anime`) : sautillement des créatures, dandinement des monstres, pattes qui marchent, ailes, queues, oreilles, coup de bras/mâchoire quand un monstre frappe (attribut `FrappeA`).
 - Interface : boutons de pièges en rangée en bas à gauche (ne recouvrent plus les stats).
 
