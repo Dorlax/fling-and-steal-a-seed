@@ -2,6 +2,12 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Bestiaire en blocs et animations des membres
+- Nouveau style « jouet en blocs » (inspiré des jeux de référence) : `Shared.Bestiaire` décrit chaque espèce, `Modeleur` la construit autour d'un `Corps` invisible.
+- Créatures : une espèce par rareté (Poussigraine, Lapinou, Renardelle, Cerfaurore, Dragonnet), auras de rareté.
+- Monstres : deux espèces par zone (Gloupinou, Piquerelle, Ronchonbulle, Croquelune, Grobidou, Brasaurus) ; le nom affiché est celui de l'espèce.
+- Animations client : pattes, bras, ailes, queues, oreilles, tête et mâchoire ; coup animé quand un monstre frappe. Aucune règle ni valeur de Config modifiée.
+
 ## 2026-11-08 — Modèles détaillés et animations
 - Créatures ornées selon la rareté : pousse (Commune), oreilles (Rare), ailes et étincelles (Épique), couronne dorée (Légendaire), auréole d'étoiles (Mythique).
 - Monstres détaillés par zone : antenne et gouttes (Gloupinou), sourcils froncés, cornes et piquants (Ronchonbulle), grandes cornes, dents, bras et taches (Grobidou) ; pieds et reflets pour tous.
