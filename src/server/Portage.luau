@@ -120,11 +120,12 @@ function Portage.porte(joueur: any): boolean
 	return portees[joueur] ~= nil and joueur:GetAttribute("Porte") ~= nil
 end
 
--- Plaquage : la créature portée tombe à DistanceChute studs du joueur, du côté
--- opposé à `depuis` (position du plaqueur). Elle devient « libre » : récoltable
--- par n'importe qui, hors des créatures au sol de tout joueur, et disparaît
--- après DureeVieLachee si personne ne la ramasse. Renvoie la créature, ou nil.
-function Portage.lacherParPlaquage(joueur: any, depuis: Vector3?, maintenant: number?): Model?
+-- Plaquage ou coup de monstre : la créature portée tombe à DistanceChute studs
+-- du joueur, du côté opposé à `depuis` (position du plaqueur ou du monstre).
+-- Elle devient « libre » : récoltable par n'importe qui, hors des créatures au
+-- sol de tout joueur, et disparaît après DureeVieLachee si personne ne la
+-- ramasse. Renvoie la créature, ou nil.
+function Portage.lacher(joueur: any, depuis: Vector3?, maintenant: number?): Model?
 	local racine = racineEtHumanoide(joueur)
 	local porteeOuNil = oublier(joueur)
 	if porteeOuNil == nil then
@@ -169,6 +170,11 @@ function Portage.lacherParPlaquage(joueur: any, depuis: Vector3?, maintenant: nu
 		end
 	end)
 	return creature
+end
+
+-- Plaquage : même comportement que `lacher`.
+function Portage.lacherParPlaquage(joueur: any, depuis: Vector3?, maintenant: number?): Model?
+	return Portage.lacher(joueur, depuis, maintenant)
 end
 
 -- Récolte une créature au sol. Renvoie true si le joueur la porte désormais.

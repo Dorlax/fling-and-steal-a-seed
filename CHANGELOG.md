@@ -2,6 +2,16 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage CI (issue #9)
+- Typage strict corrigé dans Monstres (serveur, effet « PAF ! ») : la pièce support est explicitement typée BasePart pour luau-lsp. Aucun changement de comportement.
+
+## 2026-11-08 — Monstres (issue #9)
+- Monstres cartoon dans les Terres Sauvages : Gloupinou (Proche), Ronchonbulle (Moyenne), Grobidou (Lointaine), plus nombreux, rapides et forts en s'éloignant ; vitesse toujours inférieure à celle d'un joueur entraîné.
+- Ils poursuivent le joueur valide le plus proche (hors base, non protégé), sinon errent dans leur zone ; ils n'entrent jamais dans une base et rentrent chez eux s'ils s'éloignent trop.
+- Coup : dégâts selon la zone, la créature portée tombe à 4 studs (libre, récoltable par tous), « PAF ! », puis 3 s de protection.
+- Cycle jour/nuit (4 min / 2 min) : nuit bleu-violet, yeux des monstres brillants, vagues plus nombreuses ; messages « La nuit tombe… » et « Le jour se lève ! ».
+- `Portage.lacher` (utilisé par le plaquage et les monstres). Aucun nouveau RemoteEvent.
+
 ## 2026-11-08 — Correctif typage CI (issue #7)
 - Typage strict corrigé dans InterfacePlaquage (client) et Plaquages (serveur) : valeurs optionnelles explicitement vérifiées pour luau-lsp. Aucun changement de comportement.
 
