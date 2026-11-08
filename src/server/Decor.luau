@@ -435,10 +435,11 @@ end
 -- Ornements des bases (ajoutés quand une base apparaît)
 
 function Decor.ornerBase(base: Model)
-	local sol = base:FindFirstChild("Sol")
-	if not (sol and sol:IsA("BasePart")) or base:FindFirstChild("Ornements") then
+	local trouve = base:FindFirstChild("Sol")
+	if not (trouve and trouve:IsA("BasePart")) or base:FindFirstChild("Ornements") then
 		return
 	end
+	local sol = trouve :: BasePart
 	local centre = sol.Position + Vector3.new(0, sol.Size.Y / 2, 0)
 	local ornements = Instance.new("Folder")
 	ornements.Name = "Ornements"
