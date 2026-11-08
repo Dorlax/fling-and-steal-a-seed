@@ -65,4 +65,28 @@ return {
 		Bases.liberer(j)
 		assert(achete == false and j:GetAttribute("Etages") == 1, "achat refusé attendu")
 	end,
+
+	["C17 agrandir : sol plus grand, bord avant au même Z, créatures plus grandes permises"] = function()
+		local Bases = module("Bases")
+		local prix = Config.Bases.PrixAgrandissement[1]
+		local j = fauxJoueur(prix)
+		Bases.creer(j)
+		local ok, err = pcall(function()
+			local sol1 = Bases.solDe(j) :: BasePart
+			local avant = sol1.Position.Z + sol1.Size.Z / 2
+			assert(Bases.agrandir(j) == true, "agrandissement attendu")
+			assert(
+				j:GetAttribute("Pieces") == 0 and j:GetAttribute("Agrandissement") == 2,
+				"prix retiré, niveau 2"
+			)
+			local sol2 = Bases.solDe(j) :: BasePart
+			assert(sol2.Size.X == Config.Bases.Tailles[2], "sol agrandi")
+			assert(
+				math.abs(sol2.Position.Z + sol2.Size.Z / 2 - avant) < 0.01,
+				"bord avant inchangé"
+			)
+		end)
+		Bases.liberer(j)
+		assert(ok, err)
+	end,
 }

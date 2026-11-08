@@ -28,6 +28,7 @@
 ## Porter et revenus
 - Bases façon vitrine : un socle numéroté par emplacement, liseré lumineux à la couleur de la rareté posée ; les créatures trônent dessus.
 - Étages de base (`Config.Bases`) : jusqu'à 3 étages, 10 socles chacun ; étage 2 = 2 500 pièces, étage 3 = 150 000 (bouton sous les stats, RemoteEvent `AcheterEtage`, sauvegardé `Etages`) ; plancher, garde-corps, ascenseurs (plaques lumineuses, touche G) ; raids possibles à tous les étages.
+- Agrandissements de base (`Config.Bases.Tailles`) : sol 40, 56 puis 72 studs (6 000 puis 250 000 pièces, RemoteEvent `AgrandirBase`, sauvegardé `Agrandissement`) ; bord avant toujours à Z = 20 ; socles plus espacés ; créatures exposées à leur vraie taille jusqu'à × 1,3 / 2,1 / 2,8 selon le niveau. Bases espacées de 90 studs, monde élargi à 1 200 studs.
 - Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (10 emplacements, « Base pleine ! »). [[03 Porter et revenus]]
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 

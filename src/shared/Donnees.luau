@@ -15,6 +15,7 @@ export type DonneesJoueur = {
 	ModeForge: string,
 	NiveauForge: number,
 	Etages: number,
+	Agrandissement: number,
 	Pieces: number,
 	CreaturesBase: { string },
 }
@@ -28,6 +29,7 @@ function Donnees.parDefaut(): DonneesJoueur
 		ModeForge = Config.Forge.ModeParDefaut,
 		NiveauForge = 1,
 		Etages = 1,
+		Agrandissement = 1,
 		Pieces = 0,
 		CreaturesBase = {},
 	}
@@ -84,6 +86,14 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 	local etages = brut.Etages
 	if type(etages) == "number" and etages == etages and etages >= 1 then
 		donnees.Etages = math.min(math.floor(etages), Config.Bases.EtagesMax)
+	end
+	local agrandissement = brut.Agrandissement
+	if
+		type(agrandissement) == "number"
+		and agrandissement == agrandissement
+		and agrandissement >= 1
+	then
+		donnees.Agrandissement = math.min(math.floor(agrandissement), #Config.Bases.Tailles)
 	end
 	donnees.Pieces = nettoyerPieces(brut.Pieces)
 	donnees.CreaturesBase = nettoyerCreatures(brut.CreaturesBase)

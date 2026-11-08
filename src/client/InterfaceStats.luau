@@ -119,6 +119,18 @@ function InterfaceStats.demarrer()
 		acheterEtage:FireServer()
 	end)
 
+	-- Agrandissement de la base (plus de place pour les grosses créatures).
+	local agrandirBase = ReplicatedStorage:WaitForChild("AgrandirBase") :: RemoteEvent
+	local boutonAgrandir = Habillage.bouton(cadre, "AgrandirBase", {
+		texte = "Agrandir",
+		couleur = Color3.fromRGB(150, 230, 120),
+	})
+	boutonAgrandir.LayoutOrder = 7
+	boutonAgrandir.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
+	boutonAgrandir.Activated:Connect(function()
+		agrandirBase:FireServer()
+	end)
+
 	local function nombre(nom: string): number
 		local valeur = joueur:GetAttribute(nom)
 		return if type(valeur) == "number" then valeur else 0
@@ -145,6 +157,17 @@ function InterfaceStats.demarrer()
 				then Color3.fromRGB(120, 200, 255)
 				else COULEUR_INACTIF
 		end
+		local agrandissement = math.max(1, math.floor(nombre("Agrandissement")))
+		local prixAgrandir = Config.Bases.PrixAgrandissement[agrandissement]
+		boutonAgrandir.Visible = prixAgrandir ~= nil and agrandissement < #Config.Bases.Tailles
+		if prixAgrandir then
+			local taille = Config.Bases.Tailles[agrandissement + 1]
+			boutonAgrandir.Text =
+				`📐 Agrandir la base ({taille}×{taille}) : {Nombres.abreger(prixAgrandir)} 🪙`
+			boutonAgrandir.BackgroundColor3 = if nombre("Pieces") >= prixAgrandir
+				then Color3.fromRGB(150, 230, 120)
+				else COULEUR_INACTIF
+		end
 		boutonNiveau.BackgroundColor3 = if nombre("Pieces") >= cout
 			then Color3.fromRGB(255, 170, 40)
 			else COULEUR_INACTIF
@@ -155,7 +178,18 @@ function InterfaceStats.demarrer()
 		end
 	end
 
-	for _, nom in { "Force", "Vitesse", "ModeForge", "SurForge", "NiveauForge", "Pieces", "Etages" } do
+	for _, nom in
+		{
+			"Force",
+			"Vitesse",
+			"ModeForge",
+			"SurForge",
+			"NiveauForge",
+			"Pieces",
+			"Etages",
+			"Agrandissement",
+		}
+	do
 		joueur:GetAttributeChangedSignal(nom):Connect(rafraichir)
 	end
 	rafraichir()

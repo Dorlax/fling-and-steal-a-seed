@@ -95,6 +95,13 @@ local Config = {
 		EtagesMax = 3,
 		HauteurEtage = 14, -- studs entre deux étages
 		PrixEtages = { 2500, 150000 }, -- prix des étages 2 et 3
+		-- Agrandissements : côté du sol de la base (studs), prix des niveaux 2
+		-- et 3, et taille max des créatures exposées (× leur taille de base),
+		-- pour que les plus grosses tiennent sur leur socle.
+		Tailles = { 40, 56, 72 },
+		PrixAgrandissement = { 6000, 250000 },
+		EchelleMax = { 1.3, 2.1, 2.8 },
+		Ecart = 90, -- distance entre deux bases (assez pour la plus grande)
 	},
 
 	-- Tailles des créatures (tirées par le serveur à la pousse, indépendantes
@@ -112,7 +119,6 @@ local Config = {
 		Taux = { Normale = 60, Grande = 25, Geante = 10, Colossale = 4, Titan = 1 }, -- %
 		Echelle = { Normale = 1, Grande = 1.3, Geante = 1.65, Colossale = 2.1, Titan = 2.8 },
 		Multiplicateur = { Normale = 1, Grande = 2, Geante = 4, Colossale = 8, Titan = 20 },
-		EchelleBaseMax = 1.8, -- dans la base, les plus grosses sont réduites pour tenir
 	},
 
 	-- Plaquage d'un joueur qui porte une créature (vérifié par le serveur).
