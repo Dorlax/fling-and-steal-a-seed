@@ -1,5 +1,5 @@
 ---
-statut: brouillon
+statut: prêt
 issue:
 taille: normale
 priorité: basse
@@ -7,7 +7,7 @@ priorité: basse
 # Pièges
 
 ## Ce que je veux
-Pièges posés par les joueurs : filet, flaque de glu, fausse graine.
+Les joueurs posent des pièges dans les Terres Sauvages (jamais dans une base), avec un bouton à l'écran sur PC, mobile et console : un filet (immobilise la victime quelques secondes), une flaque de glu (ralentit fortement tant qu'on est dedans) et une fausse graine (ressemble à une vraie graine posée au sol ; qui l'attrape est immobilisé ou ralenti brièvement). Chaque piège coûte des pièces, a un nombre limité par joueur, un délai entre deux poses et une durée de vie ; le poseur n'est pas affecté par ses propres pièges ; une victime est protégée quelques secondes après avoir été piégée. Une victime piégée qui porte une créature la garde (le piège ne fait pas lâcher). Tout est décidé et vérifié côté serveur. Effets très cartoon (couleurs vives, messages comiques).
 
 ## Liens avec le plan
 - [[Vision]]
