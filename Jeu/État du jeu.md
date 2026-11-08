@@ -24,10 +24,11 @@
 ## Décor et ambiance
 - Décor cartoon généré par le serveur (`Decor`) : éclairage coloré (atmosphère, saturation, éclat), place de sable sous les bases, chemins devant les portes, arbres (dont roses et dorés), rochers, champignons, fleurs, nuages, collines de bordure.
 - Bases ornées : bordure colorée (sans collision) et lampadaires-sucettes ; sol vert vif.
-- Créatures : reflets dans les yeux, joues roses, petits pieds.
+- Créatures : reflets dans les yeux, joues roses, petits pieds ; ornements selon la rareté (pousse, oreilles, ailes + étincelles, couronne, auréole).
+- Monstres détaillés par zone (antenne/gouttes, sourcils/cornes/piquants, grandes cornes/dents/bras) ; pieds et reflets.
+- Animations client (module `Animations`, calcul dans `Shared.Anime`) : créatures posées qui sautillent, monstres qui se dandinent.
 - Interface : boutons de pièges en rangée en bas à gauche (ne recouvrent plus les stats).
 
 ## À faire
 - Passes Robux (x2 Force, x2 Vitesse, x2 Pièces, Ramassage auto), cosmétiques.
-- Peaufinage visuel restant : modèles plus détaillés (créatures, monstres), animations de personnages.
 - Test du cycle jour/nuit à la main (vérifié seulement par les tests automatiques).

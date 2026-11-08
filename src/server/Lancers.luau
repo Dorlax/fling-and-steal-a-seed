@@ -144,6 +144,7 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 	end
 
 	Decor.mignonner(modele, corps, TAILLE_CREATURE)
+	Decor.detaillerCreature(modele, corps, TAILLE_CREATURE, resultat.Rarete)
 
 	if precieuse then
 		local lumiere = Instance.new("PointLight")

@@ -2,6 +2,11 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Modèles détaillés et animations
+- Créatures ornées selon la rareté : pousse (Commune), oreilles (Rare), ailes et étincelles (Épique), couronne dorée (Légendaire), auréole d'étoiles (Mythique).
+- Monstres détaillés par zone : antenne et gouttes (Gloupinou), sourcils froncés, cornes et piquants (Ronchonbulle), grandes cornes, dents, bras et taches (Grobidou) ; pieds et reflets pour tous.
+- Animations locales (client) : les créatures posées sautillent et regardent autour d'elles, les monstres se dandinent. Aucune règle de jeu modifiée.
+
 ## 2026-11-08 — Décor cartoon et ambiance
 
 - Nouveau module serveur `Decor` : éclairage coloré (Atmosphere, ColorCorrection, Bloom, SunRays) appliqué avant le cycle jour/nuit ; place de sable sous les bases ; chemins devant les portes ; arbres, rochers, champignons, fleurs, nuages et collines de bordure (graine fixe, purement visuel, `CanQuery = false`).

@@ -431,6 +431,7 @@ local function creerCreatureExposee(
 	end
 
 	Decor.mignonner(modele, corps, TAILLE_EXPOSEE)
+	Decor.detaillerCreature(modele, corps, TAILLE_EXPOSEE, rarete)
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"
