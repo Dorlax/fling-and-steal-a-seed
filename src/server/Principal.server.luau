@@ -4,8 +4,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Bases = require(script.Parent.Bases)
+local CycleJourNuit = require(script.Parent.CycleJourNuit)
 local Entrainement = require(script.Parent.Entrainement)
 local Lancers = require(script.Parent.Lancers)
+local Monstres = require(script.Parent.Monstres)
 local Plaquages = require(script.Parent.Plaquages)
 local Portage = require(script.Parent.Portage)
 local Sauvegarde = require(script.Parent.Sauvegarde)
@@ -64,6 +66,11 @@ end)
 
 TerresSauvages.creer()
 
+-- Cycle jour/nuit puis monstres : tout est décidé par le serveur, aucun
+-- RemoteEvent (le client n'envoie rien pour les monstres).
+CycleJourNuit.demarrer()
+Monstres.demarrer()
+
 local function placerDansSaBase(joueur: Player, personnage: Model)
 	local racine = personnage:WaitForChild("HumanoidRootPart", 5)
 	local apparition = Bases.apparitionDe(joueur)
@@ -104,6 +111,7 @@ end
 Players.PlayerRemoving:Connect(function(joueur)
 	Portage.nettoyer(joueur)
 	Plaquages.nettoyer(joueur)
+	Monstres.nettoyer(joueur)
 	Lancers.nettoyer(joueur)
 	Bases.liberer(joueur)
 	Sauvegarde.terminer(joueur)

@@ -95,6 +95,63 @@ local Config = {
 		Touches = { Clavier = "F", Manette = "ButtonY" },
 	},
 
+	-- Monstres des Terres Sauvages (tout est décidé par le serveur).
+	Monstres = {
+		BordBases = 20, -- Z du bord des bases (= début des Terres Sauvages)
+		MargeBases = 6, -- un monstre reste toujours à Z >= BordBases + MargeBases
+		IntervalleIA = 0.1, -- secondes entre deux pas de la boucle serveur
+		DureeProtection = 3, -- secondes sans pouvoir être refrappé par un monstre
+		DistanceDisparition = 120, -- au-delà, le monstre revient à son point d'apparition
+		-- Par zone (mêmes noms que Lancer.Zones), valeurs croissantes.
+		Zones = {
+			Proche = {
+				Nom = "Gloupinou",
+				Couleur = { 120, 230, 255 },
+				Taille = 4,
+				Vitesse = 10,
+				Degats = 10,
+				PorteeDetection = 30,
+				PorteeCoup = 5,
+				Recharge = 2.0,
+				NombreJour = 2,
+				NombreNuit = 4,
+			},
+			Moyenne = {
+				Nom = "Ronchonbulle",
+				Couleur = { 255, 170, 60 },
+				Taille = 5,
+				Vitesse = 13,
+				Degats = 20,
+				PorteeDetection = 40,
+				PorteeCoup = 6,
+				Recharge = 1.6,
+				NombreJour = 3,
+				NombreNuit = 6,
+			},
+			Lointaine = {
+				Nom = "Grobidou",
+				Couleur = { 200, 90, 255 },
+				Taille = 6,
+				Vitesse = 16,
+				Degats = 30,
+				PorteeDetection = 50,
+				PorteeCoup = 7,
+				Recharge = 1.2,
+				NombreJour = 4,
+				NombreNuit = 9,
+			},
+		},
+		IntervalleVague = 30, -- la nuit, une vague complète les zones toutes les 30 s
+	},
+
+	-- Cycle jour/nuit (horloge serveur).
+	Cycle = {
+		DureeJour = 240, -- secondes
+		DureeNuit = 120, -- secondes
+		HeureJour = 14, -- Lighting.ClockTime
+		HeureNuit = 0,
+	},
+
 	-- Sauvegarde des joueurs (DataStore).
 	Sauvegarde = {
 		NomDataStore = "JoueursV1",
