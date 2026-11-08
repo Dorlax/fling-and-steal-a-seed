@@ -6,6 +6,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Bases = require(script.Parent.Bases)
 local Entrainement = require(script.Parent.Entrainement)
 local Lancers = require(script.Parent.Lancers)
+local Portage = require(script.Parent.Portage)
 local Sauvegarde = require(script.Parent.Sauvegarde)
 local TerresSauvages = require(script.Parent.TerresSauvages)
 
@@ -41,6 +42,17 @@ remote("LacherJauge").OnServerEvent:Connect(function(joueur: Player)
 	Lancers.traiterLacher(joueur)
 end)
 
+-- Messages courts serveur -> client (« Base pleine ! », « Créature déposée ! »).
+remote("MessageJeu")
+
+-- Récolte : bouton « Récolter » (ProximityPrompt.Triggered), validé par Portage.
+-- Aucun RemoteEvent client -> serveur pour la récolte ni le dépôt.
+Lancers.surRecolte(function(joueur: Player, creature: Model)
+	if Sauvegarde.estCharge(joueur) then
+		Portage.recolter(joueur, creature)
+	end
+end)
+
 TerresSauvages.creer()
 
 local function placerDansSaBase(joueur: Player, personnage: Model)
@@ -71,6 +83,7 @@ local function surArrivee(joueur: Player)
 	Sauvegarde.charger(joueur)
 	if Sauvegarde.estCharge(joueur) then
 		Entrainement.appliquerVitesse(joueur)
+		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
 	end
 end
 
@@ -80,6 +93,7 @@ for _, joueur in Players:GetPlayers() do
 end
 
 Players.PlayerRemoving:Connect(function(joueur)
+	Portage.nettoyer(joueur)
 	Lancers.nettoyer(joueur)
 	Bases.liberer(joueur)
 	Sauvegarde.terminer(joueur)
@@ -95,6 +109,30 @@ task.spawn(function()
 			if Sauvegarde.estCharge(joueur) then
 				joueur:SetAttribute("SurForge", Bases.estSurSaForge(joueur))
 				Entrainement.tick(joueur)
+			end
+		end
+	end
+end)
+
+-- Dépôt automatique : vérifié souvent pour réagir dès l'entrée dans la base.
+task.spawn(function()
+	while true do
+		task.wait(0.2)
+		for _, joueur in Players:GetPlayers() do
+			if Sauvegarde.estCharge(joueur) then
+				Portage.verifierDepot(joueur)
+			end
+		end
+	end
+end)
+
+-- Revenus : chaque créature de la base rapporte des pièces, AFK compris.
+task.spawn(function()
+	while true do
+		task.wait(Config.Creatures.IntervalleRevenus)
+		for _, joueur in Players:GetPlayers() do
+			if Sauvegarde.estCharge(joueur) then
+				Portage.tickRevenus(joueur)
 			end
 		end
 	end

@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Donnees = require(ReplicatedStorage.Shared.Donnees)
+local Revenus = require(ReplicatedStorage.Shared.Revenus)
 
 type Session = {
 	donnees: Donnees.DonneesJoueur,
@@ -17,7 +18,9 @@ type Session = {
 local Sauvegarde = {}
 
 local reglages = Config.Sauvegarde
-local sessions: { [Player]: Session } = {}
+local sessions: { [any]: Session } = {}
+-- Créatures déposées dans la base de chaque joueur (raretés), tenues par le serveur.
+local creaturesParJoueur: { [any]: { string } } = {}
 
 local magasin: DataStore? = nil
 do
@@ -55,15 +58,44 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("Vitesse", donnees.Vitesse)
 	joueur:SetAttribute("ModeForge", donnees.ModeForge)
 	joueur:SetAttribute("SurForge", false)
+	joueur:SetAttribute("Pieces", donnees.Pieces)
+	creaturesParJoueur[joueur] = table.clone(donnees.CreaturesBase)
+	joueur:SetAttribute("RevenuParSeconde", Revenus.total(donnees.CreaturesBase))
+end
+
+-- Créatures de la base du joueur (copie).
+function Sauvegarde.creaturesDe(joueur: any): { string }
+	return table.clone(creaturesParJoueur[joueur] or {})
+end
+
+-- Ajoute une créature (rareté valide) à la base si elle n'est pas pleine.
+function Sauvegarde.ajouterCreature(joueur: any, rarete: any): boolean
+	if type(rarete) ~= "string" or not table.find(Config.Raretes.Ordre, rarete) then
+		return false
+	end
+	local liste = creaturesParJoueur[joueur]
+	if liste == nil then
+		liste = {}
+		creaturesParJoueur[joueur] = liste
+	end
+	if #liste >= Config.Creatures.MaxCreaturesBase then
+		return false
+	end
+	table.insert(liste, rarete)
+	joueur:SetAttribute("RevenuParSeconde", Revenus.total(liste))
+	return true
 end
 
 -- Données actuelles du joueur (attributs serveur), nettoyées.
-local function collecter(joueur: Player, session: Session): Donnees.DonneesJoueur
+function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
+	local session = sessions[joueur]
 	return Donnees.nettoyer({
 		Force = joueur:GetAttribute("Force"),
 		Vitesse = joueur:GetAttribute("Vitesse"),
 		ModeForge = joueur:GetAttribute("ModeForge"),
-		NiveauForge = session.donnees.NiveauForge,
+		NiveauForge = if session then session.donnees.NiveauForge else 1,
+		Pieces = joueur:GetAttribute("Pieces"),
+		CreaturesBase = creaturesParJoueur[joueur],
 	})
 end
 
@@ -100,7 +132,7 @@ function Sauvegarde.sauvegarder(joueur: Player)
 	if session == nil or store == nil or not session.peutSauvegarder then
 		return
 	end
-	local donnees = collecter(joueur, session)
+	local donnees = Sauvegarde.collecter(joueur)
 	session.donnees = donnees
 	local ok, erreur = avecTentatives(function()
 		(store :: DataStore):SetAsync(cle(joueur), donnees, { joueur.UserId })
@@ -113,10 +145,12 @@ end
 -- Sauvegarde puis oublie la session (départ du joueur).
 function Sauvegarde.terminer(joueur: Player)
 	if sessions[joueur] == nil then
+		creaturesParJoueur[joueur] = nil
 		return
 	end
 	Sauvegarde.sauvegarder(joueur)
 	sessions[joueur] = nil
+	creaturesParJoueur[joueur] = nil
 end
 
 -- Branche l'arrêt du serveur et la sauvegarde automatique.

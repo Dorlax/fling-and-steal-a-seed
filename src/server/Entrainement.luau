@@ -6,12 +6,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Forge = require(ReplicatedStorage.Shared.Forge)
+local Revenus = require(ReplicatedStorage.Shared.Revenus)
 
 local Entrainement = {}
 
--- Applique au personnage le WalkSpeed correspondant à la Vitesse ; le renvoie.
+-- Applique au personnage le WalkSpeed correspondant à la Vitesse (ralenti
+-- pendant le portage d'une créature, attribut Porte) ; le renvoie.
 function Entrainement.appliquerVitesse(joueur: any): number
 	local walkSpeed = Forge.walkSpeedPour(joueur:GetAttribute("Vitesse"))
+	if joueur:GetAttribute("Porte") ~= nil then
+		walkSpeed = Revenus.walkSpeedPortage(walkSpeed)
+	end
 	local personnage = joueur.Character
 	if personnage then
 		local humanoide = personnage:FindFirstChildOfClass("Humanoid")

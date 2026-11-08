@@ -12,6 +12,8 @@ export type DonneesJoueur = {
 	Vitesse: number,
 	ModeForge: string,
 	NiveauForge: number,
+	Pieces: number,
+	CreaturesBase: { string },
 }
 
 local Donnees = {}
@@ -22,6 +24,8 @@ function Donnees.parDefaut(): DonneesJoueur
 		Vitesse = 0,
 		ModeForge = Config.Forge.ModeParDefaut,
 		NiveauForge = 1,
+		Pieces = 0,
+		CreaturesBase = {},
 	}
 end
 
@@ -31,6 +35,31 @@ local function nettoyerStat(valeur: any): number
 		return 0
 	end
 	return math.min(valeur, Config.Forge.PlafondStat)
+end
+
+-- Pièces valides : entier fini, entre 0 et PiecesMax.
+local function nettoyerPieces(valeur: any): number
+	if type(valeur) ~= "number" or valeur ~= valeur or valeur < 0 or valeur == math.huge then
+		return 0
+	end
+	return math.min(math.floor(valeur), Config.Creatures.PiecesMax)
+end
+
+-- Liste de raretés valides, tronquée à MaxCreaturesBase.
+local function nettoyerCreatures(valeur: any): { string }
+	local liste = {}
+	if type(valeur) ~= "table" then
+		return liste
+	end
+	for _, rarete in ipairs(valeur) do
+		if #liste >= Config.Creatures.MaxCreaturesBase then
+			break
+		end
+		if type(rarete) == "string" and table.find(Config.Raretes.Ordre, rarete) then
+			table.insert(liste, rarete)
+		end
+	end
+	return liste
 end
 
 -- Corrige des données chargées (ou reçues) : jamais de confiance aveugle.
@@ -48,6 +77,8 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 	if type(niveau) == "number" and niveau == niveau and niveau >= 1 and niveau < math.huge then
 		donnees.NiveauForge = math.floor(niveau)
 	end
+	donnees.Pieces = nettoyerPieces(brut.Pieces)
+	donnees.CreaturesBase = nettoyerCreatures(brut.CreaturesBase)
 	return donnees
 end
 

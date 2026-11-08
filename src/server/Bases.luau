@@ -4,10 +4,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Revenus = require(ReplicatedStorage.Shared.Revenus)
 
 local Bases = {}
 
+local raretes: any = Config.Raretes -- indexé par des noms dynamiques
 local TAILLE_SOL = 40
+local HAUTEUR_BASE = 12 -- « dans la base » : jusqu'à 12 studs au-dessus du sol
+local TAILLE_EXPOSEE = 2 -- diamètre des créatures exposées dans la base
+local BORD_EXPOSITION = 16 -- rangées à 16 studs du centre (sol de 40)
 local ECART = 60 -- distance entre deux bases (studs)
 local NOMBRE_EMPLACEMENTS = 12
 
@@ -156,15 +161,28 @@ function Bases.apparitionDe(joueur: any): CFrame?
 	return nil
 end
 
--- Vrai si le personnage du joueur est vivant et au-dessus de SA Forge.
-function Bases.estSurSaForge(joueur: Player): boolean
-	local forgeTrouvee = Bases.forgeDe(joueur)
+-- Sol de la base du joueur, ou nil.
+function Bases.solDe(joueur: any): BasePart?
+	local base = basesParJoueur[joueur]
+	if base == nil then
+		return nil
+	end
+	local sol = base.modele:FindFirstChild("Sol")
+	if sol and sol:IsA("BasePart") then
+		return sol
+	end
+	return nil
+end
+
+-- Vrai si le personnage du joueur est vivant et au-dessus de `partie`,
+-- à au plus `hauteurMax` studs de sa face supérieure (test de boîte).
+local function estAuDessusDe(joueur: any, partieTrouvee: BasePart?, hauteurMax: number): boolean
 	local personnageTrouve = joueur.Character
-	if forgeTrouvee == nil or personnageTrouve == nil then
+	if partieTrouvee == nil or typeof(personnageTrouve) ~= "Instance" then
 		return false
 	end
-	local forge = forgeTrouvee :: BasePart
-	local personnage = personnageTrouve :: Model
+	local partie = partieTrouvee :: BasePart
+	local personnage = personnageTrouve :: Instance
 	local humanoide = personnage:FindFirstChildOfClass("Humanoid")
 	local racineTrouvee = personnage:FindFirstChild("HumanoidRootPart")
 	if
@@ -176,13 +194,116 @@ function Bases.estSurSaForge(joueur: Player): boolean
 		return false
 	end
 	local racine = racineTrouvee :: BasePart
-	local local_ = forge.CFrame:PointToObjectSpace(racine.Position)
-	local demi = forge.Size / 2
+	local local_ = partie.CFrame:PointToObjectSpace(racine.Position)
+	local demi = partie.Size / 2
 	local hauteur = local_.Y - demi.Y
 	return math.abs(local_.X) <= demi.X
 		and math.abs(local_.Z) <= demi.Z
 		and hauteur >= 0
-		and hauteur <= Config.Forge.DistanceForge.Hauteur
+		and hauteur <= hauteurMax
+end
+
+-- Vrai si le personnage du joueur est vivant et au-dessus de SA Forge.
+function Bases.estSurSaForge(joueur: any): boolean
+	return estAuDessusDe(joueur, Bases.forgeDe(joueur), Config.Forge.DistanceForge.Hauteur)
+end
+
+-- Vrai si le personnage du joueur est vivant et au-dessus du sol de SA base.
+function Bases.estDansSaBase(joueur: any): boolean
+	return estAuDessusDe(joueur, Bases.solDe(joueur), HAUTEUR_BASE)
+end
+
+-- Petite créature exposée dans la base (couleur de rareté, yeux, « +N/s »).
+local function creerCreatureExposee(rarete: string, position: Vector3): Model
+	local rgb = raretes.Couleurs[rarete] or { 255, 255, 255 }
+	local couleur = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
+	local precieuse = (table.find(raretes.Ordre, rarete) or 1) >= 3
+
+	local modele = Instance.new("Model")
+	modele.Name = "Creature_" .. rarete
+
+	local corps = Instance.new("Part")
+	corps.Name = "Corps"
+	corps.Shape = Enum.PartType.Ball
+	corps.Size = Vector3.one * TAILLE_EXPOSEE
+	corps.Anchored = true
+	corps.CanCollide = false
+	corps.Color = couleur
+	corps.Material = if precieuse then Enum.Material.Neon else Enum.Material.SmoothPlastic
+	-- Yeux tournés vers le centre de la base (axe X).
+	local regard = if position.X > 0 then -1 else 1
+	corps.CFrame = CFrame.lookAt(position, position + Vector3.new(regard, 0, 0))
+	corps.Parent = modele
+
+	for _, cote in { -1, 1 } do
+		local oeil = Instance.new("Part")
+		oeil.Name = "Oeil"
+		oeil.Shape = Enum.PartType.Ball
+		oeil.Size = Vector3.one * 0.4
+		oeil.Anchored = true
+		oeil.CanCollide = false
+		oeil.Color = Color3.new(0.05, 0.05, 0.05)
+		oeil.CFrame = corps.CFrame * CFrame.new(cote * 0.4, 0.3, -TAILLE_EXPOSEE / 2 + 0.05)
+		oeil.Parent = modele
+	end
+
+	local panneau = Instance.new("BillboardGui")
+	panneau.Name = "Panneau"
+	panneau.Size = UDim2.fromOffset(90, 30)
+	panneau.StudsOffset = Vector3.new(0, TAILLE_EXPOSEE, 0)
+	panneau.MaxDistance = 120
+	panneau.Parent = corps
+	local texte = Instance.new("TextLabel")
+	texte.Size = UDim2.fromScale(1, 1)
+	texte.BackgroundTransparency = 1
+	texte.Font = Enum.Font.FredokaOne
+	texte.TextScaled = true
+	texte.TextColor3 = couleur
+	texte.TextStrokeTransparency = 0
+	texte.TextStrokeColor3 = Color3.new(0, 0, 0)
+	texte.Text = `+{Revenus.parSeconde(rarete)}/s`
+	texte.Parent = panneau
+
+	modele.PrimaryPart = corps
+	modele:SetAttribute("Rarete", rarete)
+	return modele
+end
+
+-- Position (relative au centre de la base) de l'emplacement `numero` :
+-- deux rangées le long des bords X, loin de la Forge (centre, Z +4..+12)
+-- et du point d'apparition (centre, Z -8).
+local function positionEmplacement(numero: number): Vector3
+	local parRangee = math.ceil(Config.Creatures.MaxCreaturesBase / 2)
+	local rangee = if numero <= parRangee then 0 else 1
+	local rang = numero - rangee * parRangee - 1
+	local x = (if rangee == 0 then -1 else 1) * BORD_EXPOSITION
+	local pas = if parRangee > 1 then (2 * BORD_EXPOSITION) / (parRangee - 1) else 0
+	local z = -BORD_EXPOSITION + rang * pas
+	return Vector3.new(x, TAILLE_EXPOSEE / 2, z)
+end
+
+-- (Re)crée les créatures exposées de la base, une par emplacement.
+function Bases.afficherCreatures(joueur: any, liste: { string })
+	local base = basesParJoueur[joueur]
+	if base == nil then
+		return
+	end
+	local ancien = base.modele:FindFirstChild("CreaturesBase")
+	if ancien then
+		ancien:Destroy()
+	end
+	local dossier = Instance.new("Folder")
+	dossier.Name = "CreaturesBase"
+	local centre = base.modele:GetPivot().Position + Vector3.new(0, 0.5, 0) -- surface du sol
+	for numero, rarete in liste do
+		if numero > Config.Creatures.MaxCreaturesBase then
+			break
+		end
+		if type(rarete) == "string" then
+			creerCreatureExposee(rarete, centre + positionEmplacement(numero)).Parent = dossier
+		end
+	end
+	dossier.Parent = base.modele
 end
 
 return Bases
