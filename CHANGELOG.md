@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage des pièges (issue #13)
+- `src/server/Pieges.luau` : conversions explicites après les vérifications de nil (`BasePart?`, `Humanoid?`) pour que luau-lsp passe en CI.
+
 ## 2026-11-08 — Pièges (issue #13)
 - Trois pièges à poser dans les Terres Sauvages : Filet (immobilise 3 s), Flaque de glu (ralentit ×0,3 tant qu'on est dedans), Fausse graine (ressemble à une créature « Récolter » ; immobilise 2 s).
 - Prix en pièces, 3 pièges actifs max par joueur, 5 s entre deux poses, 90 s de durée de vie, 4 s de protection après un effet ; pose interdite dans les bases et trop près d'un autre piège.

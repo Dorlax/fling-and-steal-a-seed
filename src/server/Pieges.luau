@@ -341,10 +341,11 @@ end
 
 -- Gros texte comique au-dessus de la tête pendant `duree` secondes.
 local function afficherTexte(joueur: any, texte: string, couleur: Color3, duree: number?)
-	local support = supportTete(joueur)
-	if support == nil then
+	local supportOuNil = supportTete(joueur)
+	if supportOuNil == nil then
 		return
 	end
+	local support = supportOuNil :: BasePart
 	local ancien = support:FindFirstChild(NOM_EFFET)
 	if ancien then
 		ancien:Destroy()
@@ -378,10 +379,11 @@ end
 
 -- Filet orange au-dessus de la tête de la victime.
 local function afficherFiletTete(joueur: any)
-	local support = supportTete(joueur)
-	if support == nil then
+	local supportOuNil = supportTete(joueur)
+	if supportOuNil == nil then
 		return
 	end
+	local support = supportOuNil :: BasePart
 	local filet = Instance.new("Part")
 	filet.Name = NOM_FILET_TETE
 	filet.Shape = Enum.PartType.Ball
@@ -404,10 +406,11 @@ end
 -- ----------------------------------------------------------------------------
 -- Effets de jeu
 
-local function bloquerSaut(joueur: any, humanoide: Humanoid?)
-	if humanoide == nil or sauts[joueur] ~= nil then
+local function bloquerSaut(joueur: any, humanoideOuNil: Humanoid?)
+	if humanoideOuNil == nil or sauts[joueur] ~= nil then
 		return
 	end
+	local humanoide = humanoideOuNil :: Humanoid
 	sauts[joueur] = {
 		useJumpPower = humanoide.UseJumpPower,
 		jumpPower = humanoide.JumpPower,
@@ -591,10 +594,11 @@ function Pieges.declencherFausse(joueur: any, piege: any, maintenant: number?): 
 		return false
 	end
 	connus[joueur] = true
-	local racine = racineEtHumanoide(joueur)
-	if racine == nil then
+	local racineOuNil = racineEtHumanoide(joueur)
+	if racineOuNil == nil then
 		return false
 	end
+	local racine = racineOuNil :: BasePart
 	local distance = (racine.Position - (piege :: Model):GetPivot().Position).Magnitude
 	if not Piege.dansRayon(distance, reglages.DistanceRecolteFausse) then
 		return false
