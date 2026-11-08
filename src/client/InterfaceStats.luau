@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Style = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Style"))
 local Forge = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forge"))
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Nombres = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Nombres"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
@@ -106,6 +107,18 @@ function InterfaceStats.demarrer()
 		ameliorer:FireServer()
 	end)
 
+	-- Achat de l'étage de base suivant (10 socles de plus, vérifié par le serveur).
+	local acheterEtage = ReplicatedStorage:WaitForChild("AcheterEtage") :: RemoteEvent
+	local boutonEtage = Habillage.bouton(cadre, "AcheterEtage", {
+		texte = "Étage 2",
+		couleur = Color3.fromRGB(120, 200, 255),
+	})
+	boutonEtage.LayoutOrder = 6
+	boutonEtage.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
+	boutonEtage.Activated:Connect(function()
+		acheterEtage:FireServer()
+	end)
+
 	local function nombre(nom: string): number
 		local valeur = joueur:GetAttribute(nom)
 		return if type(valeur) == "number" then valeur else 0
@@ -120,6 +133,18 @@ function InterfaceStats.demarrer()
 			`⬆ Forge niv. {niveau + 1} : {Nombres.abreger(cout)} 🪙 (×{Nombres.abreger(
 				Forge.gainPour(niveau + 1)
 			)}/s)`
+		local etages = math.max(1, math.floor(nombre("Etages")))
+		local prixEtage = Config.Bases.PrixEtages[etages]
+		boutonEtage.Visible = etages < Config.Bases.EtagesMax and prixEtage ~= nil
+		if prixEtage then
+			boutonEtage.Text =
+				`🏠 Étage {etages + 1} (+{Config.Creatures.MaxCreaturesBase} socles) : {Nombres.abreger(
+					prixEtage
+				)} 🪙`
+			boutonEtage.BackgroundColor3 = if nombre("Pieces") >= prixEtage
+				then Color3.fromRGB(120, 200, 255)
+				else COULEUR_INACTIF
+		end
 		boutonNiveau.BackgroundColor3 = if nombre("Pieces") >= cout
 			then Color3.fromRGB(255, 170, 40)
 			else COULEUR_INACTIF
@@ -130,7 +155,7 @@ function InterfaceStats.demarrer()
 		end
 	end
 
-	for _, nom in { "Force", "Vitesse", "ModeForge", "SurForge", "NiveauForge", "Pieces" } do
+	for _, nom in { "Force", "Vitesse", "ModeForge", "SurForge", "NiveauForge", "Pieces", "Etages" } do
 		joueur:GetAttributeChangedSignal(nom):Connect(rafraichir)
 	end
 	rafraichir()

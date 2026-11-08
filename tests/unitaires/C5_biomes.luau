@@ -15,7 +15,10 @@ return {
 		assert(Biomes.index(-5) == 1 and Biomes.index(0 / 0) == 1, "valeurs invalides -> 1")
 		assert(Biomes.index(1e9) == Biomes.nombre(), "au-delà : dernier biome défini")
 		assert(Biomes.dansBiome(L + 160) == 160, "position dans le biome")
-		assert(Biomes.multiplicateur(1) == 1 and Biomes.multiplicateur(3) == 2.25, "× 1,5 par biome")
+		assert(
+			Biomes.multiplicateur(1) == 1 and Biomes.multiplicateur(3) == 2.25,
+			"× 1,5 par biome"
+		)
 		assert(Biomes.texteMultiplicateur(2) == "1,5", "texte du multiplicateur")
 	end,
 
@@ -24,7 +27,10 @@ return {
 		for numero, biome in Biomes.Liste do
 			for _, rarete in Config.Raretes.Ordre do
 				local liste = biome.Creatures[rarete]
-				assert(liste and #liste >= 2, biome.Nom .. " : 2 espèces " .. rarete .. " attendues")
+				assert(
+					liste and #liste >= 2,
+					biome.Nom .. " : 2 espèces " .. rarete .. " attendues"
+				)
 				for _, nom in liste do
 					assert(Bestiaire.Especes[nom], "espèce non dessinée : " .. nom)
 					assert(vues[nom] == nil, "espèce dans deux biomes : " .. nom)
@@ -59,7 +65,10 @@ return {
 		local base = Lancer.distance(1000, 0)
 		local double = Lancer.distance(2000, 0)
 		assert(math.abs(double - base - L) < 1e-6, "doublement = un biome")
-		assert(Lancer.distance(1e15, 1e6) <= Biomes.distanceMax(), "jamais au-delà du dernier biome")
+		assert(
+			Lancer.distance(1e15, 1e6) <= Biomes.distanceMax(),
+			"jamais au-delà du dernier biome"
+		)
 		assert(Lancer.zone(L + 10) == "Proche", "chaque biome recommence à Proche")
 	end,
 

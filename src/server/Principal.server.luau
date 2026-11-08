@@ -43,6 +43,13 @@ remote("AmeliorerForge").OnServerEvent:Connect(function(joueur: Player)
 	end
 end)
 
+-- Achat de l'étage de base suivant : aucun argument ; le serveur vérifie tout.
+remote("AcheterEtage").OnServerEvent:Connect(function(joueur: Player)
+	if Sauvegarde.estCharge(joueur) and Bases.acheterEtage(joueur) then
+		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
+	end
+end)
+
 -- Lancer : le client signale seulement « début » et « lâcher » ; ses arguments
 -- éventuels sont ignorés, tout est calculé par le serveur.
 remote("ResultatLancer")

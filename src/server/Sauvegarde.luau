@@ -60,6 +60,7 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("Vitesse", donnees.Vitesse)
 	joueur:SetAttribute("ModeForge", donnees.ModeForge)
 	joueur:SetAttribute("NiveauForge", donnees.NiveauForge)
+	joueur:SetAttribute("Etages", donnees.Etages)
 	joueur:SetAttribute("SurForge", false)
 	joueur:SetAttribute("Pieces", donnees.Pieces)
 	creaturesParJoueur[joueur] = table.clone(donnees.CreaturesBase)
@@ -69,6 +70,15 @@ end
 -- Créatures de la base du joueur (copie).
 function Sauvegarde.creaturesDe(joueur: any): { string }
 	return table.clone(creaturesParJoueur[joueur] or {})
+end
+
+-- Nombre de places de la base : MaxCreaturesBase par étage acheté.
+function Sauvegarde.capacite(joueur: any): number
+	local etages = joueur:GetAttribute("Etages")
+	if type(etages) ~= "number" or etages ~= etages or etages < 1 then
+		etages = 1
+	end
+	return Config.Creatures.MaxCreaturesBase * math.min(math.floor(etages), Config.Bases.EtagesMax)
 end
 
 -- Ajoute une créature (fiche valide : « Rarete[:Taille[:Espece]] ») à la
@@ -82,7 +92,7 @@ function Sauvegarde.ajouterCreature(joueur: any, rarete: any): boolean
 		liste = {}
 		creaturesParJoueur[joueur] = liste
 	end
-	if #liste >= Config.Creatures.MaxCreaturesBase then
+	if #liste >= Sauvegarde.capacite(joueur) then
 		return false
 	end
 	table.insert(liste, rarete)
@@ -115,6 +125,7 @@ function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
 		ModeForge = joueur:GetAttribute("ModeForge"),
 		NiveauForge = joueur:GetAttribute("NiveauForge")
 			or (if session then session.donnees.NiveauForge else 1),
+		Etages = joueur:GetAttribute("Etages"),
 		Pieces = joueur:GetAttribute("Pieces"),
 		CreaturesBase = creaturesParJoueur[joueur],
 	})

@@ -50,7 +50,8 @@ local TRANSPARENCE_BOUCLIER = 0.75
 
 -- emplacement (numéro) -> joueur ; joueur -> { emplacement, modele }
 local occupants: { [number]: any } = {}
-local basesParJoueur: { [any]: { emplacement: number, modele: Model } } = {}
+type Base = { emplacement: number, modele: Model }
+local basesParJoueur: { [any]: Base } = {}
 
 local function dossierBases(): Folder
 	local dossier = Workspace:FindFirstChild("Bases")
@@ -323,15 +324,30 @@ function Bases.estSurSaForge(joueur: any): boolean
 	return estAuDessusDe(joueur, Bases.forgeDe(joueur), Config.Forge.DistanceForge.Hauteur)
 end
 
--- Vrai si le personnage du joueur est vivant et au-dessus du sol de SA base.
+-- Nombre d'étages achetés par le joueur (1 à EtagesMax).
+function Bases.etagesDe(joueur: any): number
+	local etages = joueur:GetAttribute("Etages")
+	if type(etages) ~= "number" or etages ~= etages or etages < 1 then
+		return 1
+	end
+	return math.min(math.floor(etages), Config.Bases.EtagesMax)
+end
+
+-- Hauteur « dans la base » : le rez-de-chaussée et chaque étage acheté.
+local function hauteurBase(proprietaire: any): number
+	return HAUTEUR_BASE + (Bases.etagesDe(proprietaire) - 1) * Config.Bases.HauteurEtage
+end
+
+-- Vrai si le personnage du joueur est vivant et au-dessus du sol de SA base
+-- (étages compris).
 function Bases.estDansSaBase(joueur: any): boolean
-	return estAuDessusDe(joueur, Bases.solDe(joueur), HAUTEUR_BASE)
+	return estAuDessusDe(joueur, Bases.solDe(joueur), hauteurBase(joueur))
 end
 
 -- Vrai si le personnage du joueur est vivant et au-dessus du sol de la base
--- de `proprietaire`.
+-- de `proprietaire` (étages compris).
 function Bases.estDansBaseDe(joueur: any, proprietaire: any): boolean
-	return estAuDessusDe(joueur, Bases.solDe(proprietaire), HAUTEUR_BASE)
+	return estAuDessusDe(joueur, Bases.solDe(proprietaire), hauteurBase(proprietaire))
 end
 
 -- Propriétaire de la base dans laquelle se trouve le joueur, ou nil.
@@ -476,14 +492,153 @@ end
 -- Position (relative au centre de la base) de l'emplacement `numero` :
 -- deux rangées le long des bords X, loin de la Forge (centre, Z +4..+12)
 -- et du point d'apparition (centre, Z -8).
-local function positionEmplacement(numero: number): Vector3
-	local parRangee = math.ceil(Config.Creatures.MaxCreaturesBase / 2)
+local function positionEmplacement(numeroGlobal: number): Vector3
+	-- 10 places par étage : l'étage est donné par le numéro.
+	local parEtage = Config.Creatures.MaxCreaturesBase
+	local etage = math.floor((numeroGlobal - 1) / parEtage)
+	local numero = (numeroGlobal - 1) % parEtage + 1
+	local parRangee = math.ceil(parEtage / 2)
 	local rangee = if numero <= parRangee then 0 else 1
 	local rang = numero - rangee * parRangee - 1
 	local x = (if rangee == 0 then -1 else 1) * BORD_EXPOSITION
 	local pas = if parRangee > 1 then (2 * BORD_EXPOSITION) / (parRangee - 1) else 0
 	local z = -BORD_EXPOSITION + rang * pas
-	return Vector3.new(x, HAUTEUR_SOCLE + TAILLE_EXPOSEE / 2, z)
+	return Vector3.new(x, etage * Config.Bases.HauteurEtage + HAUTEUR_SOCLE + TAILLE_EXPOSEE / 2, z)
+end
+
+-- Ascenseur (plaque lumineuse) : téléporte le personnage à un autre étage.
+local function ascenseur(
+	parent: Instance,
+	position: Vector3,
+	texte: string,
+	cible: Vector3,
+	proprietaire: any
+)
+	local plaque = Instance.new("Part")
+	plaque.Name = "Ascenseur"
+	plaque.Anchored = true
+	plaque.CanCollide = false
+	plaque.Size = Vector3.new(4, 0.3, 4)
+	plaque.Position = position + Vector3.new(0, 0.15, 0)
+	plaque.Color = Color3.fromRGB(80, 230, 255)
+	plaque.Material = Enum.Material.Neon
+	plaque.Parent = parent
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = texte
+	prompt.ObjectText = "Ascenseur"
+	prompt.HoldDuration = 0.2
+	prompt.MaxActivationDistance = 8
+	prompt.RequiresLineOfSight = false
+	prompt.KeyboardKeyCode = Enum.KeyCode.G
+	prompt.GamepadKeyCode = Enum.KeyCode.DPadDown
+	prompt.Parent = plaque
+	prompt.Triggered:Connect(function(declencheur: Player)
+		-- Le propriétaire et les visiteurs (raids) peuvent l'utiliser.
+		local personnage = declencheur.Character
+		if personnage and Bases.modeleDe(proprietaire) ~= nil then
+			personnage:PivotTo(CFrame.new(cible + Vector3.new(0, 3, 0)))
+		end
+	end)
+end
+
+-- (Re)crée les étages achetés : plateforme, garde-corps et ascenseurs.
+local function afficherEtages(joueur: any, base: Base)
+	local ancien = base.modele:FindFirstChild("Etages")
+	if ancien then
+		ancien:Destroy()
+	end
+	local etages = Bases.etagesDe(joueur)
+	local dossier = Instance.new("Folder")
+	dossier.Name = "Etages"
+	local sol = base.modele:GetPivot().Position + Vector3.new(0, 0.5, 0)
+	local H = Config.Bases.HauteurEtage
+	local pointAscenseur = Vector3.new(-6, 0, -15)
+	for etage = 2, etages do
+		local y = (etage - 1) * H
+		local plancher = Instance.new("Part")
+		plancher.Name = "Plancher" .. etage
+		plancher.Anchored = true
+		plancher.Size = Vector3.new(TAILLE_SOL, 1, TAILLE_SOL)
+		plancher.Position = sol + Vector3.new(0, y - 0.5, 0)
+		plancher.Color = if etage % 2 == 0
+			then Color3.fromRGB(150, 210, 255)
+			else Color3.fromRGB(255, 200, 140)
+		plancher.Material = Enum.Material.SmoothPlastic
+		plancher.TopSurface = Enum.SurfaceType.Smooth
+		plancher.Parent = dossier
+		for _, bord in
+			{
+				{ 0, TAILLE_SOL / 2 },
+				{ 0, -TAILLE_SOL / 2 },
+				{ TAILLE_SOL / 2, 0 },
+				{ -TAILLE_SOL / 2, 0 },
+			}
+		do
+			local garde = Instance.new("Part")
+			garde.Name = "GardeCorps"
+			garde.Anchored = true
+			garde.Size = if bord[1] == 0
+				then Vector3.new(TAILLE_SOL, 3, 1)
+				else Vector3.new(1, 3, TAILLE_SOL)
+			garde.Position = sol + Vector3.new(bord[1], y + 1.5, bord[2])
+			garde.Color = Color3.fromRGB(255, 255, 255)
+			garde.Transparency = 0.4
+			garde.Parent = dossier
+		end
+		-- Piliers aux coins.
+		for _, coin in { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } } do
+			local pilier = Instance.new("Part")
+			pilier.Name = "Pilier"
+			pilier.Anchored = true
+			pilier.Size = Vector3.new(2, H, 2)
+			pilier.Position = sol
+				+ Vector3.new(
+					coin[1] * (TAILLE_SOL / 2 - 1),
+					y - H / 2,
+					coin[2] * (TAILLE_SOL / 2 - 1)
+				)
+			pilier.Color = Color3.fromRGB(240, 230, 255)
+			pilier.Parent = dossier
+		end
+		-- Ascenseurs : monter depuis l'étage du dessous, descendre au rez-de-chaussée.
+		local dessous = sol + pointAscenseur + Vector3.new(0, y - H, 0)
+		local ici = sol + pointAscenseur + Vector3.new(0, y, 0)
+		-- Monter : plaque de l'étage du dessous ; descendre : plaque voisine.
+		local arrivee = Vector3.new(4, 0, 5)
+		ascenseur(dossier, dessous, `Monter à l'étage {etage}`, ici + arrivee, joueur)
+		ascenseur(
+			dossier,
+			ici + Vector3.new(10, 0, 0),
+			"Descendre",
+			sol + pointAscenseur + arrivee,
+			joueur
+		)
+	end
+	dossier.Parent = base.modele
+	-- Le bouclier du verrou couvre tous les étages.
+	local bouclier = base.modele:FindFirstChild("Bouclier")
+	if bouclier and bouclier:IsA("BasePart") then
+		local hauteur = HAUTEUR_BASE + (etages - 1) * H
+		bouclier.Size = Vector3.new(TAILLE_SOL, hauteur, TAILLE_SOL)
+		bouclier.Position = sol - Vector3.new(0, 0.5, 0) + Vector3.new(0, hauteur / 2, 0)
+	end
+end
+
+-- Achat de l'étage suivant avec des pièces (tout vérifié ici). Renvoie true
+-- si l'étage a été acheté ; l'appelant réaffiche les créatures.
+function Bases.acheterEtage(joueur: any): boolean
+	local etages = Bases.etagesDe(joueur)
+	if etages >= Config.Bases.EtagesMax or basesParJoueur[joueur] == nil then
+		return false
+	end
+	local prix = Config.Bases.PrixEtages[etages]
+	local pieces = joueur:GetAttribute("Pieces")
+	if type(prix) ~= "number" or type(pieces) ~= "number" or pieces ~= pieces or pieces < prix then
+		return false
+	end
+	joueur:SetAttribute("Pieces", pieces - prix)
+	joueur:SetAttribute("Etages", etages + 1)
+	return true
 end
 
 -- Socle d'exposition (façon vitrine) sous l'emplacement `numero` : bloc
@@ -564,6 +719,9 @@ function Bases.afficherCreatures(joueur: any, liste: { string })
 	dossier.Name = "CreaturesBase"
 	local centre = base.modele:GetPivot().Position + Vector3.new(0, 0.5, 0) -- surface du sol
 
+	afficherEtages(joueur, base)
+	local capacite = Config.Creatures.MaxCreaturesBase * Bases.etagesDe(joueur)
+
 	-- Un socle par emplacement, coloré par la rareté de la créature posée.
 	local anciensSocles = base.modele:FindFirstChild("Socles")
 	if anciensSocles then
@@ -571,7 +729,7 @@ function Bases.afficherCreatures(joueur: any, liste: { string })
 	end
 	local socles = Instance.new("Folder")
 	socles.Name = "Socles"
-	for numero = 1, Config.Creatures.MaxCreaturesBase do
+	for numero = 1, capacite do
 		local fiche = liste[numero]
 		local infos = if type(fiche) == "string" then Fiche.lire(fiche) else nil
 		local couleur: Color3? = nil
@@ -580,12 +738,14 @@ function Bases.afficherCreatures(joueur: any, liste: { string })
 			couleur = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
 		end
 		local position = centre + positionEmplacement(numero)
-		creerSocle(numero, Vector3.new(position.X, centre.Y, position.Z), couleur, socles)
+		local etage = math.floor((numero - 1) / Config.Creatures.MaxCreaturesBase)
+		local y = centre.Y + etage * Config.Bases.HauteurEtage
+		creerSocle(numero, Vector3.new(position.X, y, position.Z), couleur, socles)
 	end
 	socles.Parent = base.modele
 
 	for numero, rarete in liste do
-		if numero > Config.Creatures.MaxCreaturesBase then
+		if numero > capacite then
 			break
 		end
 		if type(rarete) == "string" then

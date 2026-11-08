@@ -118,16 +118,13 @@ return {
 		local seuil = Config.Monstres.BordBases + Config.Monstres.MargeBases
 		refusPose({ dansUneBase = true }, "zone")
 		refusPose({ position = { X = 0, Y = 0, Z = seuil - 1 } }, "zone")
-		refusPose(
-			{
-				position = {
-					X = 0,
-					Y = 0,
-					Z = Config.Monstres.BordBases + Config.Lancer.DistanceMax + 41,
-				},
+		refusPose({
+			position = {
+				X = 0,
+				Y = 0,
+				Z = Config.Monstres.BordBases + Config.Lancer.DistanceMax + 41,
 			},
-			"zone"
-		)
+		}, "zone")
 		refusPose({ position = { X = 401, Y = 0, Z = seuil + 10 } }, "zone")
 		local ok = Piege.verifierPose(contexteHors({ position = { X = 0, Y = 0, Z = seuil } }))
 		assert(ok == true, "Z = BordBases + MargeBases : pose permise")

@@ -7,6 +7,10 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+
+## 2026-11-08 — Étages de base
+- Jusqu'à 3 étages par base, 10 socles chacun, achetés en pièces ; ascenseurs entre les étages ; capacité de la base = 10 × étages (sauvegardé).
+- Les raids et le verrou couvrent tous les étages.
 ## 2026-11-08 — Glacier, Volcan, Galaxie ; monstres plus rapides ; socles
 - Biomes 4 (Glacier Givré), 5 (Volcan Ardent) et 6 (Galaxie Étoilée) : 39 nouvelles espèces dessinées à la main, décors en blocs (sapins, igloos, pics de glace ; cônes fumants, mares de lave, obsidienne ; cristaux, astéroïdes, planètes).
 - Monstres de plus en plus rapides à chaque biome : il faut entraîner sa Vitesse pour leur échapper.

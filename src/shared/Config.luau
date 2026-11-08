@@ -89,6 +89,14 @@ local Config = {
 		PiecesMax = 1e15, -- plafond de sécurité
 	},
 
+	-- Étages de base (façon vitrine) : chaque étage ajoute MaxCreaturesBase
+	-- socles. Le premier est gratuit ; les suivants s'achètent en pièces.
+	Bases = {
+		EtagesMax = 3,
+		HauteurEtage = 14, -- studs entre deux étages
+		PrixEtages = { 2500, 150000 }, -- prix des étages 2 et 3
+	},
+
 	-- Tailles des créatures (tirées par le serveur à la pousse, indépendantes
 	-- de la rareté et de la jauge). Plus elle est grosse, plus elle rapporte :
 	-- revenu = revenu de la rareté × Multiplicateur. Taux affichés au joueur.

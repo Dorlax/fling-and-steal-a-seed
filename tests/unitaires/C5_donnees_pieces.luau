@@ -48,12 +48,19 @@ return {
 		assert(d.CreaturesBase[1] == "Commune" and d.CreaturesBase[2] == "Mythique")
 	end,
 
-	["C6 CreaturesBase tronquée à MaxCreaturesBase"] = function()
+	["C6 CreaturesBase tronquée à la capacité de tous les étages"] = function()
+		local maxTotal = maxBase * Config.Bases.EtagesMax
 		local liste = {}
-		for _ = 1, maxBase + 5 do
+		for _ = 1, maxTotal + 5 do
 			table.insert(liste, "Commune")
 		end
-		assert(#Donnees.nettoyer({ CreaturesBase = liste }).CreaturesBase == maxBase)
+		assert(#Donnees.nettoyer({ CreaturesBase = liste }).CreaturesBase == maxTotal)
+	end,
+
+	["C6 étages : 1 par défaut, borné à EtagesMax"] = function()
+		assert(Donnees.nettoyer({}).Etages == 1, "1 étage par défaut")
+		assert(Donnees.nettoyer({ Etages = 99 }).Etages == Config.Bases.EtagesMax, "borné")
+		assert(Donnees.nettoyer({ Etages = "x" }).Etages == 1, "invalide -> 1")
 	end,
 
 	["C6 anciennes données sans ces champs restent valides"] = function()

@@ -229,7 +229,10 @@ return {
 		assert(porte == nil, "Porte doit être effacé")
 		-- Depuis les tailles : la base garde la fiche complète (rareté, taille, espèce).
 		local infos = Fiche.lire(liste[1])
-		assert(#liste == 1 and infos and infos.Rarete == rarete, "CreaturesBase doit contenir la rareté")
+		assert(
+			#liste == 1 and infos and infos.Rarete == rarete,
+			"CreaturesBase doit contenir la rareté"
+		)
 		assert(
 			revenu == Revenus.parSeconde(liste[1]),
 			"RevenuParSeconde incorrect : " .. tostring(revenu)
