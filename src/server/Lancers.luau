@@ -133,7 +133,13 @@ local function creerCreature(joueur: any, resultat: Resultat, point: Vector3): M
 	corps.Parent = modele
 
 	-- Forme en blocs de l'espèce de cette rareté (le Corps devient invisible).
-	Modeleur.construire(modele, corps, Bestiaire.especeCreature(resultat.Rarete), TAILLE_CREATURE, couleur)
+	Modeleur.construire(
+		modele,
+		corps,
+		Bestiaire.especeCreature(resultat.Rarete),
+		TAILLE_CREATURE,
+		couleur
+	)
 	Modeleur.aura(corps, couleur, table.find(raretes.Ordre, resultat.Rarete) or 1)
 
 	if precieuse then

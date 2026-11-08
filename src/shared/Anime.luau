@@ -65,7 +65,14 @@ end
 --   cote   : -1 gauche, 1 droite, 0 au centre
 --   marche : vrai si le modèle se déplace
 --   frappe : 0 (pas de coup) à 1 (début du coup)
-function Anime.piece(role: string, t: number, phase: number, cote: number, marche: boolean, frappe: number): Rotation
+function Anime.piece(
+	role: string,
+	t: number,
+	phase: number,
+	cote: number,
+	marche: boolean,
+	frappe: number
+): Rotation
 	local r = (Anime.Pieces :: any)[role]
 	if r == nil then
 		return { X = 0, Y = 0, Z = 0 }
@@ -85,7 +92,11 @@ function Anime.piece(role: string, t: number, phase: number, cote: number, march
 	elseif role == "Oreille" then
 		return { X = 0, Y = 0, Z = -cote * math.max(onde, 0) * amplitude }
 	elseif role == "Tete" then
-		return { X = onde * amplitude - coup, Y = math.sin(t * r.Vitesse * 0.5 + phase) * amplitude, Z = 0 }
+		return {
+			X = onde * amplitude - coup,
+			Y = math.sin(t * r.Vitesse * 0.5 + phase) * amplitude,
+			Z = 0,
+		}
 	elseif role == "Machoire" then
 		-- Négatif : l'avant de la mâchoire descend (la bouche s'ouvre).
 		return { X = -((onde * 0.5 + 0.5) * amplitude + coup), Y = 0, Z = 0 }

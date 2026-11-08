@@ -64,7 +64,9 @@ function Modeleur.construire(
 		end
 		p.CFrame = origine * CFrame.new(vecteur(b.p, taille)) * rotation
 		p.Color = couleurDe(b.c, couleurRarete)
-		p.Material = if b.m then MATERIAUX[b.m] or Enum.Material.SmoothPlastic else Enum.Material.SmoothPlastic
+		p.Material = if b.m
+			then MATERIAUX[b.m] or Enum.Material.SmoothPlastic
+			else Enum.Material.SmoothPlastic
 		p.Transparency = b.tr or 0
 		p.TopSurface = Enum.SurfaceType.Smooth
 		p.BottomSurface = Enum.SurfaceType.Smooth
