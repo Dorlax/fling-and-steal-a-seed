@@ -132,10 +132,11 @@ function Portage.recolter(joueur: any, creature: any): boolean
 	if humanoide.Health <= 0 then
 		return false
 	end
-	local corps = modele.PrimaryPart
-	if corps == nil then
+	local corpsOuNil = modele.PrimaryPart
+	if corpsOuNil == nil then
 		return false
 	end
+	local corps = corpsOuNil :: BasePart
 	if (racine.Position - modele:GetPivot().Position).Magnitude > reglages.DistanceRecolte then
 		return false
 	end

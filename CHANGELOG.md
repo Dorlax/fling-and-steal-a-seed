@@ -2,6 +2,9 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage Portage, suite (issue #5)
+- Corrige la dernière erreur luau-lsp de `src/server/Portage.luau` (ligne 157 : `PrimaryPart` typé `BasePart?` dans la soudure), sans changement de comportement.
+
 ## 2026-11-08 — Correctif typage Portage (issue #5)
 - Corrige les erreurs luau-lsp de `src/server/Portage.luau` (conversions `BasePart?`, `Portee?`, rareté `string`), sans changement de comportement.
 
