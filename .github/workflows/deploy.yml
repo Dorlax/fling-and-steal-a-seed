@@ -1,11 +1,7 @@
 name: Mise en ligne
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:            # une note Obsidian ne déclenche pas de mise en ligne
-      - "**/*.md"
-      - ".obsidian/**"
+  workflow_dispatch:         # mise en ligne manuelle : jamais sans le consentement du propriétaire
 
 permissions:
   contents: write            # pour archiver chaque version en release
