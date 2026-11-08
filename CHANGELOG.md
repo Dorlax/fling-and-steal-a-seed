@@ -3,6 +3,9 @@
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
+
+## 2026-11-08 — Textures pixel-art
+- Trois motifs 16×16 en niveaux de gris (Pelage, Écailles, Gelée), créés dans Blender et envoyés sur Roblox ; `Modeleur` les pose sur les faces visibles des gros blocs, teintés par leur couleur.
 ## 2026-11-08 — Finition du bestiaire
 - Ombrage automatique en trois tons des gros blocs (`Bestiaire.ombrer`) : bande sombre en bas, dessus clair.
 - Détails par espèce : griffes, rangées de dents, rayures, ventres, intérieurs d'oreilles, nervures d'ailes.
