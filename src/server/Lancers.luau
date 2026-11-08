@@ -322,6 +322,21 @@ function Lancers.traiterLacher(joueur: any): Resultat?
 	return resultat
 end
 
+-- Crée une créature identique à une créature récoltée (bouton « Récolter »,
+-- Rarete, Proprietaire = joueur), marquée Volee, au point donné (raid).
+-- Elle n'entre pas dans la liste « au sol » du joueur.
+function Lancers.creerCreaturePortable(joueur: any, rarete: string, point: Vector3): Model
+	local modele = creerCreature(joueur, {
+		Distance = 0,
+		Couleur = "",
+		Message = "",
+		Zone = "Raid",
+		Rarete = rarete,
+	}, point)
+	modele:SetAttribute("Volee", true)
+	return modele
+end
+
 -- Sort une créature de la liste « au sol » du joueur (elle est portée) :
 -- elle n'est plus détruite par MaxCreaturesAuSol.
 function Lancers.retirerDuSol(joueur: any, creature: Model)

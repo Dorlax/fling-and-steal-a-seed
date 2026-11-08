@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Donnees = require(ReplicatedStorage.Shared.Donnees)
+local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 
 type Session = {
@@ -84,6 +85,22 @@ function Sauvegarde.ajouterCreature(joueur: any, rarete: any): boolean
 	table.insert(liste, rarete)
 	joueur:SetAttribute("RevenuParSeconde", Revenus.total(liste))
 	return true
+end
+
+-- Retire la créature n° `numero` de la base (raid) ; les suivantes remontent.
+-- Renvoie la rareté retirée, ou nil sans rien changer.
+function Sauvegarde.retirerCreature(joueur: any, numero: any): string?
+	local liste = creaturesParJoueur[joueur]
+	if liste == nil then
+		return nil
+	end
+	local nouvelle, rarete = Raid.retirerEmplacement(liste, numero)
+	if rarete == nil then
+		return nil
+	end
+	creaturesParJoueur[joueur] = nouvelle :: { string }
+	joueur:SetAttribute("RevenuParSeconde", Revenus.total(nouvelle :: { string }))
+	return rarete
 end
 
 -- Données actuelles du joueur (attributs serveur), nettoyées.

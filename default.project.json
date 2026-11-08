@@ -9,7 +9,8 @@
       "LacherJauge": { "$className": "RemoteEvent" },
       "ResultatLancer": { "$className": "RemoteEvent" },
       "MessageJeu": { "$className": "RemoteEvent" },
-      "Plaquer": { "$className": "RemoteEvent" }
+      "Plaquer": { "$className": "RemoteEvent" },
+      "AlerteVol": { "$className": "RemoteEvent" }
     },
     "Workspace": {
       "TerresSauvages": {
