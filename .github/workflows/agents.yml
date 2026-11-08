@@ -158,6 +158,6 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           allowed_bots: "claude"
-          claude_args: --model ${{ env.MODELE_LEGER }} --max-turns 15 --allowedTools "Read,Write,Edit,Bash(git:*),Bash(gh:*)"
+          claude_args: --model ${{ env.MODELE_LEGER }} --max-turns 40 --allowedTools "Read,Write,Edit,Bash(git:*),Bash(gh:*)"
           prompt: |
             Suis .claude/agents/contexte.md pour la PR #${{ github.event.pull_request.number }}.
