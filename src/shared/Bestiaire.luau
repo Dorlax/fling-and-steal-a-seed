@@ -515,7 +515,7 @@ definir("Dragonnet", 0.75, function(l)
 		n = "Corne",
 		t = { 0.06, 0.16, 0.06 },
 		p = { 0.12, 0.38, -0.18 },
-		r = { -20, 0, -15 },
+		r = { 20, 0, -15 },
 		c = CREME,
 		a = "Tete",
 		j = tete,
@@ -667,7 +667,7 @@ definir("Piquerelle", 0.62, function(l)
 				n = `Piquant{ix}{iz}`,
 				t = { 0.12, 0.24, 0.12 },
 				p = { x, 0.2, z },
-				r = { -35, 0, x * 60 },
+				r = { 35, 0, -x * 60 },
 				c = if (ix + iz) % 2 == 0 then fonce else { 110, 70, 40 },
 			})
 		end
@@ -738,7 +738,7 @@ definir("Ronchonbulle", 0.62, function(l)
 			n = "Criniere" .. i,
 			t = { 0.1, 0.2, 0.16 },
 			p = { 0, 0.24, z },
-			r = { -25, 0, 0 },
+			r = { 25, 0, 0 },
 			c = fonce,
 		})
 	end
@@ -826,7 +826,7 @@ definir("Croquelune", 0.7, function(l)
 		n = "Queue",
 		t = { 0.13, 0.13, 0.36 },
 		p = { 0, 0.12, 0.66 },
-		r = { 30, 0, 0 },
+		r = { -30, 0, 0 },
 		c = gris,
 		a = "Queue",
 		j = queue,
@@ -835,7 +835,7 @@ definir("Croquelune", 0.7, function(l)
 		n = "BoutQueue",
 		t = { 0.12, 0.12, 0.12 },
 		p = { 0, 0.22, 0.83 },
-		r = { 30, 0, 0 },
+		r = { -30, 0, 0 },
 		c = clair,
 		a = "Queue",
 		j = queue,
