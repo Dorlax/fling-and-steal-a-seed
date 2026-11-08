@@ -30,6 +30,16 @@ local DEMI_TAILLE_CREATURE = 1.5 -- rayon de la créature au sol
 
 local portees: { [any]: Portee } = {}
 
+-- Définie plus bas (partagée par `recolter` et `porterVolee`).
+local mettreEnPortage: (
+	joueur: any,
+	modele: Model,
+	rarete: string,
+	racine: BasePart,
+	humanoide: Humanoid,
+	corps: BasePart
+) -> ()
+
 local function racineEtHumanoide(joueur: any): (BasePart?, Humanoid?)
 	local personnage = joueur.Character
 	if typeof(personnage) ~= "Instance" then
@@ -224,6 +234,44 @@ function Portage.recolter(joueur: any, creature: any): boolean
 		modele:SetAttribute("Proprietaire", joueur.UserId)
 	end
 	Lancers.retirerDuSol(joueur, modele)
+	mettreEnPortage(joueur, modele, rarete, racine, humanoide, corps)
+	return true
+end
+
+-- Raid : le voleur porte aussitôt une créature identique à une créature
+-- récoltée (attribut Volee). Refusé s'il porte déjà ou s'il est mort.
+function Portage.porterVolee(voleur: any, rarete: any): boolean
+	if type(rarete) ~= "string" or not table.find(Config.Raretes.Ordre, rarete) then
+		return false
+	end
+	if portees[voleur] ~= nil or voleur:GetAttribute("Porte") ~= nil then
+		return false
+	end
+	local racineOuNil, humanoideOuNil = racineEtHumanoide(voleur)
+	if racineOuNil == nil or humanoideOuNil == nil or (humanoideOuNil :: Humanoid).Health <= 0 then
+		return false
+	end
+	local racine = racineOuNil :: BasePart
+	local modele = Lancers.creerCreaturePortable(voleur, rarete, racine.Position)
+	local corps = modele.PrimaryPart
+	if corps == nil then
+		modele:Destroy()
+		return false
+	end
+	mettreEnPortage(voleur, modele, rarete, racine, humanoideOuNil :: Humanoid, corps :: BasePart)
+	return true
+end
+
+-- Soude la créature au-dessus de la tête du joueur et enregistre le portage
+-- (connexions de mort, attribut Porte, vitesse réduite).
+function mettreEnPortage(
+	joueur: any,
+	modele: Model,
+	rarete: string,
+	racine: BasePart,
+	humanoide: Humanoid,
+	corps: BasePart
+)
 	local prompt = promptDe(modele)
 	if prompt then
 		prompt.Enabled = false
@@ -245,8 +293,11 @@ function Portage.recolter(joueur: any, creature: any): boolean
 			objet.Anchored = false
 		end
 	end
-	-- Hors du personnage : elle survit à sa destruction et peut retomber.
-	modele.Parent = Workspace
+	-- Créature récoltée : hors du personnage, elle survit à sa destruction et
+	-- peut retomber. Créature volée : dans le personnage du voleur (visible
+	-- comme portée par lui) ; elle est sortie du personnage dès qu'elle tombe.
+	local personnage = racine.Parent :: Instance
+	modele.Parent = if modele:GetAttribute("Volee") == true then personnage else Workspace
 
 	local portee: Portee = {
 		creature = modele,
@@ -274,16 +325,21 @@ function Portage.recolter(joueur: any, creature: any): boolean
 			end
 		end)
 	)
-	local personnage = racine.Parent :: Instance
 	table.insert(
 		portee.connexions,
 		personnage.AncestryChanged:Connect(function()
 			if personnage.Parent == nil then
+				-- Créature volée détruite avec le personnage : on l'oublie seulement.
+				if modele:IsDescendantOf(personnage) then
+					if portees[joueur] == portee then
+						oublier(joueur)
+					end
+					return
+				end
 				surMort()
 			end
 		end)
 	)
-	return true
 end
 
 -- Dépose la créature portée si le joueur est dans SA base (appelé à chaque tick).

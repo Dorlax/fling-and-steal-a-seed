@@ -10,6 +10,7 @@ local Lancers = require(script.Parent.Lancers)
 local Monstres = require(script.Parent.Monstres)
 local Plaquages = require(script.Parent.Plaquages)
 local Portage = require(script.Parent.Portage)
+local Raids = require(script.Parent.Raids)
 local Sauvegarde = require(script.Parent.Sauvegarde)
 local TerresSauvages = require(script.Parent.TerresSauvages)
 
@@ -64,6 +65,21 @@ remote("Plaquer").OnServerEvent:Connect(function(joueur: Player)
 	end
 end)
 
+-- Raids : alertes serveur -> client uniquement (aucun OnServerEvent).
+-- « Voler » et « Verrouiller » passent par les ProximityPrompts des bases ;
+-- le serveur ne se fie qu'au joueur fourni par Triggered.
+remote("AlerteVol")
+Bases.surVol(function(declencheur: Player, proprietaire: any, numero: number)
+	if Sauvegarde.estCharge(declencheur) and Sauvegarde.estCharge(proprietaire) then
+		Raids.voler(declencheur, proprietaire, numero)
+	end
+end)
+Bases.surVerrou(function(declencheur: Player, proprietaire: any)
+	if Sauvegarde.estCharge(declencheur) and Sauvegarde.estCharge(proprietaire) then
+		Raids.verrouiller(proprietaire, declencheur)
+	end
+end)
+
 TerresSauvages.creer()
 
 -- Cycle jour/nuit puis monstres : tout est décidé par le serveur, aucun
@@ -113,6 +129,7 @@ Players.PlayerRemoving:Connect(function(joueur)
 	Plaquages.nettoyer(joueur)
 	Monstres.nettoyer(joueur)
 	Lancers.nettoyer(joueur)
+	Raids.nettoyer(joueur)
 	Bases.liberer(joueur)
 	Sauvegarde.terminer(joueur)
 end)
@@ -141,6 +158,7 @@ task.spawn(function()
 				Portage.verifierDepot(joueur)
 			end
 		end
+		Raids.pas()
 	end
 end)
 

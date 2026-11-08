@@ -2,6 +2,19 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif tests en jeu des raids (issue #11)
+- La créature volée est désormais portée dans le personnage du voleur (et oubliée proprement si ce personnage est détruit).
+
+## 2026-11-08 — Correctif typage CI (issue #11)
+- Corrige les erreurs luau-lsp (valeurs possiblement nil) dans InterfaceRaid, Bases, Portage et Raids, sans changement de comportement.
+
+## 2026-11-08 — Raids de bases (issue #11)
+- Action « Voler » (ProximityPrompt, E / ButtonX, bouton tactile) sur chaque créature exposée d'une autre base : la créature quitte la base de la victime (sauvegarde et revenus compris) et passe en portage chez le voleur, à déposer dans sa propre base. Impossible si le voleur porte déjà une créature.
+- Alerte cartoon « VOLÉ ! » (billboard rebondissant au-dessus du voleur, message à l'écran pour la victime et le voleur, RemoteEvent `AlerteVol`).
+- Une créature volée se comporte comme une créature récoltée : lâchée et libre si le voleur est plaqué ou frappé par un monstre.
+- Porte en arche, bouton « Verrouiller » (R / ButtonB, 100 pièces) et bouclier rouge : verrou de 60 s qui replace les intrus devant la porte, puis 60 s de recharge ; panneau et compteur à l'écran.
+- Tout est vérifié par le serveur (`Raids`, logique pure dans `Raid`).
+
 ## 2026-11-08 — Correctif typage CI (issue #9)
 - Typage strict corrigé dans Monstres (serveur, effet « PAF ! ») : la pièce support est explicitement typée BasePart pour luau-lsp. Aucun changement de comportement.
 
