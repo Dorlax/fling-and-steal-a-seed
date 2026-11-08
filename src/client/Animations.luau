@@ -36,6 +36,48 @@ type Suivi = {
 local suivis: { [Model]: Suivi } = {}
 local demarre = false
 
+-- Contours cartoon (Highlight) sur les modèles les plus proches : Roblox
+-- n'en affiche qu'une trentaine à la fois, on en garde au plus CONTOURS_MAX.
+local CONTOURS_MAX = 20
+local CONTOURS_DISTANCE = 90
+local contours: { [Model]: Highlight? } = {}
+local prochainTri = 0
+
+local function majContours(oeil: Vector3)
+	local proches: { { modele: Model, distance: number } } = {}
+	for modele, s in suivis do
+		local distance = (s.base.Position - oeil).Magnitude
+		if distance <= CONTOURS_DISTANCE and modele.PrimaryPart and modele.PrimaryPart.Anchored then
+			table.insert(proches, { modele = modele, distance = distance })
+		end
+	end
+	table.sort(proches, function(a, b)
+		return a.distance < b.distance
+	end)
+	local gardes: { [Model]: boolean } = {}
+	for i = 1, math.min(#proches, CONTOURS_MAX) do
+		local modele = proches[i].modele
+		gardes[modele] = true
+		if contours[modele] == nil then
+			local h = Instance.new("Highlight")
+			h.Name = "Contour"
+			h.FillTransparency = 1
+			h.OutlineColor = Color3.fromRGB(30, 20, 40)
+			h.OutlineTransparency = 0.15
+			h.DepthMode = Enum.HighlightDepthMode.Occluded
+			h.Adornee = modele
+			h.Parent = modele
+			contours[modele] = h
+		end
+	end
+	for modele, h in contours do
+		if h and (not gardes[modele] or modele.Parent == nil) then
+			h:Destroy()
+			contours[modele] = nil
+		end
+	end
+end
+
 local function sorteDe(objet: Instance): string?
 	if not objet:IsA("Model") then
 		return nil
@@ -170,6 +212,10 @@ local function pas()
 	end
 	if #parts > 0 then
 		Workspace:BulkMoveTo(parts, cadres, Enum.BulkMoveMode.FireCFrameChanged)
+	end
+	if t >= prochainTri then
+		prochainTri = t + 0.5
+		majContours(oeil)
 	end
 end
 

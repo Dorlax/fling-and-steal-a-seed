@@ -2,6 +2,11 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+
+## 2026-11-08 — Finition du bestiaire
+- Ombrage automatique en trois tons des gros blocs (`Bestiaire.ombrer`) : bande sombre en bas, dessus clair.
+- Détails par espèce : griffes, rangées de dents, rayures, ventres, intérieurs d'oreilles, nervures d'ailes.
+- Contours cartoon côté client (Highlight) sur les modèles proches (20 au plus).
 ## 2026-11-08 — Bestiaire en blocs et animations des membres
 - Nouveau style « jouet en blocs » (inspiré des jeux de référence) : `Shared.Bestiaire` décrit chaque espèce, `Modeleur` la construit autour d'un `Corps` invisible.
 - Créatures : une espèce par rareté (Poussigraine, Lapinou, Renardelle, Cerfaurore, Dragonnet), auras de rareté.
