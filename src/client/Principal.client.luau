@@ -2,6 +2,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Animations = require(script.Parent:WaitForChild("Animations"))
 local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
 local InterfaceLancer = require(script.Parent:WaitForChild("InterfaceLancer"))
 local InterfacePieges = require(script.Parent:WaitForChild("InterfacePieges"))
@@ -22,5 +23,7 @@ InterfacePieces.demarrer()
 InterfacePlaquage.demarrer()
 InterfaceRaid.demarrer()
 InterfacePieges.demarrer()
+-- Sautillement des créatures et dandinement des monstres (affichage seulement).
+Animations.demarrer()
 
 print(`{Config.NomDuJeu} : client démarré`)

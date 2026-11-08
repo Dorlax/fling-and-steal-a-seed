@@ -11,6 +11,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Monstre = require(ReplicatedStorage.Shared.Monstre)
 local Bases = require(script.Parent.Bases)
+local Decor = require(script.Parent.Decor)
 local Portage = require(script.Parent.Portage)
 
 type Etat = {
@@ -179,6 +180,7 @@ local function creerModele(zone: string, position: Vector3): Model
 		Color3.fromRGB(255, 120, 160),
 		CFrame.new(t * 0.05, -t * 0.24, -t * 0.5)
 	)
+	Decor.detaillerMonstre(modele, corps, zone)
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"
