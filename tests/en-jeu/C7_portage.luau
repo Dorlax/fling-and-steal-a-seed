@@ -5,6 +5,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Forge = require(ReplicatedStorage.Shared.Forge)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
+local Fiche = require(ReplicatedStorage.Shared.Fiche)
 
 -- API serveur supposée d'après la maquette issue-5 (à ajuster avec le Bâtisseur si les noms diffèrent) :
 --   Portage.recolter(joueur, creature) -> boolean ; Portage.verifierDepot(joueur)
@@ -226,9 +227,11 @@ return {
 		local apres = #(base :: Instance):GetDescendants()
 		nettoyer(j)
 		assert(porte == nil, "Porte doit être effacé")
-		assert(#liste == 1 and liste[1] == rarete, "CreaturesBase doit contenir la rareté")
+		-- Depuis les tailles : la base garde la fiche complète (rareté, taille, espèce).
+		local infos = Fiche.lire(liste[1])
+		assert(#liste == 1 and infos and infos.Rarete == rarete, "CreaturesBase doit contenir la rareté")
 		assert(
-			revenu == Revenus.parSeconde(rarete),
+			revenu == Revenus.parSeconde(liste[1]),
 			"RevenuParSeconde incorrect : " .. tostring(revenu)
 		)
 		assert(apres > avant, "un modèle de créature doit apparaître dans la base")
