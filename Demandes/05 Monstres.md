@@ -1,5 +1,6 @@
 ---
-statut: prêt
+statut: en-cours
+issue: https://github.com/Dorlax/fling-and-steal-a-seed/issues/9
 issue:
 taille: normale
 priorité: moyenne
