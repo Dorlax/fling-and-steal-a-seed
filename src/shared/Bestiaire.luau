@@ -17,6 +17,9 @@
 --   a  rôle d'animation : Patte, Bras, Aile, Queue, Oreille, Tete, Antenne,
 --      Machoire (facultatif) ; j = articulation {x, y, z} ; ph = phase ;
 --      cote = -1 (gauche) ou 1 (droite)
+-- selene: allow(incorrect_standard_library_use)
+local Biomes = if script then require(script.Parent.Biomes) else (require :: any)("./Biomes")
+
 local Bestiaire = {}
 
 export type Couleur = { number } | string
@@ -211,12 +214,21 @@ local TEXTURES: { [string]: string } = {
 	Gloupinou = "Gelee",
 }
 
-local function definir(nom: string, hauteur: number, remplir: (liste: { Bloc }) -> ())
+local function definir(
+	nom: string,
+	hauteur: number,
+	remplir: (liste: { Bloc }) -> (),
+	texture: string?
+)
 	local liste: { Bloc } = {}
 	remplir(liste)
 	ombrer(liste)
-	especes[nom] =
-		{ Nom = nom, Hauteur = hauteur, Texture = TEXTURES[nom] or "Pelage", Blocs = liste }
+	especes[nom] = {
+		Nom = nom,
+		Hauteur = hauteur,
+		Texture = texture or TEXTURES[nom] or "Pelage",
+		Blocs = liste,
+	}
 end
 
 ---------------------------------------------------------------------------
@@ -1889,44 +1901,63 @@ definir("Phenigraine", 0.82, function(l)
 	}, true)
 end)
 
+-- Espèces des autres biomes : un fichier par biome, qui reçoit les outils.
+local outils = {
+	definir = definir,
+	ajouter = ajouter,
+	yeux = yeux,
+	pattes4 = pattes4,
+	BLANC = BLANC,
+	NOIR = NOIR,
+	ROSE = ROSE,
+	CREME = CREME,
+	PI = PI,
+}
+-- selene: allow(incorrect_standard_library_use)
+local BoisMoussu = if script
+	then require(script.Parent.EspecesBoisMoussu)
+	else (require :: any)("./EspecesBoisMoussu")
+-- selene: allow(incorrect_standard_library_use)
+local Dunes = if script
+	then require(script.Parent.EspecesDunes)
+	else (require :: any)("./EspecesDunes")
+BoisMoussu(outils)
+Dunes(outils)
+
 Bestiaire.Especes = especes
 
--- Espèce de créature pour chaque rareté.
-Bestiaire.Creatures = {
-	Commune = { "Poussigraine", "Champichou" },
-	Rare = { "Lapinou", "Tortipousse" },
-	Epique = { "Renardelle", "Hibouflor" },
-	Legendaire = { "Cerfaurore", "Lionfeuille" },
-	Mythique = { "Dragonnet", "Phenigraine" },
-}
+-- Espèces du premier biome (Prairie), gardées pour la compatibilité.
+local prairie = Biomes.Liste[1]
+Bestiaire.Creatures = prairie.Creatures
+Bestiaire.Monstres = prairie.Monstres
 
--- Espèces de monstres par zone (la première porte le nom de Config).
-Bestiaire.Monstres = {
-	Proche = { "Gloupinou", "Piquerelle" },
-	Moyenne = { "Ronchonbulle", "Croquelune" },
-	Lointaine = { "Grobidou", "Brasaurus" },
-}
-
--- Espèce d'une créature : `nom` si c'est bien une espèce de cette rareté,
--- sinon la première espèce de la rareté.
+-- Espèce d'une créature : `nom` si c'est bien une espèce de cette rareté
+-- (dans n'importe quel biome), sinon la première espèce de la rareté.
 function Bestiaire.especeCreature(rarete: string, nom: string?): Espece
-	local liste = (Bestiaire.Creatures :: any)[rarete] or Bestiaire.Creatures.Commune
-	if nom ~= nil and table.find(liste, nom) then
+	if
+		nom ~= nil
+		and table.find(Biomes.especesDeRarete(rarete), nom)
+		and especes[nom :: string]
+	then
 		return especes[nom :: string]
 	end
+	local liste = prairie.Creatures[rarete] or prairie.Creatures.Commune
 	return especes[liste[1]]
 end
 
--- Espèce tirée au hasard parmi celles de la rareté (`tirage` dans [0, 1[).
-function Bestiaire.tirerEspece(rarete: string, tirage: number): Espece
-	local liste = (Bestiaire.Creatures :: any)[rarete] or Bestiaire.Creatures.Commune
+-- Espèce tirée au hasard parmi celles de la rareté dans le biome n
+-- (`tirage` dans [0, 1[ ; biome 1 par défaut).
+function Bestiaire.tirerEspece(rarete: string, tirage: number, biome: number?): Espece
+	local b = Biomes.biome(biome or 1)
+	local liste = b.Creatures[rarete] or prairie.Creatures[rarete] or prairie.Creatures.Commune
 	local i = math.clamp(math.floor(tirage * #liste) + 1, 1, #liste)
 	return especes[liste[i]]
 end
 
--- Espèce de monstre d'une zone ; `tirage` dans [0, 1[ choisit la variante.
-function Bestiaire.especeMonstre(zone: string, tirage: number): Espece
-	local liste = (Bestiaire.Monstres :: any)[zone] or Bestiaire.Monstres.Proche
+-- Espèce de monstre d'une sous-zone du biome n ; `tirage` choisit la variante.
+function Bestiaire.especeMonstre(zone: string, tirage: number, biome: number?): Espece
+	local b = Biomes.biome(biome or 1)
+	local liste = b.Monstres[zone] or b.Monstres.Proche or prairie.Monstres.Proche
 	local i = math.clamp(math.floor(tirage * #liste) + 1, 1, #liste)
 	return especes[liste[i]]
 end

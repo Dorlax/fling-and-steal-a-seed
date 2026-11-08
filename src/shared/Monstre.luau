@@ -6,6 +6,8 @@
 local Config = if script then require(script.Parent.Config) else (require :: any)("./Config")
 -- selene: allow(incorrect_standard_library_use)
 local Lancer = if script then require(script.Parent.Lancer) else (require :: any)("./Lancer")
+-- selene: allow(incorrect_standard_library_use)
+local Biomes = if script then require(script.Parent.Biomes) else (require :: any)("./Biomes")
 
 export type Position = { X: number, Y: number, Z: number }
 
@@ -26,10 +28,10 @@ local Monstre = {}
 local reglages = Config.Monstres
 
 -- Sol des Terres Sauvages (voir TerresSauvages) : 800 studs de large centrés
--- sur X = 0, de Z = BordBases à BordBases + DistanceMax + 40.
+-- sur X = 0, de Z = BordBases jusqu'à la fin du dernier biome.
 local MARGE_SOL = 5
 local DEMI_LARGEUR = 400 - MARGE_SOL
-local Z_FOND = reglages.BordBases + Config.Lancer.DistanceMax + 40 - MARGE_SOL
+local Z_FOND = reglages.BordBases + Biomes.nombre() * Biomes.Longueur - MARGE_SOL
 
 local function estNombreFini(valeur: any): boolean
 	return type(valeur) == "number"
@@ -55,22 +57,28 @@ function Monstre.reglagesZone(zone: string): any
 	return zones[zone] or zones.Proche
 end
 
--- Zone d'une position, mêmes seuils que les lancers.
+-- Sous-zone d'une position (dans son biome), mêmes seuils que les lancers.
 function Monstre.zoneDe(position: Position): string
 	return Lancer.zone(position.Z - reglages.BordBases)
 end
 
--- Bande de Z [min, max] où vivent les monstres d'une zone.
-function Monstre.bandeZone(zone: string): (number, number)
+-- Biome d'une position (1, 2, ...).
+function Monstre.biomeDe(position: Position): number
+	return Biomes.index(position.Z - reglages.BordBases)
+end
+
+-- Bande de Z [min, max] où vivent les monstres d'une sous-zone du biome n.
+function Monstre.bandeZone(zone: string, biome: number?): (number, number)
 	local zones = Config.Lancer.Zones
-	local minimum = reglages.BordBases + reglages.MargeBases
-	local maximum = Z_FOND
+	local debut = reglages.BordBases + Biomes.debut(biome or 1)
+	local minimum = math.max(reglages.BordBases + reglages.MargeBases, debut)
+	local maximum = math.min(Z_FOND, debut + Biomes.Longueur - 1)
 	for i, z in zones do
 		if z.Nom == zone then
-			minimum = math.max(minimum, reglages.BordBases + z.Min)
+			minimum = math.max(minimum, debut + z.Min)
 			local suivante = zones[i + 1]
 			if suivante then
-				maximum = reglages.BordBases + suivante.Min - 1
+				maximum = debut + suivante.Min - 1
 			end
 			break
 		end
@@ -79,12 +87,13 @@ function Monstre.bandeZone(zone: string): (number, number)
 end
 
 -- Position ramenée sur le sol des Terres Sauvages, jamais dans une base
--- (Z >= BordBases + MargeBases). Avec `zone`, Z reste aussi dans sa bande.
-function Monstre.limiter(position: Position, zone: string?): Position
+-- (Z >= BordBases + MargeBases). Avec `zone` (et `biome`), Z reste aussi
+-- dans sa bande.
+function Monstre.limiter(position: Position, zone: string?, biome: number?): Position
 	local zMin = reglages.BordBases + reglages.MargeBases
 	local zMax = Z_FOND
 	if zone ~= nil then
-		zMin, zMax = Monstre.bandeZone(zone)
+		zMin, zMax = Monstre.bandeZone(zone, biome)
 	end
 	local y = if estNombreFini(position.Y) then position.Y else 0
 	return {

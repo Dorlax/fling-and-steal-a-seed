@@ -5,6 +5,7 @@
     "ReplicatedStorage": {
       "Shared": { "$path": "src/shared" },
       "ChoisirModeForge": { "$className": "RemoteEvent" },
+      "AmeliorerForge": { "$className": "RemoteEvent" },
       "DemarrerJauge": { "$className": "RemoteEvent" },
       "LacherJauge": { "$className": "RemoteEvent" },
       "ResultatLancer": { "$className": "RemoteEvent" },

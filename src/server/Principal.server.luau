@@ -36,6 +36,13 @@ remote("ChoisirModeForge").OnServerEvent:Connect(function(joueur: Player, valeur
 	end
 end)
 
+-- Achat du niveau de Forge suivant : aucun argument ; le serveur vérifie tout.
+remote("AmeliorerForge").OnServerEvent:Connect(function(joueur: Player)
+	if Sauvegarde.estCharge(joueur) then
+		Entrainement.ameliorer(joueur)
+	end
+end)
+
 -- Lancer : le client signale seulement « début » et « lâcher » ; ses arguments
 -- éventuels sont ignorés, tout est calculé par le serveur.
 remote("ResultatLancer")

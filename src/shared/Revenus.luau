@@ -6,6 +6,8 @@
 local Config = if script then require(script.Parent.Config) else (require :: any)("./Config")
 -- selene: allow(incorrect_standard_library_use)
 local Fiche = if script then require(script.Parent.Fiche) else (require :: any)("./Fiche")
+-- selene: allow(incorrect_standard_library_use)
+local Biomes = if script then require(script.Parent.Biomes) else (require :: any)("./Biomes")
 
 local Revenus = {}
 
@@ -28,13 +30,16 @@ local function borner(pieces: any): number
 end
 
 -- Revenu par seconde d'une créature (fiche « Rarete[:Taille[:Espece]] ») :
--- revenu de la rareté × multiplicateur de taille ; 0 si la fiche est invalide.
+-- revenu de la rareté × multiplicateur de taille × valeur de son biome
+-- (× 1,5 par biome), arrondi ; 0 si la fiche est invalide.
 function Revenus.parSeconde(fiche: any): number
 	local infos = Fiche.lire(fiche)
 	if infos == nil then
 		return 0
 	end
-	return (revenus[infos.Rarete] or 0) * Fiche.multiplicateur(infos.Taille)
+	local biome = Biomes.indexEspece(infos.Espece) or 1
+	local brut = (revenus[infos.Rarete] or 0) * Fiche.multiplicateur(infos.Taille)
+	return math.floor(brut * Biomes.multiplicateur(biome) + 0.5)
 end
 
 -- Somme des revenus d'une liste de raretés (entrées invalides : 0).

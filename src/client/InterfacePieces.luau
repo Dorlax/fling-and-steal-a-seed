@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Style = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Style"))
+local Nombres = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Nombres"))
 local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
@@ -18,11 +19,9 @@ local COULEUR_PIECES = Habillage.nommee("Pieces")
 local COULEUR_REVENU = Color3.fromRGB(150, 255, 140)
 local DESCENTE = 112 -- sous le panneau des taux de rareté
 
--- 1234567 -> « 1 234 567 »
+-- 1234 -> « 1 234 », 1234567 -> « 1,23 M » (voir Shared.Nombres)
 local function formater(n: number): string
-	local brut = string.format("%d", math.floor(n))
-	local resultat = string.gsub(string.reverse(brut), "(%d%d%d)", "%1 ")
-	return (string.gsub(string.reverse(resultat), "^ ", ""))
+	return Nombres.abreger(n)
 end
 
 local function nombre(joueur: Player, nom: string): number

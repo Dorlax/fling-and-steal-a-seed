@@ -5,7 +5,10 @@
 -- Les pièces ne sont pas « interrogeables » (CanQuery = false) et, sauf les
 -- troncs et les collines de bordure, ne bloquent rien.
 local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+
+local Biomes = require(ReplicatedStorage.Shared.Biomes)
 
 local Decor = {}
 
@@ -13,7 +16,7 @@ local Decor = {}
 -- de -360 à +360) et TerresSauvages (800 de large, de Z = 20 à Z = 600).
 local DEMI_LARGEUR = 400
 local BORD_BASES = 20
-local FOND_SAUVAGE = 600
+local FOND_SAUVAGE = 600 -- fond du biome 1 (Prairie)
 local ECART_BASES = 60
 local DEMI_SOL_BASE = 20
 local LARGEUR_PORTE = 10
@@ -322,6 +325,315 @@ local function colline(parent: Instance, position: Vector3, taille: number, coul
 end
 
 ---------------------------------------------------------------------------
+-- Décors des biomes suivants (style « jouet en blocs », comme les créatures)
+
+local function bloc(
+	parent: Instance,
+	nom: string,
+	taille: Vector3,
+	cadre: CFrame,
+	couleur: Color3,
+	bloquant: boolean?
+): Part
+	return piece(parent, nom, Enum.PartType.Block, taille, cadre, couleur, bloquant)
+end
+
+local function teinte(c: Color3, vers: number, part: number): Color3
+	return c:Lerp(Color3.new(vers, vers, vers), part)
+end
+
+-- Forêt : grand arbre carré à étages de feuillage.
+local function arbreBloc(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ArbreBloc"
+	local e = hasard:NextNumber(1, 1.8)
+	local hauteur = 12 * e
+	local ecorce = Color3.fromRGB(100, 70, 45)
+	bloc(
+		modele,
+		"Tronc",
+		Vector3.new(2.6, hauteur, 2.6) * Vector3.new(e, 1, e),
+		CFrame.new(position + Vector3.new(0, hauteur / 2, 0)),
+		ecorce,
+		true
+	)
+	local verts =
+		{ Color3.fromRGB(45, 120, 75), Color3.fromRGB(60, 150, 90), Color3.fromRGB(35, 105, 85) }
+	local vert = verts[hasard:NextInteger(1, #verts)]
+	for i = 0, 2 do
+		local largeur = (12 - i * 3.2) * e
+		bloc(
+			modele,
+			"Feuillage",
+			Vector3.new(largeur, 3.4 * e, largeur),
+			CFrame.new(position + Vector3.new(0, hauteur + i * 3 * e, 0))
+				* CFrame.Angles(0, math.rad(i * 15), 0),
+			teinte(vert, 1, i * 0.08)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Forêt : champignon géant au chapeau violet et pois lumineux.
+local function champignonGeant(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ChampignonGeant"
+	local e = hasard:NextNumber(1, 2.4)
+	bloc(
+		modele,
+		"Pied",
+		Vector3.new(2, 5, 2) * e,
+		CFrame.new(position + Vector3.new(0, 2.5 * e, 0)),
+		Color3.fromRGB(240, 225, 200),
+		true
+	)
+	local chapeau = if hasard:NextNumber() < 0.5
+		then Color3.fromRGB(150, 60, 170)
+		else Color3.fromRGB(60, 150, 190)
+	bloc(
+		modele,
+		"Chapeau",
+		Vector3.new(7, 2, 7) * e,
+		CFrame.new(position + Vector3.new(0, 5.6 * e, 0)),
+		chapeau
+	)
+	bloc(
+		modele,
+		"Sommet",
+		Vector3.new(4.4, 1.2, 4.4) * e,
+		CFrame.new(position + Vector3.new(0, 7 * e, 0)),
+		chapeau
+	)
+	for i = 1, 4 do
+		local a = (i / 4) * 2 * math.pi
+		local pois = bloc(
+			modele,
+			"Pois",
+			Vector3.new(0.9, 0.3, 0.9) * e,
+			CFrame.new(
+				position + Vector3.new(math.cos(a) * 2.2 * e, 6.65 * e, math.sin(a) * 2.2 * e)
+			),
+			Color3.fromRGB(200, 255, 230)
+		)
+		pois.Material = Enum.Material.Neon
+	end
+	modele.Parent = parent
+end
+
+-- Forêt : rocher moussu.
+local function rocherMousse(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(2.5, 5)
+	bloc(
+		parent,
+		"Pierre",
+		Vector3.new(t * 1.3, t * 0.7, t),
+		CFrame.new(position + Vector3.new(0, t * 0.35, 0))
+			* CFrame.Angles(0, hasard:NextNumber(0, 6), 0),
+		Color3.fromRGB(120, 130, 135)
+	)
+	bloc(
+		parent,
+		"Mousse",
+		Vector3.new(t * 1.32, t * 0.18, t * 1.02),
+		CFrame.new(position + Vector3.new(0, t * 0.66, 0))
+			* CFrame.Angles(0, hasard:NextNumber(0, 6), 0),
+		Color3.fromRGB(90, 170, 90)
+	)
+end
+
+-- Forêt : luciole qui flotte (petit cube lumineux).
+local function luciole(parent: Instance, position: Vector3, hasard: Random)
+	local p = bloc(
+		parent,
+		"Luciole",
+		Vector3.one * 0.5,
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(3, 12), 0)),
+		Color3.fromRGB(210, 255, 120)
+	)
+	p.Material = Enum.Material.Neon
+	p.CastShadow = false
+end
+
+-- Désert : cactus à bras.
+local function cactusBloc(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Cactus"
+	local e = hasard:NextNumber(1, 2)
+	local vert = Color3.fromRGB(80, 170, 85)
+	bloc(
+		modele,
+		"Tige",
+		Vector3.new(2, 9, 2) * e,
+		CFrame.new(position + Vector3.new(0, 4.5 * e, 0)),
+		vert,
+		true
+	)
+	for _, cote in { -1, 1 } do
+		if hasard:NextNumber() < 0.75 then
+			local y = hasard:NextNumber(3, 6) * e
+			bloc(
+				modele,
+				"Bras",
+				Vector3.new(2, 1.4, 1.4) * e,
+				CFrame.new(position + Vector3.new(cote * 1.8 * e, y, 0)),
+				vert
+			)
+			bloc(
+				modele,
+				"Coude",
+				Vector3.new(1.4, 3, 1.4) * e,
+				CFrame.new(position + Vector3.new(cote * 2.5 * e, y + 1.6 * e, 0)),
+				teinte(vert, 1, 0.08)
+			)
+		end
+	end
+	if hasard:NextNumber() < 0.4 then
+		bloc(
+			modele,
+			"Fleur",
+			Vector3.new(1.2, 0.6, 1.2) * e,
+			CFrame.new(position + Vector3.new(0, 9.2 * e, 0)),
+			Color3.fromRGB(255, 120, 180)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Désert : mesa de grès en couches.
+local function mesa(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Mesa"
+	local e = hasard:NextNumber(1, 2.2)
+	local couleurs = {
+		Color3.fromRGB(215, 120, 75),
+		Color3.fromRGB(235, 160, 100),
+		Color3.fromRGB(200, 100, 65),
+	}
+	local y = 0
+	for i = 1, 3 do
+		local largeur = (16 - i * 3) * e
+		local hauteur = hasard:NextNumber(3, 5) * e
+		bloc(
+			modele,
+			"Couche",
+			Vector3.new(largeur, hauteur, largeur * 0.8),
+			CFrame.new(position + Vector3.new(0, y + hauteur / 2, 0)),
+			couleurs[i],
+			true
+		)
+		y += hauteur
+	end
+	modele.Parent = parent
+end
+
+-- Désert : dune douce (ne bloque pas).
+local function dune(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(18, 34)
+	piece(
+		parent,
+		"Dune",
+		Enum.PartType.Ball,
+		Vector3.new(t * 1.6, t * 0.5, t),
+		CFrame.new(position - Vector3.new(0, t * 0.16, 0)),
+		Color3.fromRGB(245, 210, 130)
+	)
+end
+
+-- Désert : palmier d'oasis.
+local function palmier(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Palmier"
+	local e = hasard:NextNumber(1, 1.5)
+	for i = 0, 4 do
+		bloc(
+			modele,
+			"Tronc",
+			Vector3.new(1.6, 2.6, 1.6) * e,
+			CFrame.new(position + Vector3.new(i * 0.4 * e, (1.3 + i * 2.5) * e, 0)),
+			teinte(Color3.fromRGB(160, 110, 60), 0, (i % 2) * 0.12),
+			true
+		)
+	end
+	local sommet = position + Vector3.new(2 * e, 13.5 * e, 0)
+	for i = 1, 5 do
+		local a = (i / 5) * 2 * math.pi
+		bloc(
+			modele,
+			"Palme",
+			Vector3.new(7, 0.6, 2) * e,
+			CFrame.new(sommet + Vector3.new(math.cos(a) * 3 * e, -0.8 * e, math.sin(a) * 3 * e))
+				* CFrame.Angles(0, -a, math.rad(-18)),
+			Color3.fromRGB(70, 170, 80)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Désert : petite pyramide en marches.
+local function pyramide(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Pyramide"
+	local e = hasard:NextNumber(1.4, 2.2)
+	for i = 0, 5 do
+		local largeur = (24 - i * 4) * e
+		bloc(
+			modele,
+			"Marche",
+			Vector3.new(largeur, 3 * e, largeur),
+			CFrame.new(position + Vector3.new(0, (1.5 + i * 3) * e, 0)),
+			teinte(Color3.fromRGB(225, 185, 115), 1, (i % 2) * 0.08),
+			true
+		)
+	end
+	local pointe = bloc(
+		modele,
+		"Pointe",
+		Vector3.new(3, 2, 3) * e,
+		CFrame.new(position + Vector3.new(0, 19 * e, 0)),
+		Color3.fromRGB(255, 205, 50)
+	)
+	pointe.Material = Enum.Material.Foil
+	modele.Parent = parent
+end
+
+local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombre: number } } } = {
+	Foret = {
+		{ fonction = arbreBloc, nombre = 70 },
+		{ fonction = champignonGeant, nombre = 22 },
+		{ fonction = rocherMousse, nombre = 30 },
+		{ fonction = luciole, nombre = 60 },
+	},
+	Desert = {
+		{ fonction = cactusBloc, nombre = 50 },
+		{ fonction = mesa, nombre = 12 },
+		{ fonction = dune, nombre = 24 },
+		{ fonction = palmier, nombre = 8 },
+		{ fonction = pyramide, nombre = 2 },
+	},
+}
+
+-- Décor d'un biome, entre son entrée et sa fin (sauf l'allée de l'arche).
+local function creerBiome(racine: Instance, numero: number)
+	local biome = Biomes.Liste[numero]
+	local theme = THEMES[biome.Decor]
+	if theme == nil then
+		return
+	end
+	local dossierBiome = dossier(racine, "Biome" .. numero)
+	local hasard = Random.new(GRAINE + numero * 97)
+	local debut = BORD_BASES + Biomes.debut(numero)
+	for _, element in theme do
+		for _ = 1, element.nombre do
+			local x = hasard:NextNumber(-DEMI_LARGEUR + 12, DEMI_LARGEUR - 12)
+			local z = hasard:NextNumber(debut + 25, debut + Biomes.Longueur - 15)
+			if math.abs(x) > 50 or z > debut + 60 then
+				element.fonction(dossierBiome, Vector3.new(x, 0, z), hasard)
+			end
+		end
+	end
+end
+
+---------------------------------------------------------------------------
 -- Construction du monde
 
 function Decor.creer(): Folder
@@ -397,21 +709,35 @@ function Decor.creer(): Folder
 		arbre(nature, Vector3.new(x, 0, hasard:NextNumber(-95, -40)), hasard)
 	end
 
-	-- Collines tout autour (fond, côtés, arrière).
+	-- Collines tout autour : derrière les bases, le long de chaque biome (à sa
+	-- couleur) et au bout du dernier biome.
 	local bord = dossier(racine, "Bordure")
+	local fin = BORD_BASES + Biomes.nombre() * Biomes.Longueur
 	local x = -DEMI_LARGEUR
 	while x <= DEMI_LARGEUR do
 		local t = hasard:NextNumber(50, 80)
-		colline(bord, Vector3.new(x, 0, FOND_SAUVAGE + 15), t, COULEURS.Colline)
+		local dernier = Biomes.Liste[Biomes.nombre()]
+		local couleurFin =
+			Color3.fromRGB(dernier.Bordure[1], dernier.Bordure[2], dernier.Bordure[3])
+		colline(bord, Vector3.new(x, 0, fin + 15), t, couleurFin)
 		colline(bord, Vector3.new(x, 0, -110), t * 0.8, COULEURS.CollineClaire)
 		x += 45
 	end
 	local z = -100
-	while z <= FOND_SAUVAGE do
+	while z <= fin do
 		local t = hasard:NextNumber(50, 80)
-		colline(bord, Vector3.new(-DEMI_LARGEUR - 15, 0, z), t, COULEURS.Colline)
-		colline(bord, Vector3.new(DEMI_LARGEUR + 15, 0, z), t, COULEURS.Colline)
+		local biome = Biomes.biome(Biomes.index(z - BORD_BASES))
+		local couleur = if z < BORD_BASES + Biomes.Longueur
+			then COULEURS.Colline
+			else Color3.fromRGB(biome.Bordure[1], biome.Bordure[2], biome.Bordure[3])
+		colline(bord, Vector3.new(-DEMI_LARGEUR - 15, 0, z), t, couleur)
+		colline(bord, Vector3.new(DEMI_LARGEUR + 15, 0, z), t, couleur)
 		z += 45
+	end
+
+	-- Décor propre à chaque biome suivant (Forêt, Désert...).
+	for numero = 2, Biomes.nombre() do
+		creerBiome(racine, numero)
 	end
 
 	-- Nuages.

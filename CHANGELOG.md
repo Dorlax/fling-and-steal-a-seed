@@ -5,6 +5,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+
+## 2026-11-08 — Biomes, niveaux de Forge et bestiaire élargi
+- Moteur de biomes (`Shared.Biomes`) : route de biomes de 600 studs, sols, arches, décors en blocs (Forêt, Désert) et ambiance par biome ; valeur × 1,5 par biome.
+- Biomes 2 (Bois Moussu) et 3 (Dunes Dorées) : 26 nouvelles espèces dessinées à la main (10 créatures + 3 monstres chacun).
+- Monstres limités aux biomes occupés (12 au plus par biome la nuit).
+- Progression sans limite : Force/Vitesse logarithmiques au-delà de 1 000, niveaux de Forge achetés en pièces, nombres raccourcis.
 ## 2026-11-08 — Tailles des créatures et espèces « graine »
 - Cinq tailles (Normale → Titan) tirées par le serveur, taux affichés dans le panneau des taux ; revenu × 1 à × 20 selon la taille (`Config.Tailles`, `Shared.Fiche`).
 - Sauvegarde : chaque créature de base est une fiche « Rarete[:Taille[:Espece]] », compatible avec les anciennes sauvegardes.
