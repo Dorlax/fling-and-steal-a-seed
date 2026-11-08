@@ -119,6 +119,9 @@ local Config = {
 		Taux = { Normale = 60, Grande = 25, Geante = 10, Colossale = 4, Titan = 1 }, -- %
 		Echelle = { Normale = 1, Grande = 1.3, Geante = 1.65, Colossale = 2.1, Titan = 2.8 },
 		Multiplicateur = { Normale = 1, Grande = 2, Geante = 4, Colossale = 8, Titan = 20 },
+		-- Plus le biome est loin, plus les grosses tailles sortent souvent :
+		-- le poids de la taille n (1 = Normale) est × (1 + BonusParBiome × (biome - 1))^(n - 1).
+		BonusParBiome = 0.2,
 	},
 
 	-- Plaquage d'un joueur qui porte une créature (vérifié par le serveur).
