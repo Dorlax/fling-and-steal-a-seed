@@ -111,7 +111,11 @@ return {
 		refusVerrou({ verrouJusqua = 90, pretA = 150 }, "recharge")
 		refusVerrou({ pieces = R.PrixVerrou - 1 }, "pieces")
 		refusVerrou({ pieces = 0 / 0 }, "pieces")
-		refusVerrou({ pieces = nil }, "pieces")
+		-- Une clé à nil n'existe pas dans une table : on construit le contexte à la main.
+		local sansPieces = verrou()
+		sansPieces.pieces = nil
+		local ok, pourquoi = Raid.verifierVerrou(sansPieces)
+		assert(ok == false and pourquoi == "pieces", "refus pieces attendu si pieces est nil")
 	end,
 
 	["C4 verifierVerrou : ordre de priorité et bornes"] = function()
