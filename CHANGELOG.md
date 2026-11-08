@@ -2,6 +2,11 @@
 
 Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
+## 2026-11-08 — Correctif typage interface (issue #15)
+
+- InterfacePieges : le champ `jauge` utilise le type `Habillage.Jauge`.
+- Panneaux : genre affiné après le test de nil ; `Adornee` affecté seulement si le support est une BasePart.
+
 ## 2026-11-08 — Peaufinage interface et effets (issue #15)
 - Nouveau module pur `Shared/Style` (couleurs, dégradé des jauges, recharges, file de bandeaux) et fabrique client `Habillage` (textes, boutons, jauges, rebonds, nombres flottants).
 - Toute l'interface en police ronde FredokaOne avec contour noir épais ; gros boutons colorés qui rebondissent (LANCER vert, PLAQUER orange, Force rouge, Vitesse bleu, pièges à leur couleur).

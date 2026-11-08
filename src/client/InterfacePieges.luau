@@ -56,7 +56,7 @@ function InterfacePieges.demarrer()
 		typePiege: string,
 		bouton: TextButton,
 		texte: TextLabel,
-		jauge: { maj: (number) -> () },
+		jauge: Habillage.Jauge,
 		couleur: Color3,
 	}
 	local boutons: { Bouton } = {}

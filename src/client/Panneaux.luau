@@ -83,13 +83,14 @@ local function restyler(panneau: BillboardGui, essai: number)
 		return
 	end
 	local label = panneau:FindFirstChildWhichIsA("TextLabel")
-	local genre = if label then genreDe(panneau, label) else nil
-	if label == nil or genre == nil then
+	local trouve = if label then genreDe(panneau, label) else nil
+	if label == nil or trouve == nil then
 		if essai < ESSAIS then
 			task.delay(0.3, restyler, panneau, essai + 1)
 		end
 		return
 	end
+	local genre = trouve :: Genre
 	restyles[panneau] = true
 
 	local taille = panneau.Size
@@ -155,7 +156,9 @@ local function montrerPrompt(
 	local support = prompt.Parent
 	local billboard = Instance.new("BillboardGui")
 	billboard.Name = "Prompt" .. prompt.Name
-	billboard.Adornee = if support and support:IsA("BasePart") then support else nil
+	if support and support:IsA("BasePart") then
+		billboard.Adornee = support
+	end
 	billboard.AlwaysOnTop = true
 	billboard.Active = true
 	billboard.LightInfluence = 0
