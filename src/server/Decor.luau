@@ -599,7 +599,9 @@ local function pousse(modele: Model, corps: BasePart, t: number)
 			"Feuille",
 			Enum.PartType.Ball,
 			Vector3.new(t * 0.26, t * 0.06, t * 0.14),
-			corps.CFrame * CFrame.new(cote * t * 0.12, t * 0.67, 0) * CFrame.Angles(0, 0, math.rad(cote * 25)),
+			corps.CFrame
+				* CFrame.new(cote * t * 0.12, t * 0.67, 0)
+				* CFrame.Angles(0, 0, math.rad(cote * 25)),
 			VERT_POUSSE
 		)
 		feuille.CastShadow = false
@@ -609,8 +611,17 @@ end
 local function oreilles(modele: Model, corps: BasePart, t: number)
 	local fonce = corps.Color:Lerp(Color3.new(0, 0, 0), 0.15)
 	for _, cote in { -1, 1 } do
-		local cadre = corps.CFrame * CFrame.new(cote * t * 0.3, t * 0.42, 0) * CFrame.Angles(0, 0, math.rad(-cote * 22))
-		piece(modele, "Oreille", Enum.PartType.Ball, Vector3.new(t * 0.22, t * 0.32, t * 0.12), cadre, fonce)
+		local cadre = corps.CFrame
+			* CFrame.new(cote * t * 0.3, t * 0.42, 0)
+			* CFrame.Angles(0, 0, math.rad(-cote * 22))
+		piece(
+			modele,
+			"Oreille",
+			Enum.PartType.Ball,
+			Vector3.new(t * 0.22, t * 0.32, t * 0.12),
+			cadre,
+			fonce
+		)
 		piece(
 			modele,
 			"OreilleInterieur",
@@ -656,7 +667,8 @@ local function couronne(modele: Model, corps: BasePart, t: number)
 			"Couronne",
 			Enum.PartType.Ball,
 			Vector3.one * t * 0.1,
-			corps.CFrame * CFrame.new(math.cos(angle) * t * 0.17, t * 0.64, math.sin(angle) * t * 0.17),
+			corps.CFrame
+				* CFrame.new(math.cos(angle) * t * 0.17, t * 0.64, math.sin(angle) * t * 0.17),
 			OR
 		)
 		pointe.Material = Enum.Material.Foil
@@ -671,7 +683,8 @@ local function aureole(modele: Model, corps: BasePart, t: number)
 			"Aureole",
 			Enum.PartType.Ball,
 			Vector3.one * t * 0.08,
-			corps.CFrame * CFrame.new(math.cos(angle) * t * 0.32, t * 0.88, math.sin(angle) * t * 0.32),
+			corps.CFrame
+				* CFrame.new(math.cos(angle) * t * 0.32, t * 0.88, math.sin(angle) * t * 0.32),
 			Color3.fromRGB(255, 250, 200)
 		)
 		etoile.Material = Enum.Material.Neon
@@ -753,7 +766,14 @@ function Decor.detaillerMonstre(modele: Model, corps: BasePart, zone: string)
 			c * CFrame.new(0, t * 0.6, 0) * CFrame.Angles(0, 0, math.rad(90)),
 			fonce
 		)
-		local bout = piece(modele, "Antenne", Enum.PartType.Ball, Vector3.one * t * 0.14, c * CFrame.new(0, t * 0.78, 0), clair)
+		local bout = piece(
+			modele,
+			"Antenne",
+			Enum.PartType.Ball,
+			Vector3.one * t * 0.14,
+			c * CFrame.new(0, t * 0.78, 0),
+			clair
+		)
 		bout.Material = Enum.Material.Neon
 		for i, x in { -0.32, 0.1, 0.36 } do
 			piece(
@@ -772,7 +792,9 @@ function Decor.detaillerMonstre(modele: Model, corps: BasePart, zone: string)
 				"Sourcil",
 				Enum.PartType.Block,
 				Vector3.new(t * 0.3, t * 0.06, t * 0.06),
-				c * CFrame.new(cote * t * 0.2, t * 0.4, -t * 0.42) * CFrame.Angles(0, 0, math.rad(cote * 18)),
+				c
+					* CFrame.new(cote * t * 0.2, t * 0.4, -t * 0.42)
+					* CFrame.Angles(0, 0, math.rad(cote * 18)),
 				Color3.fromRGB(60, 30, 20)
 			)
 			piece(
@@ -780,7 +802,9 @@ function Decor.detaillerMonstre(modele: Model, corps: BasePart, zone: string)
 				"Corne",
 				Enum.PartType.Ball,
 				Vector3.new(t * 0.12, t * 0.26, t * 0.12),
-				c * CFrame.new(cote * t * 0.22, t * 0.5, 0) * CFrame.Angles(0, 0, math.rad(-cote * 20)),
+				c
+					* CFrame.new(cote * t * 0.22, t * 0.5, 0)
+					* CFrame.Angles(0, 0, math.rad(-cote * 20)),
 				creme
 			)
 		end
@@ -790,7 +814,9 @@ function Decor.detaillerMonstre(modele: Model, corps: BasePart, zone: string)
 				"Piquant",
 				Enum.PartType.Ball,
 				Vector3.new(t * 0.1, t * 0.22, t * 0.14),
-				c * CFrame.new(0, t * (0.42 - i * 0.12), t * (0.28 + i * 0.06)) * CFrame.Angles(math.rad(40 + i * 15), 0, 0),
+				c
+					* CFrame.new(0, t * (0.42 - i * 0.12), t * (0.28 + i * 0.06))
+					* CFrame.Angles(math.rad(40 + i * 15), 0, 0),
 				fonce
 			)
 		end
@@ -801,7 +827,9 @@ function Decor.detaillerMonstre(modele: Model, corps: BasePart, zone: string)
 				"Corne",
 				Enum.PartType.Ball,
 				Vector3.new(t * 0.14, t * 0.4, t * 0.14),
-				c * CFrame.new(cote * t * 0.3, t * 0.5, 0) * CFrame.Angles(0, 0, math.rad(-cote * 30)),
+				c
+					* CFrame.new(cote * t * 0.3, t * 0.5, 0)
+					* CFrame.Angles(0, 0, math.rad(-cote * 30)),
 				creme
 			)
 			piece(
@@ -817,7 +845,9 @@ function Decor.detaillerMonstre(modele: Model, corps: BasePart, zone: string)
 				"Bras",
 				Enum.PartType.Ball,
 				Vector3.new(t * 0.18, t * 0.32, t * 0.18),
-				c * CFrame.new(cote * t * 0.52, -t * 0.1, -t * 0.05) * CFrame.Angles(0, 0, math.rad(cote * 25)),
+				c
+					* CFrame.new(cote * t * 0.52, -t * 0.1, -t * 0.05)
+					* CFrame.Angles(0, 0, math.rad(cote * 25)),
 				fonce
 			)
 		end
