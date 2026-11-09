@@ -8,6 +8,10 @@ local Config = if script then require(script.Parent.Config) else (require :: any
 local Forge = if script then require(script.Parent.Forge) else (require :: any)("./Forge")
 -- selene: allow(incorrect_standard_library_use)
 local Fiche = if script then require(script.Parent.Fiche) else (require :: any)("./Fiche")
+-- selene: allow(incorrect_standard_library_use)
+local Collection = if script
+	then require(script.Parent.Collection)
+	else (require :: any)("./Collection")
 
 export type DonneesJoueur = {
 	Force: number,
@@ -17,6 +21,7 @@ export type DonneesJoueur = {
 	Etages: number,
 	Agrandissement: number,
 	RecordBiome: number,
+	Decouvertes: { string }, -- espèces de créatures déjà récoltées (Bestiaire)
 	Pieces: number,
 	CreaturesBase: { string },
 }
@@ -32,6 +37,7 @@ function Donnees.parDefaut(): DonneesJoueur
 		Etages = 1,
 		Agrandissement = 1,
 		RecordBiome = 1,
+		Decouvertes = {},
 		Pieces = 0,
 		CreaturesBase = {},
 	}
@@ -101,6 +107,7 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 	if type(record) == "number" and record == record and record >= 1 and record < math.huge then
 		donnees.RecordBiome = math.floor(record)
 	end
+	donnees.Decouvertes = Collection.nettoyer(brut.Decouvertes)
 	donnees.Pieces = nettoyerPieces(brut.Pieces)
 	donnees.CreaturesBase = nettoyerCreatures(brut.CreaturesBase)
 	return donnees

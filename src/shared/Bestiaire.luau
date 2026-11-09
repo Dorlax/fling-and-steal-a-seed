@@ -12,7 +12,7 @@
 --   t  taille {x, y, z}            p  centre {x, y, z}
 --   c  couleur {r, g, b} (0-255) ou "Rarete" (couleur de la rareté)
 --   r  rotation {x, y, z} en degrés (facultatif)
---   m  matériau : "Neon", "Glass" ou "Foil" (facultatif)
+--   m  matériau : "Neon", "Glass", "Foil" ou "Metal" (facultatif)
 --   tr transparence (facultatif)
 --   a  rôle d'animation : Patte, Bras, Aile, Queue, Oreille, Tete, Antenne,
 --      Machoire (facultatif) ; j = articulation {x, y, z} ; ph = phase ;
@@ -39,7 +39,7 @@ export type Bloc = {
 }
 export type Espece = {
 	Nom: string,
-	Hauteur: number, -- haut du modèle (unités), pour placer le panneau
+	Hauteur: number, -- haut du modèle au-dessus du centre (unités), mesuré sur les blocs
 	Texture: string, -- motif pixel-art des gros blocs (clé de Bestiaire.Textures)
 	Blocs: { Bloc },
 }
@@ -214,9 +214,27 @@ local TEXTURES: { [string]: string } = {
 	Gloupinou = "Gelee",
 }
 
+-- Haut réel du modèle (Y le plus haut de tous les coins des blocs tournés).
+local function sommet(liste: { Bloc }): number
+	local haut = -0.5
+	for _, b in liste do
+		for _, sy in { -1, 1 } do
+			for _, sx in { -1, 1 } do
+				for _, sz in { -1, 1 } do
+					local coin = tourner({ sx * b.t[1] / 2, sy * b.t[2] / 2, sz * b.t[3] / 2 }, b.r)
+					haut = math.max(haut, b.p[2] + coin[2])
+				end
+			end
+		end
+	end
+	return haut
+end
+
+-- `_hauteur` (ancienne estimation à la main) est ignorée : le haut du modèle
+-- est mesuré sur ses blocs, pour placer le panneau juste au-dessus.
 local function definir(
 	nom: string,
-	hauteur: number,
+	_hauteur: number,
 	remplir: (liste: { Bloc }) -> (),
 	texture: string?
 )
@@ -225,7 +243,7 @@ local function definir(
 	ombrer(liste)
 	especes[nom] = {
 		Nom = nom,
-		Hauteur = hauteur,
+		Hauteur = sommet(liste),
 		Texture = texture or TEXTURES[nom] or "Pelage",
 		Blocs = liste,
 	}

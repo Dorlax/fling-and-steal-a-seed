@@ -21,6 +21,7 @@ local MATERIAUX: { [string]: Enum.Material } = {
 	Neon = Enum.Material.Neon,
 	Glass = Enum.Material.Glass,
 	Foil = Enum.Material.Foil,
+	Metal = Enum.Material.Metal,
 }
 
 local function vecteur(v: { number }, echelle: number): Vector3
@@ -38,7 +39,7 @@ local FACES = {
 -- Habille de pixel-art les faces visibles d'un gros bloc (teinté par sa
 -- couleur). Les petits détails (yeux, dents, griffes) restent unis.
 local function texturer(p: BasePart, b: Bestiaire.Bloc, image: string, taille: number)
-	if b.f ~= nil or b.m == "Neon" or b.m == "Foil" then
+	if b.f ~= nil or b.m == "Neon" or b.m == "Foil" or b.m == "Metal" then
 		return
 	end
 	if math.min(b.t[1], b.t[3]) < 0.1 or string.sub(b.n, 1, 4) == "Oeil" then
