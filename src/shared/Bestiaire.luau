@@ -1933,6 +1933,111 @@ local outils = {
 	CREME = CREME,
 	PI = PI,
 }
+---------------------------------------------------------------------------
+-- Mascotte du Pays des Graines (ni créature ni monstre) : Pépin, une graine
+-- souriante avec sa pousse, qui accueille les joueurs devant les bases.
+definir("Pepin", 0.95, function(l)
+	local graine = { 200, 140, 70 }
+	local claire = { 235, 185, 110 }
+	local feuille = { 110, 200, 80 }
+	local tete = { 0, 0.1, 0 }
+	ajouter(l, { n = "Graine", t = { 0.56, 0.62, 0.5 }, p = { 0, -0.06, 0 }, c = graine })
+	ajouter(l, { n = "Bas", t = { 0.44, 0.12, 0.4 }, p = { 0, -0.41, 0 }, c = graine })
+	ajouter(l, {
+		n = "Haut",
+		t = { 0.4, 0.14, 0.36 },
+		p = { 0, 0.31, 0 },
+		c = graine,
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, {
+		n = "Pointe",
+		t = { 0.22, 0.1, 0.2 },
+		p = { 0, 0.42, 0 },
+		c = graine,
+		a = "Tete",
+		j = tete,
+	})
+	ajouter(l, { n = "Ventre", t = { 0.34, 0.3, 0.03 }, p = { 0, -0.14, -0.255 }, c = claire })
+	ajouter(
+		l,
+		{ n = "Rainure", t = { 0.03, 0.5, 0.02 }, p = { 0, 0.02, -0.26 }, c = { 170, 110, 50 } }
+	)
+	yeux(l, 0.11, 0.12, -0.26, 0.12)
+	ajouter(l, {
+		n = "Sourcil",
+		t = { 0.1, 0.025, 0.02 },
+		p = { 0.11, 0.24, -0.26 },
+		r = { 0, 0, -10 },
+		c = { 120, 70, 40 },
+	}, true)
+	ajouter(
+		l,
+		{ n = "Sourire", t = { 0.16, 0.04, 0.02 }, p = { 0, -0.02, -0.27 }, c = { 120, 50, 40 } }
+	)
+	ajouter(l, { n = "Langue", t = { 0.07, 0.03, 0.02 }, p = { 0, -0.045, -0.275 }, c = ROSE })
+	ajouter(l, { n = "Joue", t = { 0.07, 0.04, 0.02 }, p = { 0.2, 0.0, -0.26 }, c = ROSE }, true)
+	local pousse = { 0, 0.46, 0 }
+	ajouter(l, {
+		n = "Tige",
+		t = { 0.04, 0.16, 0.04 },
+		p = { 0, 0.54, 0 },
+		c = { 90, 160, 60 },
+		a = "Antenne",
+		j = pousse,
+	})
+	ajouter(l, {
+		n = "Feuille",
+		t = { 0.2, 0.03, 0.1 },
+		p = { 0.1, 0.62, 0 },
+		r = { 0, 0, 25 },
+		c = feuille,
+		a = "Antenne",
+		j = pousse,
+	}, true)
+	ajouter(l, {
+		n = "Bouton",
+		t = { 0.06, 0.06, 0.06 },
+		p = { 0, 0.64, 0 },
+		c = { 255, 150, 190 },
+		a = "Antenne",
+		j = pousse,
+	})
+	ajouter(
+		l,
+		{ n = "Noeud", t = { 0.2, 0.08, 0.04 }, p = { 0, -0.3, -0.26 }, c = { 230, 70, 80 } }
+	)
+	ajouter(l, {
+		n = "Bras",
+		t = { 0.07, 0.24, 0.07 },
+		p = { 0.32, 0.0, -0.02 },
+		r = { 0, 0, -35 },
+		c = graine,
+		a = "Bras",
+		j = { 0.27, -0.06, -0.02 },
+		ph = 0,
+	}, true)
+	ajouter(l, {
+		n = "Main",
+		t = { 0.1, 0.1, 0.1 },
+		p = { 0.39, 0.1, -0.02 },
+		c = claire,
+		a = "Bras",
+		j = { 0.27, -0.06, -0.02 },
+		ph = 0,
+	}, true)
+	ajouter(l, {
+		n = "Pied",
+		t = { 0.14, 0.06, 0.18 },
+		p = { 0.12, -0.47, -0.04 },
+		c = { 120, 80, 50 },
+		a = "Patte",
+		j = { 0.12, -0.44, -0.02 },
+		ph = 0,
+	}, true)
+end)
+
 -- selene: allow(incorrect_standard_library_use)
 local BoisMoussu = if script
 	then require(script.Parent.EspecesBoisMoussu)

@@ -36,6 +36,12 @@ type Suivi = {
 local suivis: { [Model]: Suivi } = {}
 local demarre = false
 
+-- Niveau de détail : de près, chaque image ; plus loin, une image sur 2 ou 3
+-- (chaque modèle à son tour, pour lisser la charge).
+local PRES = 50 -- studs
+local MOYEN = 100 -- studs
+local image = 0
+
 -- Contours cartoon (Highlight) sur les modèles les plus proches : Roblox
 -- n'en affiche qu'une trentaine à la fois, on en garde au plus CONTOURS_MAX.
 local CONTOURS_MAX = 20
@@ -85,7 +91,11 @@ local function sorteDe(objet: Instance): string?
 	if objet:GetAttribute("Monstre") == true then
 		return "Monstre"
 	end
-	if objet:GetAttribute("Rarete") ~= nil or string.sub(objet.Name, 1, 8) == "Creature" then
+	if
+		objet:GetAttribute("Rarete") ~= nil
+		or objet:GetAttribute("Mascotte") == true
+		or string.sub(objet.Name, 1, 8) == "Creature"
+	then
 		return "Creature"
 	end
 	return nil
@@ -182,6 +192,7 @@ local function pas()
 	local oeil = camera.CFrame.Position
 	local t = os.clock()
 	local serveur = Workspace:GetServerTimeNow()
+	image += 1
 	table.clear(parts)
 	table.clear(cadres)
 	for modele, s in suivis do
@@ -204,7 +215,14 @@ local function pas()
 			end
 			s.base = actuel
 		end
-		local loin = (s.base.Position - oeil).Magnitude > Anime.DistanceMax
+		local distance = (s.base.Position - oeil).Magnitude
+		local loin = distance > Anime.DistanceMax
+		if not loin and distance > PRES then
+			local pasImages = if distance > MOYEN then 3 else 2
+			if (image + math.floor(s.phase * 10)) % pasImages ~= 0 then
+				continue
+			end
+		end
 		if loin then
 			if pose ~= nil then
 				poser(s, s.base, t, false, 0)

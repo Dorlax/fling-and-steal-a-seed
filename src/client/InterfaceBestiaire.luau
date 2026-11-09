@@ -17,63 +17,13 @@ local Revenus = require(Shared:WaitForChild("Revenus"))
 local Nombres = require(Shared:WaitForChild("Nombres"))
 local Style = require(Shared:WaitForChild("Style"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
+local Apercu = require(script.Parent:WaitForChild("Apercu"))
 
 local InterfaceBestiaire = {}
 
 local VIOLET = Color3.fromRGB(150, 100, 255)
-local SILHOUETTE = Color3.fromRGB(25, 25, 35)
 local COULEUR_MONSTRE = Color3.fromRGB(255, 90, 90)
 local VITESSE_ROTATION = 0.6 -- radians par seconde
-
-local FORMES: { [string]: Enum.PartType } = {
-	Ball = Enum.PartType.Ball,
-	Cylinder = Enum.PartType.Cylinder,
-}
-local MATERIAUX: { [string]: Enum.Material } = {
-	Neon = Enum.Material.Neon,
-	Glass = Enum.Material.Glass,
-	Foil = Enum.Material.Foil,
-	Metal = Enum.Material.Metal,
-}
-
--- Modèle d'aperçu (1 unité = 1 stud), sans physique ni texture.
-local function apercu(espece: any, silhouette: boolean, couleurRarete: Color3): Model
-	local modele = Instance.new("Model")
-	modele.Name = espece.Nom
-	for _, b in espece.Blocs do
-		local p: BasePart
-		if b.f == "Wedge" then
-			p = Instance.new("WedgePart")
-		else
-			local part = Instance.new("Part")
-			part.Shape = FORMES[b.f or ""] or Enum.PartType.Block
-			p = part
-		end
-		p.Size = Vector3.new(b.t[1], b.t[2], b.t[3])
-		local rotation = CFrame.new()
-		if b.r then
-			rotation = CFrame.Angles(math.rad(b.r[1]), math.rad(b.r[2]), math.rad(b.r[3]))
-		end
-		p.CFrame = CFrame.new(b.p[1], b.p[2], b.p[3]) * rotation
-		p.Anchored = true
-		p.CanCollide = false
-		p.CanQuery = false
-		p.CanTouch = false
-		if silhouette then
-			p.Color = SILHOUETTE
-			p.Material = Enum.Material.SmoothPlastic
-			p.Transparency = if b.tr and b.tr > 0.5 then 1 else 0
-		else
-			p.Color = if type(b.c) == "string"
-				then couleurRarete
-				else Color3.fromRGB(b.c[1], b.c[2], b.c[3])
-			p.Material = MATERIAUX[b.m or ""] or Enum.Material.SmoothPlastic
-			p.Transparency = b.tr or 0
-		end
-		p.Parent = modele
-	end
-	return modele
-end
 
 type Carte = { cadre: Frame, monde: Model?, pivot: CFrame }
 
@@ -195,15 +145,8 @@ function InterfaceBestiaire.demarrer()
 		vue.LightDirection = Vector3.new(-0.4, -1, 0.6)
 		vue.Parent = cadre
 		Habillage.arrondi(vue, 0.08)
-		local monde = Instance.new("WorldModel")
-		monde.Parent = vue
-		local modele = apercu(espece, silhouette, couleur)
-		modele.Parent = monde
-		local camera = Instance.new("Camera")
-		camera.FieldOfView = 34
-		camera.CFrame = CFrame.lookAt(Vector3.new(1.3, 0.55, -2.3), Vector3.new(0, -0.02, 0))
-		camera.Parent = vue
-		vue.CurrentCamera = camera
+		local modele = Apercu.modele(espece, silhouette, couleur)
+		Apercu.montrer(vue, modele)
 
 		local etiquette = Habillage.texte(cadre, "Nom", { contour = Style.Contour.Petit })
 		etiquette.Position = UDim2.new(0, 4, 1, -42)

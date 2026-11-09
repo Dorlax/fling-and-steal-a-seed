@@ -381,6 +381,8 @@ Effets.Especes = {
 	Mouliventou = { sig("Paille", "Moyeu", 1.3) },
 	Tornadogre = { sig("Poussiere", nil, 2.5) },
 	Orageon = { sig("Gouttes", "Eclair", 1.5) },
+	-- Mascotte
+	Pepin = { sig("Coeurs", "Bouton", 0.6), sig("Pollen", "Feuille", 1.5) },
 }
 
 -- Animations signature : { [début du nom de pièce] = rôle } par espèce.
