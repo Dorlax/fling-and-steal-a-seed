@@ -8,7 +8,7 @@
 - Pièces et créatures de la base sauvegardées ; revenus par seconde selon la rareté (1/3/10/30/100).
 
 ## Biomes et progression
-- Les Terres Sauvages sont une route de biomes de 600 studs (`Shared.Biomes`) : 1 Prairie Pétillante, 2 Bois Moussu, 3 Dunes Dorées, 4 Glacier Givré, 5 Volcan Ardent, 6 Galaxie Étoilée. Chaque biome garde Proche / Moyenne / Lointaine et les taux du Plan ; sol, arche d'entrée, décor en blocs et ambiance (client `Ambiances`) propres.
+- Les Terres Sauvages sont une route de biomes de 600 studs (`Shared.Biomes`) : 1 Prairie Pétillante, 2 Bois Moussu, 3 Dunes Dorées, 4 Glacier Givré, 5 Volcan Ardent, 6 Galaxie Étoilée, 7 Marais Brumeux, 8 Récif Corail, 9 Royaume Bonbon. Chaque biome garde Proche / Moyenne / Lointaine et les taux du Plan ; sol, arche d'entrée, décor en blocs et ambiance (client `Ambiances`) propres.
 - Valeur des créatures × 1,5 par biome (espèce -> biome) ; chaque biome a 2 créatures par rareté et 1 monstre par sous-zone (un fichier `Especes<Biome>` par biome).
 - Monstres plus rapides à chaque biome (`Monstre.vitesse`) : biome 1 = vitesse de Config ; ensuite vitesse d'un joueur au seuil du biome × 0,9 / 1,05 / 1,2 (Proche / Moyenne / Lointaine).
 - Monstres seulement dans les biomes où il y a un joueur (et le biome 1), 12 au plus par biome la nuit.
