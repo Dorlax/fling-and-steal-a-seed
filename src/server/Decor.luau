@@ -8,7 +8,9 @@ local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
+local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Biomes = require(ReplicatedStorage.Shared.Biomes)
+local Modeleur = require(script.Parent.Modeleur)
 
 local Decor = {}
 
@@ -80,6 +82,8 @@ local function piece(
 	p.CanCollide = bloquant == true
 	p.CanQuery = false
 	p.CanTouch = false
+	-- Optimisation : les petits éléments ne projettent pas d'ombre.
+	p.CastShadow = math.max(taille.X, taille.Y, taille.Z) >= 4
 	p.Parent = parent
 	return p
 end
@@ -3049,6 +3053,136 @@ local function creerLimites(racine: Instance)
 end
 
 ---------------------------------------------------------------------------
+-- Accueil du Pays des Graines : Pépin, la mascotte géante, et le panneau de
+-- bienvenue, de part et d'autre du chemin de la base centrale.
+
+local TAILLE_PEPIN = 16 -- studs (hauteur d'une unité du Bestiaire)
+
+local function creerPepin(parent: Instance, position: Vector3)
+	local espece = Bestiaire.Especes.Pepin
+	if espece == nil then
+		return
+	end
+	local modele = Instance.new("Model")
+	modele.Name = "Pepin"
+	local corps = Instance.new("Part")
+	corps.Name = "Corps"
+	corps.Size = Vector3.one * 2
+	corps.Anchored = true
+	corps.CanCollide = false
+	corps.CanQuery = false
+	corps.CanTouch = false
+	-- Face avant (-Z) tournée vers les bases.
+	corps.CFrame = CFrame.new(position + Vector3.new(0, TAILLE_PEPIN * 0.5, 0))
+	corps.Parent = modele
+	modele.PrimaryPart = corps
+	Modeleur.construire(modele, corps, espece, TAILLE_PEPIN, Color3.fromRGB(255, 200, 80))
+	modele:SetAttribute("Mascotte", true)
+	-- Un socle de fleurs sous ses pieds.
+	piece(
+		modele,
+		"Socle",
+		Enum.PartType.Cylinder,
+		Vector3.new(1, TAILLE_PEPIN * 0.75, TAILLE_PEPIN * 0.75),
+		CFrame.new(position + Vector3.new(0, 0.5, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+		Color3.fromRGB(120, 210, 90),
+		true
+	)
+	for i = 0, 7 do
+		local a = math.rad(i * 45)
+		piece(
+			modele,
+			"Fleur",
+			Enum.PartType.Ball,
+			Vector3.one * 1.4,
+			CFrame.new(
+				position
+					+ Vector3.new(
+						math.cos(a) * TAILLE_PEPIN * 0.33,
+						1.2,
+						math.sin(a) * TAILLE_PEPIN * 0.33
+					)
+			),
+			FLEURS[(i % #FLEURS) + 1]
+		)
+	end
+	modele.Parent = parent
+end
+
+local function creerPanneauAccueil(parent: Instance, position: Vector3)
+	local modele = Instance.new("Model")
+	modele.Name = "PanneauAccueil"
+	local bois = Color3.fromRGB(170, 115, 70)
+	for _, x in { -6, 6 } do
+		piece(
+			modele,
+			"Pied",
+			Enum.PartType.Block,
+			Vector3.new(1.2, 12, 1.2),
+			CFrame.new(position + Vector3.new(x, 6, 0)),
+			bois,
+			true
+		)
+	end
+	local planche = piece(
+		modele,
+		"Planche",
+		Enum.PartType.Block,
+		Vector3.new(16, 7, 1),
+		CFrame.new(position + Vector3.new(0, 10, 0)),
+		Color3.fromRGB(255, 225, 150),
+		true
+	)
+	piece(
+		modele,
+		"Cadre",
+		Enum.PartType.Block,
+		Vector3.new(17, 7.8, 0.8),
+		CFrame.new(position + Vector3.new(0, 10, 0.2)),
+		bois
+	)
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = Enum.NormalId.Front
+	gui.PixelsPerStud = 30
+	gui.LightInfluence = 0.3
+	gui.Parent = planche
+	local titre = Instance.new("TextLabel")
+	titre.Size = UDim2.fromScale(1, 0.55)
+	titre.BackgroundTransparency = 1
+	titre.Font = Enum.Font.FredokaOne
+	titre.TextScaled = true
+	titre.TextColor3 = Color3.fromRGB(255, 120, 60)
+	titre.TextStrokeTransparency = 0
+	titre.TextStrokeColor3 = Color3.fromRGB(90, 50, 30)
+	titre.Text = "Bienvenue au Pays des Graines !"
+	titre.Parent = gui
+	local sous = titre:Clone()
+	sous.Position = UDim2.fromScale(0.05, 0.55)
+	sous.Size = UDim2.fromScale(0.9, 0.4)
+	sous.TextColor3 = Color3.fromRGB(70, 140, 60)
+	sous.Text = "Lance. Récolte. Collectionne. Va plus loin."
+	sous.Parent = gui
+	-- Petite pousse sur le panneau.
+	piece(
+		modele,
+		"Pousse",
+		Enum.PartType.Block,
+		Vector3.new(0.6, 2.4, 0.6),
+		CFrame.new(position + Vector3.new(7, 14.6, 0)),
+		Color3.fromRGB(90, 160, 60)
+	)
+	piece(
+		modele,
+		"Feuille",
+		Enum.PartType.Block,
+		Vector3.new(2.4, 0.4, 1.2),
+		CFrame.new(position + Vector3.new(8, 15.6, 0)) * CFrame.Angles(0, 0, math.rad(25)),
+		Color3.fromRGB(110, 200, 80)
+	)
+	modele.Parent = parent
+end
+
+---------------------------------------------------------------------------
 -- Construction du monde
 
 function Decor.creer(): Folder
@@ -3152,6 +3286,11 @@ function Decor.creer(): Folder
 
 	-- Remparts décorés et murs invisibles autour de toute la carte.
 	creerLimites(racine)
+
+	-- Accueil : Pépin et le panneau, entre la base centrale et ses voisines.
+	local accueil = dossier(racine, "Accueil")
+	creerPepin(accueil, Vector3.new(ECART_BASES / 2, 0, BORD_BASES + 40))
+	creerPanneauAccueil(accueil, Vector3.new(-ECART_BASES / 2, 0, BORD_BASES + 34))
 
 	-- Décor propre à chaque biome suivant (Forêt, Désert...).
 	for numero = 2, Biomes.nombre() do

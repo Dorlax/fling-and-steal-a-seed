@@ -46,6 +46,7 @@
 - Pièges : filet, glu, fausse graine (coût en pièces, nombre limité, protection après piégeage, pas dans les bases). [[07 Pièges]]
 
 ## Décor et ambiance
+- Pays des Graines : Pépin, mascotte géante animée (espèce `Pepin`, attribut `Mascotte`), et panneau de bienvenue devant la base centrale. Streaming activé (rayon 640) ; petits décors sans ombre ; animations à cadence réduite au loin.
 - Bords de la carte : rempart décoré propre à chaque biome des deux côtés (palissade, mur moussu, muraille de grès, mur de glace, falaise de lave, champ de force, corail, sucres d'orge, végétation, nuages et colonnes, grille de manoir), Prairie derrière les bases, dernier biome au bout ; murs invisibles de 1 000 studs derrière ; un joueur sous Y = -30 revient dans sa base (`Config.Limites`).
 - Décor cartoon généré par le serveur (`Decor`) : éclairage coloré (atmosphère, saturation, éclat), place de sable sous les bases, chemins devant les portes, arbres (dont roses et dorés), rochers, champignons, fleurs, nuages, collines de bordure.
 - Bases ornées : bordure colorée (sans collision) et lampadaires-sucettes ; sol vert vif.

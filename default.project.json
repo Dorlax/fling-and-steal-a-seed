@@ -17,6 +17,11 @@
       "PoserPiege": { "$className": "RemoteEvent" }
     },
     "Workspace": {
+      "$properties": {
+        "StreamingEnabled": true,
+        "StreamingTargetRadius": 640,
+        "StreamingMinRadius": 160
+      },
       "TerresSauvages": {
         "$className": "Part",
         "$properties": {

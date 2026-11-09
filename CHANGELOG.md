@@ -9,6 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Optimisation et identité du Pays des Graines
+- Streaming activé (rayon 640, minimum 160) : chaque joueur ne charge que les biomes autour de lui, au lieu des 21 biomes d'un coup.
+- Petits éléments de décor sans ombre portée ; animations des créatures à pleine cadence de près, une image sur 2 ou 3 au-delà de 50 / 100 studs.
+- Pépin, mascotte géante du Pays des Graines (graine souriante à pousse, socle fleuri, animée, cœurs et pollen) devant les bases, et panneau « Bienvenue au Pays des Graines ! ».
+- Aperçus 3D partagés (`Apercu`) entre le Bestiaire et les futures interfaces.
+
 ## 2026-11-09 — Effets et animations signature des espèces
 - Effets en petits blocs autour de chaque espèce (client `EffetsEspeces`, données `Shared.Effets`) : ambiance de son biome (pollen, lucioles, poussière, flocons, braises, étoiles, bulles, confettis, feuilles, plumes, brume, vapeur, pétales, éclats de cristal, paille, Zzz, gouttes) et effets signature pour ~80 espèces (flammes des créatures de feu, vapeur des machines, notes du piano et du tambour, Zzz des dormeurs, cœurs des peluches, poussière d'étoiles des fées, jets d'eau…).
 - Animations signature : toupie qui tourne, tornade qui tourbillonne, hélices et roues qui tournent, moulin, aiguilles et balancier de l'horloge, cheval à bascule, flammes qui frémissent (nouveaux rôles d'`Anime`).
