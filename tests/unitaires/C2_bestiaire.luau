@@ -10,6 +10,13 @@ local ROLES = {
 	Tete = true,
 	Antenne = true,
 	Machoire = true,
+	Toupie = true,
+	Helice = true,
+	Roue = true,
+	Moulin = true,
+	Pendule = true,
+	Bascule = true,
+	Flamme = true,
 }
 
 return {

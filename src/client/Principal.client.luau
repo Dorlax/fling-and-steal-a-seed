@@ -6,6 +6,7 @@ local Animations = require(script.Parent:WaitForChild("Animations"))
 local Ambiances = require(script.Parent:WaitForChild("Ambiances"))
 local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
 local EffetsComiques = require(script.Parent:WaitForChild("EffetsComiques"))
+local EffetsEspeces = require(script.Parent:WaitForChild("EffetsEspeces"))
 local InterfaceBestiaire = require(script.Parent:WaitForChild("InterfaceBestiaire"))
 local InterfaceClassement = require(script.Parent:WaitForChild("InterfaceClassement"))
 local InterfaceEvenement = require(script.Parent:WaitForChild("InterfaceEvenement"))
@@ -36,6 +37,8 @@ InterfaceBestiaire.demarrer()
 EffetsComiques.demarrer()
 -- Sautillement des créatures et dandinement des monstres (affichage seulement).
 Animations.demarrer()
+-- Effets en blocs des espèces (ambiance du biome, signatures, grosses tailles).
+EffetsEspeces.demarrer()
 -- Ambiance et nom du biome quand le joueur change de biome.
 Ambiances.demarrer()
 

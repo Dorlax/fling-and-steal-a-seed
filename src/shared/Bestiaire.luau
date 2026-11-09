@@ -19,6 +19,8 @@
 --      cote = -1 (gauche) ou 1 (droite)
 -- selene: allow(incorrect_standard_library_use)
 local Biomes = if script then require(script.Parent.Biomes) else (require :: any)("./Biomes")
+-- selene: allow(incorrect_standard_library_use)
+local Effets = if script then require(script.Parent.Effets) else (require :: any)("./Effets")
 
 local Bestiaire = {}
 
@@ -2029,6 +2031,29 @@ Automne(outils)
 Ferme(outils)
 Reves(outils)
 Plage(outils)
+
+-- Animations signature (Shared.Effets.Roles) : la pièce (et ses bandes
+-- d'ombrage) tourne autour de son articulation, ou de son propre centre.
+for nom, roles in Effets.Roles do
+	local espece = especes[nom]
+	if espece == nil then
+		continue
+	end
+	local centres: { [string]: { number } } = {}
+	for _, b in espece.Blocs do
+		centres[b.n] = b.j or b.p
+	end
+	for _, b in espece.Blocs do
+		for prefixe, role in roles :: { [string]: string } do
+			if string.sub(b.n, 1, #prefixe) == prefixe then
+				local base = string.gsub(string.gsub(b.n, "Ombre$", ""), "Lumiere$", "")
+				b.a = role
+				b.j = b.j or centres[base] or b.p
+				break
+			end
+		end
+	end
+end
 
 Bestiaire.Especes = especes
 
