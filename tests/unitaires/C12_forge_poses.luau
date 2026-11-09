@@ -19,14 +19,28 @@ local CHAMPS = {
 }
 
 return {
-	["C1 série : bonus de 1 au départ, plafonné à 1 + BonusMax"] = function()
-		assert(Forge.bonusSerie(0) == 1 and Forge.bonusSerie(nil) == 1, "départ")
-		local plafond = 1 + Config.Forge.Serie.BonusMax
-		assert(Forge.bonusSerie(Config.Forge.Serie.DureeMax) == plafond, "plafond atteint")
-		assert(Forge.bonusSerie(1e9) == plafond, "jamais au-delà")
-		assert(Forge.bonusSerie(0 / 0) == 1, "NaN refusé")
-		local moitie = Forge.bonusSerie(Config.Forge.Serie.DureeMax / 2)
-		assert(moitie > 1 and moitie < plafond, "progressif")
+	["C1 gains de la Forge : +1, +2, +5, +10, +20, +50…"] = function()
+		local attendus = { 1, 2, 5, 10, 20, 50, 100, 200, 500 }
+		for niveau, gain in attendus do
+			assert(Forge.gainPour(niveau) == gain * Config.Forge.GainParTick, `niveau {niveau}`)
+		end
+		assert(Forge.gainPour(0 / 0) == Forge.gainPour(1), "niveau invalide = 1")
+	end,
+
+	["C5 paliers : l'agrès se modernise avec le niveau"] = function()
+		assert(Forge.palier(1) == 1 and Forge.palier(nil) == 1, "rustique au départ")
+		local precedent = 0
+		for i, palier in Config.Forge.Paliers do
+			assert(palier.Niveau > precedent, "niveaux croissants")
+			precedent = palier.Niveau
+			assert(Forge.palier(palier.Niveau) == i, palier.Nom)
+			for _, mode in { "Vitesse", "Force", "Double" } do
+				assert(type(palier[mode]) == "string", `{palier.Nom} {mode}`)
+			end
+		end
+		assert(Forge.agres("Vitesse", 1) == "Roue en bois", "roue au début")
+		assert(Forge.agres("Force", 999) == "Météorite", "dernier palier")
+		assert(Forge.palier(Config.Forge.Double.NiveauMin) >= 4, "Double = agrès moderne")
 	end,
 
 	["C2 poses : chaque mode donne une pose complète et finie"] = function()

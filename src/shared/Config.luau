@@ -18,9 +18,48 @@ local Config = {
 		StatLineaire = 1000,
 		WalkSpeedParDoublement = 20,
 		WalkSpeedMax = 1e9, -- aucune limite réelle : le joueur va aussi vite qu'il veut
-		-- Niveaux de Forge achetés en pièces : gain × CroissanceGain par niveau,
-		-- coût du niveau n -> n + 1 = CoutBase × CroissanceCout^(n - 1).
-		Niveaux = { CoutBase = 100, CroissanceCout = 1.9, CroissanceGain = 1.6 },
+		-- Niveaux de Forge achetés en pièces. Gain par seconde : suite 1, 2, 5,
+		-- 10, 20, 50, 100… (× GainParTick) ; coût du niveau n -> n + 1 =
+		-- CoutBase × CroissanceCout^(n - 1).
+		Niveaux = { CoutBase = 100, CroissanceCout = 1.9 },
+		-- Paliers : l'agrès se modernise avec le niveau de la Forge.
+		Paliers = {
+			{
+				Niveau = 1,
+				Nom = "Rustique",
+				Vitesse = "Roue en bois",
+				Force = "Gros rocher",
+				Double = "Corde lumineuse",
+			},
+			{
+				Niveau = 4,
+				Nom = "Club",
+				Vitesse = "Tapis de course",
+				Force = "Haltères",
+				Double = "Corde lumineuse",
+			},
+			{
+				Niveau = 8,
+				Nom = "Pro",
+				Vitesse = "Tapis pro",
+				Force = "Barre olympique",
+				Double = "Corde lumineuse",
+			},
+			{
+				Niveau = 12,
+				Nom = "Futur",
+				Vitesse = "Piste néon",
+				Force = "Barre plasma",
+				Double = "Corde laser",
+			},
+			{
+				Niveau = 18,
+				Nom = "Cosmique",
+				Vitesse = "Piste cosmique",
+				Force = "Météorite",
+				Double = "Anneau cosmique",
+			},
+		},
 		-- Zone « sur la Forge » : au-dessus de la plateforme (studs).
 		DistanceForge = {
 			Largeur = 8,
@@ -29,10 +68,6 @@ local Config = {
 		-- Mode « Double » : Force et Vitesse à la fois, chacune à Part du gain,
 		-- débloqué à partir du niveau de Forge NiveauMin.
 		Double = { NiveauMin = 12, Part = 0.6 },
-		-- Série : rester sur la Forge sans s'arrêter accélère l'entraînement
-		-- (gain × (1 + BonusMax × durée / DureeMax), plafonné), et le
-		-- personnage court / soulève / saute de plus en plus vite.
-		Serie = { DureeMax = 30, BonusMax = 1 },
 	},
 
 	-- Passes Robux autorisés par le propriétaire (Plan/Règles du jeu.md).

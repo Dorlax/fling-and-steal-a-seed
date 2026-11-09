@@ -2,11 +2,11 @@
 -- Forge côté client (affichage seulement, rien n'est envoyé au serveur) :
 -- * n'affiche que l'agrès du mode du propriétaire (tapis, barre, corde) ;
 -- * anime le personnage de tout joueur qui s'entraîne sur sa Forge
---   (course, soulevé de barre, corde à sauter), de plus en plus vite pendant
---   la série (attribut SerieDebut écrit par le serveur) ;
--- * fait défiler le tapis, affiche la vitesse sur l'écran, fait apparaître
---   la barre dans les mains et la corde qui tourne ;
--- * « +N » au-dessus de la tête du joueur local à chaque gain.
+--   (course, soulevé, corde à sauter), plus vite quand l'agrès est moderne ;
+-- * fait tourner la roue / défiler le tapis, affiche le gain sur l'écran,
+--   met l'objet soulevé (rocher, haltères, barre, météorite) dans les mains
+--   et fait tourner la corde ;
+-- * « +N » au-dessus de la tête et fête du nouvel agrès pour le joueur local.
 -- Les poses (Shared.PosesForge) remplacent l'animation par défaut en écrivant
 -- Motor6D.Transform à chaque PreSimulation, après l'Animator.
 local CollectionService = game:GetService("CollectionService")
@@ -17,6 +17,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared:WaitForChild("Config"))
 local Forge = require(Shared:WaitForChild("Forge"))
 local Nombres = require(Shared:WaitForChild("Nombres"))
 local PosesForge = require(Shared:WaitForChild("PosesForge"))
@@ -25,7 +26,6 @@ local AnimationsForge = {}
 
 local TAG = "MachineForge"
 local DISTANCE = 160
-local HAUTEUR_TAPIS = 0.45
 local COULEURS: { [string]: Color3 } = {
 	Force = Color3.fromRGB(235, 70, 60),
 	Vitesse = Color3.fromRGB(70, 165, 255),
@@ -41,6 +41,7 @@ type Machine = {
 	transparences: { [BasePart]: number },
 	defilement: number,
 	barreCachee: boolean,
+	palier: number?,
 }
 
 type Moteurs = {
@@ -119,12 +120,15 @@ local function machineDe(joueur: Player): Machine?
 	return nil
 end
 
+-- Intensité de l'animation : 0 pour l'agrès rustique, 1 pour le dernier.
 local function intensiteDe(joueur: Player): number
-	local debut = joueur:GetAttribute("SerieDebut")
-	if type(debut) ~= "number" then
-		return 0
-	end
-	return Forge.intensiteSerie(Workspace:GetServerTimeNow() - debut)
+	local paliers = #Config.Forge.Paliers
+	return (Forge.palier(joueur:GetAttribute("NiveauForge")) - 1) / math.max(1, paliers - 1)
+end
+
+local function posteDe(machine: Machine, mode: string): Model?
+	local m = machine.modele:FindFirstChild("Poste" .. mode)
+	return if m and m:IsA("Model") then m else nil
 end
 
 -- Montre l'agrès du mode et cache les autres (transparence locale).
@@ -156,9 +160,10 @@ local function cacherBarre(machine: Machine, cachee: boolean)
 		return
 	end
 	machine.barreCachee = cachee
-	local barre = machine.modele:FindFirstChild("Barre", true)
-	if barre then
-		for _, p in barre:GetDescendants() do
+	local force = posteDe(machine, "Force")
+	local objet = force and force:FindFirstChild("Objet")
+	if objet then
+		for _, p in objet:GetDescendants() do
 			if p:IsA("BasePart") then
 				p.LocalTransparencyModifier = if cachee then 1 else 0
 			end
@@ -179,6 +184,7 @@ local function ajouterMachine(instance: Instance)
 		transparences = {},
 		defilement = 0,
 		barreCachee = false,
+		palier = nil,
 	}
 end
 
@@ -196,23 +202,44 @@ local function majMachine(machine: Machine, dt: number)
 	local intensite = if joueur and actif then intensiteDe(joueur) else 0
 	cacherBarre(machine, actif and mode == "Force")
 
-	if mode == "Vitesse" and machine.plateforme then
-		local plateforme = machine.plateforme :: BasePart
-		local origine = plateforme.Position + Vector3.new(0, plateforme.Size.Y / 2, 0)
+	if machine.palier ~= machine.modele:GetAttribute("Palier") then
+		-- Machine reconstruite (nouveau palier) : tout réafficher.
+		local palier = machine.modele:GetAttribute("Palier")
+		machine.palier = if type(palier) == "number" then palier else nil
+		machine.transparences = {}
+		machine.barreCachee = false
+		afficherMode(machine, mode :: string)
+	end
+	local vitesse = if mode == "Vitesse" then posteDe(machine, "Vitesse") else nil
+	if vitesse then
+		local niveau = if joueur then joueur:GetAttribute("NiveauForge") else 1
+		local allure = 6 + 14 * intensite
 		if actif then
-			machine.defilement += dt * (6 + 14 * intensite)
+			machine.defilement += dt * allure
 		end
-		for _, bande in machine.modele:GetDescendants() do
-			local indice = bande:GetAttribute("Indice")
-			if bande:IsA("BasePart") and bande.Name == "Bande" and type(indice) == "number" then
-				local z = -3 + ((indice * 0.85 + machine.defilement) % 6.8)
-				bande.CFrame = CFrame.new(origine + Vector3.new(0, 0.44, z))
+		local roue = vitesse:FindFirstChild("Roue")
+		local axe = roue and roue:GetAttribute("Axe")
+		local rayon = roue and roue:GetAttribute("Rayon")
+		if roue and typeof(axe) == "CFrame" and type(rayon) == "number" then
+			local rotation = (axe :: CFrame) * CFrame.Angles(-machine.defilement / rayon, 0, 0)
+			for _, p in roue:GetChildren() do
+				local decalage = p:GetAttribute("Decalage")
+				if p:IsA("BasePart") and typeof(decalage) == "CFrame" then
+					p.CFrame = rotation * decalage
+				end
 			end
 		end
-		local texte = machine.modele:FindFirstChild("Texte", true)
+		for _, bande in vitesse:GetChildren() do
+			local indice = bande:GetAttribute("Indice")
+			if bande:IsA("BasePart") and type(indice) == "number" and machine.plateforme then
+				local z = -3 + ((indice * 0.85 + machine.defilement) % 6.8)
+				local centre = (machine.plateforme :: BasePart).Position
+				bande.CFrame = CFrame.new(bande.Position.X, bande.Position.Y, centre.Z + z)
+			end
+		end
+		local texte = vitesse:FindFirstChild("Texte", true)
 		if texte and texte:IsA("TextLabel") then
-			local multiplicateur = string.gsub(string.format("%.1f", 1 + intensite), "%.", ",")
-			texte.Text = if actif then `× {multiplicateur}` else "VITESSE"
+			texte.Text = if actif then `+{Nombres.abreger(Forge.gainPour(niveau))}/s` else "GO !"
 		end
 	end
 end
@@ -312,37 +339,116 @@ local function retirerAccessoires(sportif: Sportif)
 	end
 end
 
--- Barre tenue à deux mains ; les disques grossissent avec la Force.
-local function creerBarre(force: number): Folder
+-- Objet soulevé selon l'agrès : X = décalage le long de l'axe des mains,
+-- Y = au-dessus des mains, Main = "G"/"D" pour un objet par main.
+local function creerObjet(genre: string, force: number): Folder
 	local f = Instance.new("Folder")
-	f.Name = "Barre"
-	local tige = partie(f, Vector3.new(6.6, 0.24, 0.24), ACIER, Enum.PartType.Cylinder)
-	tige.Name = "Tige"
-	tige.Material = Enum.Material.Metal
+	f.Name = "Objet"
 	local d = 1.3 + 0.22 * math.min(10, math.log10(math.max(force, 0) + 1))
-	for _, cote in { -1, 1 } do
-		local grand = partie(f, Vector3.new(0.35, d, d), COULEURS.Force, Enum.PartType.Cylinder)
-		grand.Name = "Disque"
-		grand:SetAttribute("X", cote * 2.3)
-		local petit = partie(f, Vector3.new(0.3, d * 0.72, d * 0.72), JAUNE, Enum.PartType.Cylinder)
-		petit.Name = "Disque"
-		petit:SetAttribute("X", cote * 2.65)
+	if genre == "Rocher" then
+		for _, b in
+			{
+				{ 0, 0.9, 0, 1.6 },
+				{ 0.5, 1.1, 0.2, 1.1 },
+				{ -0.5, 1.0, -0.2, 1.1 },
+				{ 0, 1.6, 0, 0.9 },
+			}
+		do
+			local roc = partie(
+				f,
+				Vector3.new(b[4], b[4], b[4]),
+				Color3.fromRGB(128, 124, 136),
+				Enum.PartType.Ball
+			)
+			roc.Material = Enum.Material.Slate
+			roc:SetAttribute("X", b[1])
+			roc:SetAttribute("Y", b[2])
+			roc:SetAttribute("Z", b[3])
+		end
+	elseif genre == "Halteres" then
+		for _, main in { "G", "D" } do
+			local poignee = partie(f, Vector3.new(1, 0.2, 0.2), ACIER, Enum.PartType.Cylinder)
+			poignee:SetAttribute("Main", main)
+			for _, cote in { -1, 1 } do
+				local poids = partie(
+					f,
+					Vector3.new(0.3, 0.75, 0.75),
+					if main == "G" then COULEURS.Vitesse else COULEURS.Force,
+					Enum.PartType.Cylinder
+				)
+				poids:SetAttribute("Main", main)
+				poids:SetAttribute("X", cote * 0.55)
+			end
+		end
+	elseif genre == "Meteorite" then
+		local roc =
+			partie(f, Vector3.new(2.6, 2.6, 2.6), Color3.fromRGB(90, 50, 40), Enum.PartType.Ball)
+		roc.Material = Enum.Material.CrackedLava
+		roc:SetAttribute("Y", 1.3)
+		local feu = Instance.new("ParticleEmitter")
+		feu.Texture = "rbxasset://textures/particles/fire_main.dds"
+		feu.Color = ColorSequence.new(Color3.fromRGB(255, 120, 40), Color3.fromRGB(255, 120, 210))
+		feu.LightEmission = 1
+		feu.Size = NumberSequence.new(1, 0)
+		feu.Lifetime = NumberRange.new(0.3, 0.6)
+		feu.Rate = 18
+		feu.Parent = roc
+	else
+		local plasma = genre == "Plasma"
+		local tige = partie(f, Vector3.new(6.6, 0.24, 0.24), ACIER, Enum.PartType.Cylinder)
+		tige.Material = Enum.Material.Metal
+		for _, cote in { -1, 1 } do
+			if plasma then
+				local disque = partie(
+					f,
+					Vector3.new(0.4, d, d),
+					Color3.fromRGB(60, 240, 255),
+					Enum.PartType.Cylinder
+				)
+				disque.Material = Enum.Material.Neon
+				disque.Transparency = 0.3
+				disque:SetAttribute("X", cote * 2.4)
+			else
+				local grand =
+					partie(f, Vector3.new(0.35, d, d), COULEURS.Force, Enum.PartType.Cylinder)
+				grand:SetAttribute("X", cote * 2.3)
+				local petit =
+					partie(f, Vector3.new(0.3, d * 0.72, d * 0.72), JAUNE, Enum.PartType.Cylinder)
+				petit:SetAttribute("X", cote * 2.65)
+			end
+		end
 	end
 	f.Parent = dossier()
 	return f
 end
 
-local function creerCorde(): Folder
+local COULEURS_CORDE: { [string]: Color3 } = {
+	Lumineuse = JAUNE,
+	Laser = Color3.fromRGB(60, 240, 255),
+}
+
+local function creerCorde(genre: string): Folder
 	local f = Instance.new("Folder")
 	f.Name = "Corde"
 	for i = 1, 18 do
-		local brin = partie(f, Vector3.new(0.13, 0.13, 1), JAUNE)
+		local couleur = COULEURS_CORDE[genre] or Color3.fromHSV(i / 18, 0.7, 1)
+		local brin = partie(f, Vector3.new(0.13, 0.13, 1), couleur)
 		brin.Name = "Brin"
 		brin.Material = Enum.Material.Neon
 		brin:SetAttribute("Indice", i)
 	end
 	f.Parent = dossier()
 	return f
+end
+
+local function attributStation(joueur: Player, mode: string, nom: string): any
+	local machine = machineDe(joueur)
+	local station = if machine then posteDe(machine, mode) else nil
+	return if station then station:GetAttribute(nom) else nil
+end
+
+local function nombreOu(valeur: any, defaut: number): number
+	return if type(valeur) == "number" then valeur else defaut
 end
 
 local function placerAccessoires(sportif: Sportif, joueur: Player, sol: number?)
@@ -354,19 +460,32 @@ local function placerAccessoires(sportif: Sportif, joueur: Player, sol: number?)
 	local mode = sportif.mode
 	if mode == "Force" then
 		if sportif.accessoires == nil then
-			local force = joueur:GetAttribute("Force")
-			sportif.accessoires = creerBarre(if type(force) == "number" then force else 0)
+			local genre = attributStation(joueur, "Force", "Objet")
+			sportif.accessoires = creerObjet(
+				if type(genre) == "string" then genre else "Barre",
+				nombreOu(joueur:GetAttribute("Force"), 0)
+			)
 		end
 		local repere = repereEntre(g :: Vector3, d :: Vector3)
 		for _, p in (sportif.accessoires :: Folder):GetChildren() do
 			if p:IsA("BasePart") then
-				local x = p:GetAttribute("X")
-				p.CFrame = repere * CFrame.new(if type(x) == "number" then x else 0, 0, 0)
+				local main = p:GetAttribute("Main")
+				local base = if main == "G"
+					then repere - repere.Position + (g :: Vector3)
+					elseif main == "D" then repere - repere.Position + (d :: Vector3)
+					else repere
+				p.CFrame = base
+					* CFrame.new(
+						nombreOu(p:GetAttribute("X"), 0),
+						nombreOu(p:GetAttribute("Y"), 0),
+						nombreOu(p:GetAttribute("Z"), 0)
+					)
 			end
 		end
 	elseif mode == "Double" then
 		if sportif.accessoires == nil then
-			sportif.accessoires = creerCorde()
+			local genre = attributStation(joueur, "Double", "Corde")
+			sportif.accessoires = creerCorde(if type(genre) == "string" then genre else "Lumineuse")
 		end
 		local axe = (d :: Vector3) - (g :: Vector3)
 		local largeur = axe.Magnitude / 2
@@ -487,7 +606,14 @@ local function pas(dt: number)
 				end
 				local pose = PosesForge.pose(mode, sportif.phase, intensite)
 				if pose then
-					appliquer(sportif.moteurs, pose, if mode == "Vitesse" then HAUTEUR_TAPIS else 0)
+					local machine = machineDe(joueur)
+					local station = if machine then posteDe(machine, mode :: string) else nil
+					local hauteur = if station then station:GetAttribute("Hauteur") else nil
+					appliquer(
+						sportif.moteurs,
+						pose,
+						if type(hauteur) == "number" then hauteur else 0
+					)
 				end
 			end
 		end
@@ -577,6 +703,50 @@ local function suivreGains()
 	end
 end
 
+-- Fête du nouvel agrès quand le niveau de Forge passe un palier.
+local function suivrePaliers()
+	local joueur = Players.LocalPlayer
+	local avant = Forge.palier(joueur:GetAttribute("NiveauForge"))
+	joueur:GetAttributeChangedSignal("NiveauForge"):Connect(function()
+		local niveau = joueur:GetAttribute("NiveauForge")
+		local palier = Forge.palier(niveau)
+		if palier > avant then
+			local ecran = Instance.new("ScreenGui")
+			ecran.Name = "NouvelAgres"
+			ecran.ResetOnSpawn = false
+			local etiquette = Instance.new("TextLabel")
+			etiquette.AnchorPoint = Vector2.new(0.5, 0.5)
+			etiquette.Position = UDim2.fromScale(0.5, 0.32)
+			etiquette.Size = UDim2.fromScale(0.7, 0.12)
+			etiquette.BackgroundTransparency = 1
+			etiquette.Font = Enum.Font.FredokaOne
+			etiquette.TextScaled = true
+			etiquette.TextColor3 = JAUNE
+			etiquette.TextStrokeTransparency = 0
+			local mode = joueur:GetAttribute("ModeForge")
+			etiquette.Text =
+				`✨ Forge {Config.Forge.Paliers[palier].Nom} : {Forge.agres(mode, niveau)} !`
+			etiquette.Parent = ecran
+			local echelle = Instance.new("UIScale")
+			echelle.Scale = 0.2
+			echelle.Parent = etiquette
+			ecran.Parent = joueur:WaitForChild("PlayerGui")
+			TweenService:Create(echelle, TweenInfo.new(0.5, Enum.EasingStyle.Back), { Scale = 1 })
+				:Play()
+			task.delay(2.5, function()
+				TweenService:Create(
+					etiquette,
+					TweenInfo.new(0.5),
+					{ TextTransparency = 1, TextStrokeTransparency = 1 }
+				):Play()
+				task.wait(0.6)
+				ecran:Destroy()
+			end)
+		end
+		avant = palier
+	end)
+end
+
 function AnimationsForge.demarrer()
 	CollectionService:GetInstanceAddedSignal(TAG):Connect(ajouterMachine)
 	for _, modele in CollectionService:GetTagged(TAG) do
@@ -585,6 +755,7 @@ function AnimationsForge.demarrer()
 	RunService.PreSimulation:Connect(pas)
 	RunService.PreRender:Connect(rendu)
 	suivreGains()
+	suivrePaliers()
 end
 
 return AnimationsForge

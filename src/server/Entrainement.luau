@@ -3,7 +3,6 @@
 -- Les stats vivent dans les attributs du Player (Force, Vitesse, ModeForge,
 -- SurForge), écrits uniquement ici et par la Sauvegarde.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Forge = require(ReplicatedStorage.Shared.Forge)
@@ -40,9 +39,6 @@ function Entrainement.traiterChoixMode(joueur: any, valeur: any)
 	if not Forge.modePermis(valeur, joueur:GetAttribute("NiveauForge")) then
 		return
 	end
-	if joueur:GetAttribute("ModeForge") ~= valeur then
-		joueur:SetAttribute("SerieDebut", nil) -- changer d'exercice recommence la série
-	end
 	joueur:SetAttribute("ModeForge", valeur)
 end
 
@@ -52,10 +48,6 @@ end
 -- × renaissances, × 2 avec le passe de la stat.
 function Entrainement.tick(joueur: any)
 	if joueur:GetAttribute("SurForge") ~= true then
-		-- Quitter la Forge casse la série.
-		if joueur:GetAttribute("SerieDebut") ~= nil then
-			joueur:SetAttribute("SerieDebut", nil)
-		end
 		return
 	end
 	local mode = joueur:GetAttribute("ModeForge")
@@ -63,14 +55,6 @@ function Entrainement.tick(joueur: any)
 	if not Forge.modePermis(mode, niveau) then
 		return
 	end
-	-- Série : démarre au premier tick sur la Forge (heure du serveur).
-	local maintenant = Workspace:GetServerTimeNow()
-	local debut = joueur:GetAttribute("SerieDebut")
-	if type(debut) ~= "number" or debut > maintenant then
-		debut = maintenant
-		joueur:SetAttribute("SerieDebut", debut)
-	end
-	local serie = Forge.bonusSerie(maintenant - debut)
 	local noms, part = Forge.statsDuMode(mode)
 	-- Renaissances : le gain de la Forge grandit (+50 % par renaissance).
 	local bonus = Bonus.forgeRenaissance(joueur:GetAttribute("Renaissances"))
@@ -88,7 +72,6 @@ function Entrainement.tick(joueur: any)
 						* part
 						* bonus
 						* Passes.multiplicateurStat(nom, passe)
-						* serie
 					+ 0.5
 			)
 		)
