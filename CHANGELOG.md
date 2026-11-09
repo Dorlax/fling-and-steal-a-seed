@@ -9,6 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Plus de graines et de mutations
+
+- 5 nouvelles graines (11 en tout) : émeraude, rubis, solaire, nébuleuse, éternelle.
+- 4 nouvelles mutations (7 en tout) : Givrée ×2, Enflammée ×4, Électrique ×9, Galactique ×30.
+- Visuel des mutations piloté par Config (matière, mélange, particules : givre, flammes, éclairs, étoiles).
+
 ## 2026-11-09 — Renaissance, graines, mutations, roue et traînées
 - Renaissance (Boutique) : pièces remises à 0, créatures/Forge/stats gardées ; revenus × 2 et gain de Forge + 50 % par renaissance ; prix 1 M × 10ⁿ ; annoncée au serveur.
 - Bestiaire : chaque page de biome complète donne + 10 % de revenus pour toujours.

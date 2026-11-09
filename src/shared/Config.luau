@@ -304,7 +304,19 @@ local Config = {
 	-- grosses tailles aussi (Tailles = biomes de plus) et les mutations
 	-- (Mutation = multiplicateur de chance). Toutes les raretés restent possibles.
 	Graines = {
-		Ordre = { "Simple", "Doree", "Cristal", "Etoilee", "Cosmique", "Arcenciel" },
+		Ordre = {
+			"Simple",
+			"Doree",
+			"Emeraude",
+			"Cristal",
+			"Rubis",
+			"Etoilee",
+			"Solaire",
+			"Cosmique",
+			"Arcenciel",
+			"Nebuleuse",
+			"Eternelle",
+		},
 		Liste = {
 			Simple = {
 				Nom = "Graine simple",
@@ -322,6 +334,14 @@ local Config = {
 				Mutation = 1.2,
 				Couleur = { 255, 200, 60 },
 			},
+			Emeraude = {
+				Nom = "Graine émeraude",
+				Prix = 2.5e5,
+				Chance = 0.7,
+				Tailles = 1,
+				Mutation = 1.3,
+				Couleur = { 70, 210, 120 },
+			},
 			Cristal = {
 				Nom = "Graine cristal",
 				Prix = 2.5e6,
@@ -330,6 +350,14 @@ local Config = {
 				Mutation = 1.5,
 				Couleur = { 120, 220, 255 },
 			},
+			Rubis = {
+				Nom = "Graine rubis",
+				Prix = 3e7,
+				Chance = 1.5,
+				Tailles = 2,
+				Mutation = 1.7,
+				Couleur = { 230, 60, 90 },
+			},
 			Etoilee = {
 				Nom = "Graine étoilée",
 				Prix = 4e8,
@@ -337,6 +365,14 @@ local Config = {
 				Tailles = 3,
 				Mutation = 2,
 				Couleur = { 200, 150, 255 },
+			},
+			Solaire = {
+				Nom = "Graine solaire",
+				Prix = 6e9,
+				Chance = 2.7,
+				Tailles = 3,
+				Mutation = 2.5,
+				Couleur = { 255, 160, 40 },
 			},
 			Cosmique = {
 				Nom = "Graine cosmique",
@@ -354,21 +390,103 @@ local Config = {
 				Mutation = 5,
 				Couleur = { 255, 120, 200 },
 			},
+			Nebuleuse = {
+				Nom = "Graine nébuleuse",
+				Prix = 3e16,
+				Chance = 9,
+				Tailles = 8,
+				Mutation = 7,
+				Couleur = { 150, 70, 220 },
+			},
+			Eternelle = {
+				Nom = "Graine éternelle",
+				Prix = 2e20,
+				Chance = 13,
+				Tailles = 10,
+				Mutation = 9,
+				Couleur = { 255, 245, 210 },
+			},
 		},
 	},
 
 	-- Mutations : tirées à la pousse, indépendamment du reste ; revenus × Mult.
 	-- Chances doublées pendant un événement de serveur.
 	Mutations = {
-		Ordre = { "Doree", "Cristal", "Arcenciel" },
+		-- Du plus courant au plus rare. Matiere : Enum.Material appliqué ;
+		-- Melange : part de la couleur de la mutation ; Effet : particules.
+		Ordre = {
+			"Givree",
+			"Doree",
+			"Enflammee",
+			"Cristal",
+			"Electrique",
+			"Arcenciel",
+			"Galactique",
+		},
 		Liste = {
-			Doree = { Nom = "Dorée", Chance = 0.04, Mult = 3, Couleur = { 255, 210, 60 } },
-			Cristal = { Nom = "Cristal", Chance = 0.012, Mult = 6, Couleur = { 140, 230, 255 } },
+			Givree = {
+				Nom = "Givrée",
+				Chance = 0.03,
+				Mult = 2,
+				Couleur = { 190, 235, 255 },
+				Matiere = "Ice",
+				Melange = 0.5,
+				Effet = "Givre",
+			},
+			Doree = {
+				Nom = "Dorée",
+				Chance = 0.025,
+				Mult = 3,
+				Couleur = { 255, 210, 60 },
+				Matiere = "Foil",
+				Melange = 0.6,
+				Effet = "Etincelles",
+			},
+			Enflammee = {
+				Nom = "Enflammée",
+				Chance = 0.015,
+				Mult = 4,
+				Couleur = { 255, 110, 40 },
+				Matiere = "CrackedLava",
+				Melange = 0.45,
+				Effet = "Flammes",
+			},
+			Cristal = {
+				Nom = "Cristal",
+				Chance = 0.01,
+				Mult = 6,
+				Couleur = { 140, 230, 255 },
+				Matiere = "Glass",
+				Melange = 0.55,
+				Transparence = 0.15,
+				Effet = "Etincelles",
+			},
+			Electrique = {
+				Nom = "Électrique",
+				Chance = 0.005,
+				Mult = 9,
+				Couleur = { 90, 200, 255 },
+				Matiere = "Neon",
+				Melange = 0.4,
+				Effet = "Eclairs",
+			},
 			Arcenciel = {
 				Nom = "Arc-en-ciel",
-				Chance = 0.003,
+				Chance = 0.0025,
 				Mult = 15,
 				Couleur = { 255, 140, 220 },
+				Arc = true,
+				Melange = 0.65,
+				Effet = "Etincelles",
+			},
+			Galactique = {
+				Nom = "Galactique",
+				Chance = 0.0008,
+				Mult = 30,
+				Couleur = { 70, 40, 140 },
+				Matiere = "SmoothPlastic",
+				Melange = 0.75,
+				Effet = "Etoiles",
 			},
 		},
 		BonusEvenement = 2,

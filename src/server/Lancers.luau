@@ -30,7 +30,7 @@ export type Resultat = {
 	Rarete: string,
 	Taille: string?, -- Normale, Grande, Geante, Colossale ou Titan
 	Espece: string?,
-	Mutation: string?, -- Doree, Cristal, Arcenciel (rare)
+	Mutation: string?, -- voir Config.Mutations (rare)
 	Graine: string?, -- graine lancée
 }
 

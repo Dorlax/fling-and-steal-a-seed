@@ -45,6 +45,12 @@ return {
 		)
 		assert(Bonus.meilleureGraine("Doree", "Cristal") == "Cristal", "meilleure graine")
 		assert(Bonus.graine("Inconnue").Chance == 0, "graine inconnue = simple")
+		local prix, chance = -1, -1
+		for _, id in Config.Graines.Ordre do
+			local g = Config.Graines.Liste[id]
+			assert(g.Prix > prix and g.Chance > chance, "chaque graine meilleure et plus chère")
+			prix, chance = g.Prix, g.Chance
+		end
 	end,
 
 	["C3 mutations : fiche lue, revenus multipliés, chances respectées"] = function()
@@ -57,7 +63,15 @@ return {
 			"Dorée : × 3"
 		)
 		assert(Fiche.tirerMutation(0.99) == nil, "le plus souvent rien")
-		assert(Fiche.tirerMutation(0) == "Arcenciel", "tirage 0 : la plus rare")
+		assert(Fiche.tirerMutation(0) == "Galactique", "tirage 0 : la plus rare")
+		assert(Fiche.multiplicateurMutation("Galactique") == 30, "Galactique : × 30")
+		local precedent = 0
+		for _, nom in Config.Mutations.Ordre do
+			local m = Config.Mutations.Liste[nom]
+			assert(m.Mult > precedent, "plus rare = plus rentable")
+			assert(m.Effet ~= nil and m.Melange ~= nil, "visuel défini")
+			precedent = m.Mult
+		end
 		assert(Fiche.texte("Rare", "Grande", "Cristal") == "Cristal Grande Rare", "texte")
 	end,
 
