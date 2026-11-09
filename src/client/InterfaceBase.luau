@@ -36,7 +36,7 @@ function InterfaceBase.demarrer()
 	local bouton =
 		Habillage.bouton(ecran, "BoutonBase", { texte = "Base", couleur = VERT, rond = true })
 	bouton.AnchorPoint = Vector2.new(1, 0.5)
-	bouton.Position = UDim2.new(1, -12, 0.42, 2 * (Style.TailleBoutonMin + 12))
+	bouton.Position = UDim2.new(1, -Style.TailleBoutonMin - 22, 0.42, Style.TailleBoutonMin / 2 + 6)
 
 	local panneau = Instance.new("Frame")
 	panneau.Name = "Panneau"
@@ -125,7 +125,7 @@ function InterfaceBase.demarrer()
 		nom.Size = UDim2.new(1, -HAUTEUR_LIGNE - 140, 0, 28)
 		nom.TextXAlignment = Enum.TextXAlignment.Left
 		nom.TextScaled = true
-		nom.Text = `{espece.Nom} · {Fiche.texte(infos.Rarete, infos.Taille)}`
+		nom.Text = `{espece.Nom} · {Fiche.texte(infos.Rarete, infos.Taille, infos.Mutation)}`
 		local detail =
 			Habillage.texte(cadre, "Detail", { couleur = couleur, contour = Style.Contour.Petit })
 		detail.Position = UDim2.fromOffset(HAUTEUR_LIGNE + 4, 34)

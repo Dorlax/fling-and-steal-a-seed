@@ -111,7 +111,8 @@ function InterfaceClassement.demarrer()
 		rond = true,
 	})
 	bouton.AnchorPoint = Vector2.new(1, 0.5)
-	bouton.Position = UDim2.new(1, -12, 0.42, 0)
+	bouton.Position =
+		UDim2.new(1, -Style.TailleBoutonMin - 22, 0.42, -(Style.TailleBoutonMin / 2 + 6))
 
 	local panneau = Instance.new("Frame")
 	panneau.Name = "Panneau"

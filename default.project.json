@@ -16,7 +16,13 @@
       "AlerteVol": { "$className": "RemoteEvent" },
       "PoserPiege": { "$className": "RemoteEvent" },
       "VendreCreature": { "$className": "RemoteEvent" },
-      "TrierBase": { "$className": "RemoteEvent" }
+      "TrierBase": { "$className": "RemoteEvent" },
+      "Renaitre": { "$className": "RemoteEvent" },
+      "AcheterGraine": { "$className": "RemoteEvent" },
+      "EquiperGraine": { "$className": "RemoteEvent" },
+      "TournerRoue": { "$className": "RemoteEvent" },
+      "ResultatRoue": { "$className": "RemoteEvent" },
+      "EquiperTrainee": { "$className": "RemoteEvent" }
     },
     "Workspace": {
       "$properties": {

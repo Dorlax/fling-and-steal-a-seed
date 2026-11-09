@@ -7,6 +7,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
+local Config = require(ReplicatedStorage.Shared.Config)
 
 local Modeleur = {}
 
@@ -120,6 +121,67 @@ function Modeleur.construire(
 	-- Le client reçoit le modèle en entier (pour relever toutes ses pièces).
 	modele.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	return #espece.Blocs
+end
+
+-- Mutation (Dorée, Cristal, Arc-en-ciel) : les blocs changent de teinte et
+-- de matière, et de petites étincelles de la couleur de la mutation
+-- l'entourent. Sans mutation : rien ne change.
+local ARC = {
+	Color3.fromRGB(255, 90, 90),
+	Color3.fromRGB(255, 180, 60),
+	Color3.fromRGB(255, 240, 80),
+	Color3.fromRGB(90, 220, 120),
+	Color3.fromRGB(80, 170, 255),
+	Color3.fromRGB(190, 110, 255),
+}
+function Modeleur.muter(modele: Model, corps: BasePart, mutation: string?)
+	if mutation == nil then
+		return
+	end
+	local infos = (Config.Mutations.Liste :: any)[mutation]
+	if infos == nil then
+		return
+	end
+	local teinte = Color3.fromRGB(infos.Couleur[1], infos.Couleur[2], infos.Couleur[3])
+	local i = 0
+	for _, p in modele:GetChildren() do
+		if p:IsA("BasePart") and p ~= corps and string.sub(p.Name, 1, 4) ~= "Oeil" then
+			i += 1
+			if mutation == "Doree" then
+				p.Color = p.Color:Lerp(teinte, 0.6)
+				p.Material = Enum.Material.Foil
+			elseif mutation == "Cristal" then
+				p.Color = p.Color:Lerp(teinte, 0.55)
+				p.Material = Enum.Material.Glass
+				p.Transparency = math.max(p.Transparency, 0.15)
+			else
+				p.Color = p.Color:Lerp(ARC[(i % #ARC) + 1], 0.65)
+			end
+			for _, motif in p:GetChildren() do
+				if motif:IsA("Texture") then
+					motif.Color3 = p.Color
+				end
+			end
+		end
+	end
+	local e = Instance.new("ParticleEmitter")
+	e.Name = "Mutation"
+	e.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	e.Color = if mutation == "Arcenciel"
+		then ColorSequence.new({
+			ColorSequenceKeypoint.new(0, ARC[1]),
+			ColorSequenceKeypoint.new(0.5, ARC[4]),
+			ColorSequenceKeypoint.new(1, ARC[6]),
+		})
+		else ColorSequence.new(teinte)
+	e.LightEmission = 1
+	e.Size = NumberSequence.new(0.4, 0)
+	e.Lifetime = NumberRange.new(0.8, 1.4)
+	e.Speed = NumberRange.new(0.6, 1.4)
+	e.SpreadAngle = Vector2.new(180, 180)
+	e.Rate = 10
+	e.Parent = corps
+	modele:SetAttribute("Mutation", mutation)
 end
 
 -- Aura de rareté : étincelles dès Épique, plus nombreuses ensuite ;

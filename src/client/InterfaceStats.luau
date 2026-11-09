@@ -150,7 +150,7 @@ function InterfaceStats.demarrer()
 		boutonEtage.Visible = etages < Config.Bases.EtagesMax and prixEtage ~= nil
 		if prixEtage then
 			boutonEtage.Text =
-				`🏠 Étage {etages + 1} (+{Config.Creatures.MaxCreaturesBase} socles) : {Nombres.abreger(
+				`🏠 Étage {etages + 1} (+{Config.Creatures.MaxCreaturesBase} places) : {Nombres.abreger(
 					prixEtage
 				)} 🪙`
 			boutonEtage.BackgroundColor3 = if nombre("Pieces") >= prixEtage

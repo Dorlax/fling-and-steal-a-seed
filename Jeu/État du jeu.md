@@ -40,7 +40,11 @@
 - Bestiaire à collectionner (`Shared.Collection`, client `InterfaceBestiaire`, bouton « Livre ») : page par biome, aperçus 3D en ViewportFrame, silhouettes des espèces non récoltées ; découvertes sauvegardées (`Decouvertes`) à chaque dépôt d'une nouvelle espèce.
 - Effets des espèces (client `EffetsEspeces`, `Shared.Effets`) : particules en blocs d'ambiance par biome + signatures par espèce ; animations signature (rôles Toupie, Helice, Roue, Moulin, Pendule, Bascule, Flamme) ; ondes au sol dès Géante, onde de choc des Colossales/Titans à la pousse.
 
-## Interactions
+## Progression avancée
+- Multiplicateurs permanents (`Shared.Bonus`) : renaissances (revenus × 2ⁿ, Forge + 50 %·n, prix 1 M × 10ⁿ) et pages complètes du Bestiaire (+ 10 % chacune), inclus dans `RevenuParSeconde` ; boost de la roue (× 2, `BoostJusqua`) et événement appliqués au versement.
+- Graines (`Config.Graines`, `Lancer.tauxAvecChance`) achetées et équipées (`Graines`, `Graine`) ; mutations (`Config.Mutations`, fiche « Rarete:Taille:Espece:Mutation », `Modeleur.muter`).
+- Roue gratuite toutes les 4 h (`ProchaineRoue`, `TournerRoue`/`ResultatRoue`) ; traînées cosmétiques (`Trainees`, `Trainee`). Serveur `Progression`, client `InterfaceBoutique` (bouton « Shop »).
+
 - Plaquage : bouton PLAQUER (F / Y), portée 8, délai 6 s, protection 4 s ; le porteur lâche sa créature, libre pour tous ; refusé dans les bases. [[04 Plaquage]]
 - Monstres comiques par zone, jamais dans une base ; aucun dégât : leur coup fait lâcher la créature, propulse le joueur (vitesse du monstre × Recul, plafond 500 studs/s, + Hauteur) et l'étourdit (PlatformStand 1 / 1,4 / 1,8 s, attribut `EtourdiJusqua`), avec un style comique tiré au hasard (`Shared.Projection` : Boing, Toupie, Fusée, Ballon ; traînée arc-en-ciel, onomatopée, étoiles client `EffetsComiques`) ; cycle jour/nuit avec vagues de nuit. [[05 Monstres]]
 - Raids : voler une créature exposée dans la base d'un autre ; verrou de base de 60 s (100 pièces) avec bouclier et décompte. [[06 Raids de bases]]

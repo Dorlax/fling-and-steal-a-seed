@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Forge = require(ReplicatedStorage.Shared.Forge)
+local Bonus = require(ReplicatedStorage.Shared.Bonus)
 local Piege = require(ReplicatedStorage.Shared.Piege)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 
@@ -56,6 +57,11 @@ function Entrainement.tick(joueur: any)
 	}
 	local avant = stats[mode]
 	Forge.appliquerGain(stats, mode, Config.Forge, joueur:GetAttribute("NiveauForge"))
+	-- Renaissances : le gain de la Forge grandit (+50 % par renaissance).
+	local bonus = Bonus.forgeRenaissance(joueur:GetAttribute("Renaissances"))
+	if bonus > 1 and type(avant) == "number" and type(stats[mode]) == "number" then
+		stats[mode] = math.min(avant + (stats[mode] - avant) * bonus, Config.Forge.PlafondStat)
+	end
 	if stats[mode] ~= avant then
 		joueur:SetAttribute(mode, stats[mode])
 		if mode == "Vitesse" then

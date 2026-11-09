@@ -38,7 +38,9 @@ function Revenus.parSeconde(fiche: any): number
 		return 0
 	end
 	local biome = Biomes.indexEspece(infos.Espece) or 1
-	local brut = (revenus[infos.Rarete] or 0) * Fiche.multiplicateur(infos.Taille)
+	local brut = (revenus[infos.Rarete] or 0)
+		* Fiche.multiplicateur(infos.Taille)
+		* Fiche.multiplicateurMutation(infos.Mutation)
 	return math.floor(brut * Biomes.multiplicateur(biome) + 0.5)
 end
 

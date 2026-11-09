@@ -14,6 +14,7 @@ local Lancers = require(script.Parent.Lancers)
 local Monstres = require(script.Parent.Monstres)
 local Pieges = require(script.Parent.Pieges)
 local Plaquages = require(script.Parent.Plaquages)
+local Progression = require(script.Parent.Progression)
 local Portage = require(script.Parent.Portage)
 local Raids = require(script.Parent.Raids)
 local Sauvegarde = require(script.Parent.Sauvegarde)
@@ -86,6 +87,38 @@ end)
 remote("TrierBase").OnServerEvent:Connect(function(joueur: Player)
 	if gestionPermise(joueur) and Sauvegarde.trier(joueur) then
 		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
+	end
+end)
+
+-- Progression : renaissance, graines, roue, traînées. Le client n'envoie
+-- qu'un identifiant ; Progression vérifie tout (pièces, possession, délai).
+remote("Renaitre").OnServerEvent:Connect(function(joueur: Player)
+	if gestionPermise(joueur) then
+		Progression.renaitre(joueur)
+	end
+end)
+remote("AcheterGraine").OnServerEvent:Connect(function(joueur: Player, id: any)
+	if gestionPermise(joueur) then
+		Progression.acheterGraine(joueur, id)
+	end
+end)
+remote("EquiperGraine").OnServerEvent:Connect(function(joueur: Player, id: any)
+	if gestionPermise(joueur) then
+		Progression.equiperGraine(joueur, id)
+	end
+end)
+local resultatRoue = remote("ResultatRoue")
+remote("TournerRoue").OnServerEvent:Connect(function(joueur: Player)
+	if gestionPermise(joueur) then
+		local numero = Progression.tournerRoue(joueur)
+		if numero then
+			resultatRoue:FireClient(joueur, numero)
+		end
+	end
+end)
+remote("EquiperTrainee").OnServerEvent:Connect(function(joueur: Player, id: any)
+	if gestionPermise(joueur) then
+		Progression.equiperTrainee(joueur, id)
 	end
 end)
 
@@ -186,6 +219,7 @@ local function surArrivee(joueur: Player)
 	Sauvegarde.charger(joueur)
 	if Sauvegarde.estCharge(joueur) then
 		Classements.suivre(joueur)
+		Progression.suivre(joueur)
 		local gain = Sauvegarde.prendreGainHorsLigne(joueur)
 		if gain > 0 then
 			task.delay(5, function()

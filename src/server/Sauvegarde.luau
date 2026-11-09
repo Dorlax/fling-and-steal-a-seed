@@ -13,6 +13,7 @@ local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 local Collection = require(ReplicatedStorage.Shared.Collection)
 local GestionBase = require(ReplicatedStorage.Shared.GestionBase)
+local Bonus = require(ReplicatedStorage.Shared.Bonus)
 
 type Session = {
 	donnees: Donnees.DonneesJoueur,
@@ -39,11 +40,30 @@ local function envoyerMessage(joueur: any, texte: string)
 	end
 end
 
--- Nouvelle liste des créatures de la base : revenu et liste lisible par le client.
+-- Multiplicateur permanent des revenus : renaissances et pages du Bestiaire.
+local function multiplicateur(joueur: any): number
+	return Bonus.revenus(
+		joueur:GetAttribute("Renaissances"),
+		Collection.pagesCompletes(decouvertesParJoueur[joueur] or {})
+	)
+end
+
+-- Nouvelle liste des créatures de la base : revenu (bonus permanents compris)
+-- et liste lisible par le client.
 local function majListe(joueur: any, liste: { string })
 	creaturesParJoueur[joueur] = liste
-	joueur:SetAttribute("RevenuParSeconde", Revenus.total(liste))
+	joueur:SetAttribute("RevenuParSeconde", Revenus.total(liste) * multiplicateur(joueur))
 	joueur:SetAttribute("CreaturesBase", GestionBase.encoder(liste))
+end
+
+-- Recalcule le revenu (après une renaissance ou une page complète).
+function Sauvegarde.recalculer(joueur: any)
+	majListe(joueur, creaturesParJoueur[joueur] or {})
+end
+
+-- Pages complètes du Bestiaire du joueur.
+function Sauvegarde.pagesCompletes(joueur: any): number
+	return Collection.pagesCompletes(decouvertesParJoueur[joueur] or {})
 end
 
 -- Ajoute l'espèce d'une fiche au Bestiaire du joueur ; renvoie true si nouvelle.
@@ -61,6 +81,7 @@ local function decouvrir(joueur: any, fiche: string): boolean
 		return false
 	end
 	joueur:SetAttribute("Decouvertes", Collection.encoder(liste))
+	joueur:SetAttribute("PagesCompletes", Collection.pagesCompletes(liste))
 	return true
 end
 
@@ -105,13 +126,20 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("RecordBiome", donnees.RecordBiome)
 	joueur:SetAttribute("SurForge", false)
 	joueur:SetAttribute("Pieces", donnees.Pieces)
-	majListe(joueur, table.clone(donnees.CreaturesBase))
+	joueur:SetAttribute("Renaissances", donnees.Renaissances)
+	joueur:SetAttribute("Graines", table.concat(donnees.Graines, ","))
+	joueur:SetAttribute("Graine", donnees.Graine)
+	joueur:SetAttribute("Trainees", table.concat(donnees.Trainees, ","))
+	joueur:SetAttribute("Trainee", donnees.Trainee)
+	joueur:SetAttribute("ProchaineRoue", donnees.ProchaineRoue)
 	-- Bestiaire : les créatures déjà dans la base comptent comme découvertes.
 	decouvertesParJoueur[joueur] = table.clone(donnees.Decouvertes)
 	joueur:SetAttribute("Decouvertes", Collection.encoder(donnees.Decouvertes))
+	joueur:SetAttribute("PagesCompletes", Collection.pagesCompletes(donnees.Decouvertes))
 	for _, fiche in donnees.CreaturesBase do
 		decouvrir(joueur, fiche)
 	end
+	majListe(joueur, table.clone(donnees.CreaturesBase))
 end
 
 -- Espèces déjà récoltées par le joueur (copie).
@@ -149,7 +177,12 @@ function Sauvegarde.ajouterCreature(joueur: any, rarete: any): boolean
 	end
 	table.insert(liste, rarete)
 	majListe(joueur, liste)
+	local pagesAvant = Sauvegarde.pagesCompletes(joueur)
 	if decouvrir(joueur, rarete) then
+		if Sauvegarde.pagesCompletes(joueur) > pagesAvant then
+			Sauvegarde.recalculer(joueur)
+			envoyerMessage(joueur, "Page du Bestiaire complète ! Revenus +10 % pour toujours.")
+		end
 		local infos = Fiche.lire(rarete)
 		local nombre = #(decouvertesParJoueur[joueur] or {})
 		envoyerMessage(
@@ -226,6 +259,12 @@ function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
 		RecordBiome = joueur:GetAttribute("RecordBiome"),
 		Decouvertes = decouvertesParJoueur[joueur],
 		DerniereConnexion = os.time(),
+		Renaissances = joueur:GetAttribute("Renaissances"),
+		Graines = string.split(tostring(joueur:GetAttribute("Graines") or ""), ","),
+		Graine = joueur:GetAttribute("Graine"),
+		Trainees = string.split(tostring(joueur:GetAttribute("Trainees") or ""), ","),
+		Trainee = joueur:GetAttribute("Trainee"),
+		ProchaineRoue = joueur:GetAttribute("ProchaineRoue"),
 		Pieces = joueur:GetAttribute("Pieces"),
 		CreaturesBase = creaturesParJoueur[joueur],
 	})
@@ -255,7 +294,7 @@ function Sauvegarde.charger(joueur: Player)
 	-- Gains hors ligne : les créatures ont travaillé pendant l'absence.
 	if donnees.DerniereConnexion > 0 then
 		local gain = GestionBase.gainHorsLigne(
-			Revenus.total(donnees.CreaturesBase),
+			joueur:GetAttribute("RevenuParSeconde"),
 			os.time() - donnees.DerniereConnexion
 		)
 		if gain > 0 then

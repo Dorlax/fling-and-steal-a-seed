@@ -69,6 +69,18 @@ function Collection.decoder(texte: any): { string }
 	if type(texte) ~= "string" or texte == "" then
 		return {}
 	end
+	-- Nombre de pages de biome complètes (toutes leurs créatures découvertes).
+	function Collection.pagesCompletes(liste: { string }): number
+		local n = 0
+		for numero = 1, #Biomes.Liste do
+			local trouvees, total = Collection.progression(liste, numero)
+			if total > 0 and trouvees == total then
+				n += 1
+			end
+		end
+		return n
+	end
+
 	return Collection.nettoyer(string.split(texte, ","))
 end
 

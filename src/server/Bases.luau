@@ -430,7 +430,7 @@ local function creerCreatureExposee(
 	fiche: string,
 	position: Vector3
 ): Model
-	local infos = Fiche.lire(fiche) or { Rarete = "Commune", Taille = "Normale", Espece = nil }
+	local infos = Fiche.lire(fiche) or ({ Rarete = "Commune", Taille = "Normale" } :: Fiche.Infos)
 	local rarete = infos.Rarete
 	-- Les grosses sont réduites dans la base pour tenir dans leur emplacement.
 	-- Les grosses ne sont réduites que si la base est trop petite pour elles.
@@ -459,6 +459,7 @@ local function creerCreatureExposee(
 	local espece = Bestiaire.especeCreature(rarete, infos.Espece)
 	Modeleur.construire(modele, corps, espece, diametre, couleur)
 	Modeleur.aura(corps, couleur, table.find(raretes.Ordre, rarete) or 1)
+	Modeleur.muter(modele, corps, infos.Mutation)
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"
@@ -481,7 +482,7 @@ local function creerCreatureExposee(
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "Voler"
 	prompt.ActionText = "Voler"
-	prompt.ObjectText = Fiche.texte(rarete, infos.Taille)
+	prompt.ObjectText = Fiche.texte(rarete, infos.Taille, infos.Mutation)
 	prompt.HoldDuration = reglagesRaid.DureeVol
 	prompt.MaxActivationDistance = reglagesRaid.DistanceVol
 	prompt.RequiresLineOfSight = false
@@ -498,6 +499,7 @@ local function creerCreatureExposee(
 	modele.PrimaryPart = corps
 	modele:SetAttribute("Rarete", rarete)
 	modele:SetAttribute("Taille", infos.Taille)
+	modele:SetAttribute("Mutation", infos.Mutation)
 	modele:SetAttribute("Emplacement", numero)
 	-- Promenade libre dans la base : centre, rayon et graine (déterministe).
 	modele:SetAttribute("PromenadeCentre", position)
