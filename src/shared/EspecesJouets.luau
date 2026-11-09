@@ -2,13 +2,12 @@
 -- Bestiaire du biome 17 : Coffre à Jouets (cubes, peluches, ressorts, papier).
 -- Mêmes règles que Bestiaire : boîte de 1 × 1 × 1, pieds à Y = -0.5, avant -Z.
 return function(o: any)
-	local definir, ajouter, yeux, pattes4 = o.definir, o.ajouter, o.yeux, o.pattes4
+	local definir, ajouter, yeux = o.definir, o.ajouter, o.yeux
 	local BLANC, NOIR, ROSE, CREME = o.BLANC, o.NOIR, o.ROSE, o.CREME
 
 	local ROUGE = { 230, 60, 60 }
 	local BLEU = { 60, 130, 230 }
 	local JAUNE = { 255, 210, 50 }
-	local VERT = { 80, 190, 90 }
 
 	-----------------------------------------------------------------------
 	-- Créatures
