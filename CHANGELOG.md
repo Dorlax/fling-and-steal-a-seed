@@ -9,6 +9,11 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Vrai design de la Forge
+
+- Machine cartoon autour de la plateforme (serveur `MachineForge`) : fourneau en briques, bouche de feu, cheminée fumante, soufflets, enclume et grand marteau, enseigne « FORGE ».
+- Animation client (`AnimationsForge`) : couleur du mode (rouge Force, bleu Vitesse, violet Double), soufflets qui pompent pendant l'entraînement, coup de marteau et étincelles à chaque gain.
+
 ## 2026-11-09 — Passes Robux et Forge double
 
 - Passes du Plan : × 2 Force, × 2 Vitesse, × 2 Pièces, Ramassage auto (vérifiés chez Roblox par le serveur, onglet « Passes » du Shop).

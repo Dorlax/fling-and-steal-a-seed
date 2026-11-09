@@ -34,6 +34,7 @@
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 
 ## Passes et Forge double
+- Forge habillée (`MachineForge`, tag `MachineForge`) : fourneau, soufflets, enclume, marteau ; animée par le client (`AnimationsForge`) selon le mode et les gains du propriétaire.
 - Mode Double de la Forge (`Config.Forge.Double`) : Force et Vitesse ensemble, 60 % chacune, dès le niveau 12 (bouton « Double »).
 - Passes Robux (`Config.Passes`, `Shared.Passes`, serveur `PassesRobux`) : × 2 Force, × 2 Vitesse, × 2 Pièces, Ramassage auto ; attributs `Pass<Id>` écrits par le serveur ; onglet « Passes » du Shop (« Bientôt » tant que Id = 0).
 
