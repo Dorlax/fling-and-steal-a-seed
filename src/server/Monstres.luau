@@ -247,7 +247,7 @@ local function propulser(
 	direction = if direction.Magnitude > 0.01 then direction.Unit else Vector3.new(0, 0, 1)
 
 	local attache = Instance.new("Attachment")
-	attache.Name = "PousseeMonstre"
+	attache.Name = "AttachePoussee"
 	attache.Parent = racine
 	local poussee = Instance.new("LinearVelocity")
 	poussee.Name = "PousseeMonstre"
