@@ -76,4 +76,22 @@ return {
 		assert(Classements.noterBiome(j, 2) == false, "2 ne bat pas 3")
 		assert(j:GetAttribute("RecordBiome") == 3, "record inchangé")
 	end,
+
+	["C18 bestiaire : déposer une nouvelle espèce l'ajoute aux découvertes"] = function()
+		local Sauvegarde = module("Sauvegarde")
+		local Biomes = require(ReplicatedStorage.Shared.Biomes)
+		local Collection = require(ReplicatedStorage.Shared.Collection)
+		local nom = Biomes.Liste[2].Creatures.Rare[1]
+		local j = fauxJoueur()
+		assert(Sauvegarde.ajouterCreature(j, "Rare:Normale:" .. nom), "créature ajoutée")
+		local ok, err = pcall(function()
+			local liste = Collection.decoder(j:GetAttribute("Decouvertes"))
+			assert(table.find(liste, nom), "espèce découverte")
+			assert(#Sauvegarde.decouvertesDe(j) == 1, "une seule découverte")
+			assert(Sauvegarde.ajouterCreature(j, "Rare:Grande:" .. nom), "deuxième exemplaire")
+			assert(#Sauvegarde.decouvertesDe(j) == 1, "pas de doublon")
+		end)
+		Sauvegarde.terminer(j)
+		assert(ok, err)
+	end,
 }

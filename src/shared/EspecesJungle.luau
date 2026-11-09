@@ -523,6 +523,17 @@ return function(o: any)
 			j = { 0.12, -0.02, 0.08 },
 			ph = 0,
 		}, true)
+		-- Perchoir : deux troncs tiennent la branche au-dessus du sol.
+		ajouter(
+			l,
+			{ n = "Tronc", t = { 0.08, 0.92, 0.08 }, p = { 0.34, -0.04, 0 }, c = { 110, 80, 50 } },
+			true
+		)
+		ajouter(
+			l,
+			{ n = "Racines", t = { 0.16, 0.04, 0.16 }, p = { 0.34, -0.48, 0 }, c = { 90, 65, 40 } },
+			true
+		)
 	end)
 
 	-- Légendaire : jeune gorille à la couronne de feuilles.

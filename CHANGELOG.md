@@ -9,6 +9,11 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Bestiaire à collectionner et finitions
+- Bouton « Livre » : album du Bestiaire, une page par biome (210 créatures), aperçus 3D qui tournent, silhouette noire tant qu'une espèce n'a pas été récoltée, rareté et revenu de chaque espèce, les 3 monstres du biome ; ouvre sur le biome où se trouve le joueur.
+- Découvertes sauvegardées (`Decouvertes`) : déposer une nouvelle espèce dans sa base l'ajoute (« Nouvelle espèce au Bestiaire : X ! (n/210) ») ; les créatures déjà en base comptent.
+- Finitions du bestiaire : hauteur des panneaux mesurée sur les blocs (panneaux des monstres bien placés), matériau Métal rendu (Cité Mécanique), flaque d'eau sous les nageurs (poisson, requin, dauphin, raie, léviathan, koï), perchoir du paresseux.
+
 ## 2026-11-09 — Ferme Joyeuse, Royaume des Rêves, Plage Soleil
 - Biomes 19 (Ferme Joyeuse), 20 (Royaume des Rêves) et 21 (Plage Soleil) : 39 nouvelles espèces dessinées à la main (`EspecesFerme`, `EspecesReves`, `EspecesPlage`), décors en blocs (granges, enclos, moulins, potagers ; nuages-lits, lunes, étoiles tombées, bulles de rêve ; palmiers à cocos, parasols, châteaux de sable, étoiles de mer) et remparts propres.
 

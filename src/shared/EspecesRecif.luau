@@ -69,6 +69,21 @@ return function(o: any)
 			j = { 0.17, -0.12, -0.04 },
 		}, true)
 		caudale(l, 0.3, -0.12, 0.22, orange)
+		-- Flaque d'eau sous le nageur : il bondit hors de l'eau.
+		ajouter(l, {
+			n = "Flaque",
+			t = { 0.62, 0.02, 0.52 },
+			p = { 0, -0.49, 0.02 },
+			c = { 90, 190, 240 },
+			tr = 0.35,
+		})
+		ajouter(l, {
+			n = "Goutte",
+			t = { 0.05, 0.07, 0.05 },
+			p = { 0.22, -0.4, -0.1 },
+			c = { 150, 220, 255 },
+			tr = 0.2,
+		}, true)
 	end, "Ecailles")
 
 	-- Commune : étoile de mer souriante.
@@ -279,6 +294,21 @@ return function(o: any)
 			a = "Queue",
 			j = { 0, -0.2, 0.25 },
 		})
+		-- Flaque d'eau sous le nageur : il bondit hors de l'eau.
+		ajouter(l, {
+			n = "Flaque",
+			t = { 0.62, 0.02, 0.52 },
+			p = { 0, -0.49, 0.02 },
+			c = { 90, 190, 240 },
+			tr = 0.35,
+		})
+		ajouter(l, {
+			n = "Goutte",
+			t = { 0.05, 0.07, 0.05 },
+			p = { 0.22, -0.4, -0.1 },
+			c = { 150, 220, 255 },
+			tr = 0.2,
+		}, true)
 	end)
 
 	-- Épique : bébé dauphin joueur.
@@ -349,6 +379,21 @@ return function(o: any)
 			a = "Queue",
 			j = { 0, -0.08, 0.32 },
 		})
+		-- Flaque d'eau sous le nageur : il bondit hors de l'eau.
+		ajouter(l, {
+			n = "Flaque",
+			t = { 0.62, 0.02, 0.52 },
+			p = { 0, -0.49, 0.02 },
+			c = { 90, 190, 240 },
+			tr = 0.35,
+		})
+		ajouter(l, {
+			n = "Goutte",
+			t = { 0.05, 0.07, 0.05 },
+			p = { 0.22, -0.4, -0.1 },
+			c = { 150, 220, 255 },
+			tr = 0.2,
+		}, true)
 	end, "Gelee")
 
 	-- Légendaire : requin bébé au sourire plein de dents.
@@ -420,6 +465,21 @@ return function(o: any)
 			j = { 0.18, -0.18, -0.08 },
 		}, true)
 		caudale(l, 0.42, -0.04, 0.3, gris)
+		-- Flaque d'eau sous le nageur : il bondit hors de l'eau.
+		ajouter(l, {
+			n = "Flaque",
+			t = { 0.62, 0.02, 0.52 },
+			p = { 0, -0.49, 0.02 },
+			c = { 90, 190, 240 },
+			tr = 0.35,
+		})
+		ajouter(l, {
+			n = "Goutte",
+			t = { 0.05, 0.07, 0.05 },
+			p = { 0.22, -0.4, -0.1 },
+			c = { 150, 220, 255 },
+			tr = 0.2,
+		}, true)
 	end)
 
 	-- Légendaire : bernard-l'ermite dans une coquille dorée.
@@ -573,6 +633,21 @@ return function(o: any)
 			p = { 0, -0.12, -0.155 },
 			c = { 200, 230, 240 },
 		})
+		-- Flaque d'eau sous le nageur : il bondit hors de l'eau.
+		ajouter(l, {
+			n = "Flaque",
+			t = { 0.62, 0.02, 0.52 },
+			p = { 0, -0.49, 0.02 },
+			c = { 90, 190, 240 },
+			tr = 0.35,
+		})
+		ajouter(l, {
+			n = "Goutte",
+			t = { 0.05, 0.07, 0.05 },
+			p = { 0.22, -0.4, -0.1 },
+			c = { 150, 220, 255 },
+			tr = 0.2,
+		}, true)
 	end, "Ecailles")
 
 	-- Mythique : coquillage qui garde une perle lumineuse.

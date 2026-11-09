@@ -11,6 +11,7 @@ local Fiche = require(ReplicatedStorage.Shared.Fiche)
 local Donnees = require(ReplicatedStorage.Shared.Donnees)
 local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
+local Collection = require(ReplicatedStorage.Shared.Collection)
 
 type Session = {
 	donnees: Donnees.DonneesJoueur,
@@ -23,6 +24,36 @@ local reglages = Config.Sauvegarde
 local sessions: { [any]: Session } = {}
 -- Créatures déposées dans la base de chaque joueur (raretés), tenues par le serveur.
 local creaturesParJoueur: { [any]: { string } } = {}
+-- Espèces déjà récoltées par chaque joueur (Bestiaire).
+local decouvertesParJoueur: { [any]: { string } } = {}
+
+local function envoyerMessage(joueur: any, texte: string)
+	if typeof(joueur) ~= "Instance" or not joueur:IsA("Player") then
+		return
+	end
+	local remote = ReplicatedStorage:FindFirstChild("MessageJeu")
+	if remote and remote:IsA("RemoteEvent") then
+		remote:FireClient(joueur, texte)
+	end
+end
+
+-- Ajoute l'espèce d'une fiche au Bestiaire du joueur ; renvoie true si nouvelle.
+local function decouvrir(joueur: any, fiche: string): boolean
+	local infos: any = Fiche.lire(fiche)
+	if infos == nil or infos.Espece == nil then
+		return false
+	end
+	local liste = decouvertesParJoueur[joueur]
+	if liste == nil then
+		liste = {}
+		decouvertesParJoueur[joueur] = liste
+	end
+	if not Collection.ajouter(liste, infos.Espece) then
+		return false
+	end
+	joueur:SetAttribute("Decouvertes", Collection.encoder(liste))
+	return true
+end
 
 local magasin: DataStore? = nil
 do
@@ -67,6 +98,17 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("Pieces", donnees.Pieces)
 	creaturesParJoueur[joueur] = table.clone(donnees.CreaturesBase)
 	joueur:SetAttribute("RevenuParSeconde", Revenus.total(donnees.CreaturesBase))
+	-- Bestiaire : les créatures déjà dans la base comptent comme découvertes.
+	decouvertesParJoueur[joueur] = table.clone(donnees.Decouvertes)
+	joueur:SetAttribute("Decouvertes", Collection.encoder(donnees.Decouvertes))
+	for _, fiche in donnees.CreaturesBase do
+		decouvrir(joueur, fiche)
+	end
+end
+
+-- Espèces déjà récoltées par le joueur (copie).
+function Sauvegarde.decouvertesDe(joueur: any): { string }
+	return table.clone(decouvertesParJoueur[joueur] or {})
 end
 
 -- Créatures de la base du joueur (copie).
@@ -99,6 +141,14 @@ function Sauvegarde.ajouterCreature(joueur: any, rarete: any): boolean
 	end
 	table.insert(liste, rarete)
 	joueur:SetAttribute("RevenuParSeconde", Revenus.total(liste))
+	if decouvrir(joueur, rarete) then
+		local infos = Fiche.lire(rarete)
+		local nombre = #(decouvertesParJoueur[joueur] or {})
+		envoyerMessage(
+			joueur,
+			`Nouvelle espèce au Bestiaire : {(infos :: any).Espece} ! ({nombre}/{Collection.total()})`
+		)
+	end
 	return true
 end
 
@@ -130,6 +180,7 @@ function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
 		Etages = joueur:GetAttribute("Etages"),
 		Agrandissement = joueur:GetAttribute("Agrandissement"),
 		RecordBiome = joueur:GetAttribute("RecordBiome"),
+		Decouvertes = decouvertesParJoueur[joueur],
 		Pieces = joueur:GetAttribute("Pieces"),
 		CreaturesBase = creaturesParJoueur[joueur],
 	})
@@ -182,11 +233,13 @@ end
 function Sauvegarde.terminer(joueur: Player)
 	if sessions[joueur] == nil then
 		creaturesParJoueur[joueur] = nil
+		decouvertesParJoueur[joueur] = nil
 		return
 	end
 	Sauvegarde.sauvegarder(joueur)
 	sessions[joueur] = nil
 	creaturesParJoueur[joueur] = nil
+	decouvertesParJoueur[joueur] = nil
 end
 
 -- Branche l'arrêt du serveur et la sauvegarde automatique.
