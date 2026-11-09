@@ -167,7 +167,7 @@ return {
 		local humanoide = joueur.Character.Humanoid :: Humanoid
 		local avant = humanoide.Health
 		local t = Workspace:GetServerTimeNow()
-		local ok = Monstres.frapper(monstre, joueur, t)
+		local ok, raison = Monstres.frapper(monstre, joueur, t)
 		local porte = Portage.porte(joueur)
 		local libre = creature:GetAttribute("Libre")
 		local dans = creature.Parent == module("TerresSauvages").dossierCreatures()
@@ -178,6 +178,7 @@ return {
 		local etourdi = humanoide.PlatformStand
 		local fin = joueur:GetAttribute("EtourdiJusqua")
 		nettoyer(joueur)
+		assert(ok == true, "le coup doit réussir : " .. tostring(raison))
 		assert(poussee and poussee:IsA("LinearVelocity"), "poussée attendue")
 		assert(etourdi == true, "joueur étourdi (PlatformStand) attendu")
 		assert(

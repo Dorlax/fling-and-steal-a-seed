@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local Workspace = game:GetService("Workspace")
 
 local Biomes = require(ReplicatedStorage.Shared.Biomes)
@@ -6,6 +7,11 @@ local Biomes = require(ReplicatedStorage.Shared.Biomes)
 return {
 	["C19 un rempart décoré par biome et des murs invisibles autour de la carte"] = function()
 		local decor = Workspace:FindFirstChild("Decor")
+		if decor == nil or decor:FindFirstChild("Limites") == nil then
+			local serveur = ServerScriptService:WaitForChild("Server", 5)
+			assert(serveur, "dossier Server introuvable")
+			decor = (require :: any)(serveur:FindFirstChild("Decor")).creer()
+		end
 		assert(decor, "dossier Decor attendu")
 		local limites = decor:FindFirstChild("Limites")
 		assert(limites, "dossier Limites attendu")
