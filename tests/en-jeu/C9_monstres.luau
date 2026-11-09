@@ -161,20 +161,31 @@ return {
 		end
 	end,
 
-	["C10 coup de monstre : créature lâchée, libre, à DistanceChute, vie réduite"] = function()
+	["C10 coup de monstre : créature lâchée, libre, à DistanceChute, aucun dégât, propulsé et étourdi"] = function()
 		local Portage, Monstres = module("Portage"), module("Monstres")
 		local joueur, monstre, creature = scenario()
 		local humanoide = joueur.Character.Humanoid :: Humanoid
 		local avant = humanoide.Health
 		local t = Workspace:GetServerTimeNow()
-		local ok = Monstres.frapper(monstre, joueur, t)
+		local ok, raison = Monstres.frapper(monstre, joueur, t)
 		local porte = Portage.porte(joueur)
 		local libre = creature:GetAttribute("Libre")
 		local dans = creature.Parent == module("TerresSauvages").dossierCreatures()
 		local delta = creature:GetPivot().Position - joueur.Character.HumanoidRootPart.Position
 		local horizontale = Vector3.new(delta.X, 0, delta.Z).Magnitude
 		local vie = humanoide.Health
+		local poussee = joueur.Character.HumanoidRootPart:FindFirstChild("PousseeMonstre")
+		local etourdi = humanoide.PlatformStand
+		local fin = joueur:GetAttribute("EtourdiJusqua")
 		nettoyer(joueur)
+		assert(ok == true, "le coup doit réussir : " .. tostring(raison))
+		assert(poussee and poussee:IsA("LinearVelocity"), "poussée attendue")
+		assert(etourdi == true, "joueur étourdi (PlatformStand) attendu")
+		assert(
+			type(fin) == "number" and fin >= t + M.Zones.Proche.Etourdi - 0.5,
+			"EtourdiJusqua attendu"
+		)
+		assert(joueur:GetAttribute("Projection") ~= nil, "style de projection attendu")
 		assert(ok == true, "le coup doit réussir")
 		assert(porte == false, "le joueur ne doit plus rien porter")
 		assert(dans and libre == true, "créature libre dans Workspace.Creatures attendue")
@@ -182,10 +193,7 @@ return {
 			math.abs(horizontale - Config.Plaquage.DistanceChute) <= 1.5,
 			"créature à " .. horizontale .. " studs, attendu ~" .. Config.Plaquage.DistanceChute
 		)
-		assert(
-			math.abs((avant - vie) - M.Zones.Proche.Degats) < 0.01,
-			"vie perdue : " .. (avant - vie)
-		)
+		assert(vie == avant, "aucun dégât attendu, vie perdue : " .. (avant - vie))
 	end,
 
 	["C11 protection après un coup : refus 'protegee', puis succès après DureeProtection"] = function()

@@ -9,6 +9,11 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Bords de carte et coups de monstres
+- Remparts décorés autour de la carte, un style par biome, avec murs invisibles très hauts ; filet de sécurité qui ramène à la base un joueur tombé.
+- Les monstres ne font plus de dégâts : leur coup fait lâcher la créature, propulse le joueur (plus fort dans les biomes lointains, car le monstre est plus rapide) et l'étourdit 1 à 1,8 s.
+- Projections comiques tirées au hasard : Boing, Toupie (le joueur tourne sur lui-même), Fusée (décollage vertical), Ballon (le joueur flotte accroché à trois ballons puis POP) ; traînée arc-en-ciel, onomatopée colorée (« FIUUUU ! », « POUET ! »…), étoiles qui tournent autour de la tête pendant l'étourdissement.
+
 ## 2026-11-09 — Jungle, Îles Célestes, Manoir Hanté
 - Biomes 10 (Jungle Émeraude), 11 (Îles Célestes) et 12 (Manoir Hanté) : 39 nouvelles espèces dessinées à la main (`EspecesJungle`, `EspecesCiel`, `EspecesManoir`).
 - Décors en blocs : arbres tropicaux à lianes, fleurs géantes, ruines à glyphes, fougères ; nuages escaladables, colonnes de marbre, arcs-en-ciel, plumes dorées ; tombes, arbres tordus, citrouilles lumineuses, lanternes fantômes.

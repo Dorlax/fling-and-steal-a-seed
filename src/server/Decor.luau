@@ -1698,6 +1698,230 @@ local function creerBiome(racine: Instance, numero: number)
 end
 
 ---------------------------------------------------------------------------
+-- Barrières du bord de la carte : un rempart décoré par biome (lisses
+-- continues + poteaux réguliers + ornement), et des murs invisibles très
+-- hauts derrière, pour qu'aucun joueur ne sorte ni ne tombe.
+
+type Lisse = { y: number, h: number, e: number, c: { number }, m: string?, tr: number? }
+type Poteau = {
+	t: { number },
+	ecart: number,
+	c: { number },
+	alterne: { number }?,
+	m: string?,
+	y: number?, -- bas du poteau (0 = au sol)
+	neon: boolean?,
+}
+type Rempart = { lisses: { Lisse }, poteau: Poteau?, cime: Poteau? }
+
+local BOIS_BLANC = { 245, 240, 230 }
+local REMPARTS: { [string]: Rempart } = {
+	Prairie = {
+		lisses = {
+			{ y = 2, h = 0.8, e = 0.6, c = BOIS_BLANC },
+			{ y = 4.5, h = 0.8, e = 0.6, c = BOIS_BLANC },
+		},
+		poteau = { t = { 1.2, 6, 1.2 }, ecart = 10, c = BOIS_BLANC },
+		cime = { t = { 1.5, 0.6, 1.5 }, ecart = 10, c = { 230, 70, 70 }, y = 6 },
+	},
+	BoisMoussu = {
+		lisses = {
+			{ y = 3, h = 6, e = 4, c = { 115, 115, 105 }, m = "Slate" },
+			{ y = 6.4, h = 0.8, e = 4.4, c = { 90, 160, 80 }, m = "Grass" },
+		},
+		poteau = { t = { 3, 14, 3 }, ecart = 24, c = { 100, 70, 45 }, m = "Wood" },
+		cime = { t = { 8, 5, 8 }, ecart = 24, c = { 50, 130, 75 }, y = 13 },
+	},
+	Dunes = {
+		lisses = { { y = 5, h = 10, e = 4, c = { 225, 185, 120 }, m = "Sandstone" } },
+		poteau = { t = { 3, 3, 4.4 }, ecart = 6, c = { 210, 165, 100 }, m = "Sandstone", y = 10 },
+	},
+	Glacier = {
+		lisses = { { y = 6, h = 12, e = 3, c = { 175, 220, 255 }, m = "Ice", tr = 0.15 } },
+		poteau = { t = { 2.4, 17, 2.4 }, ecart = 18, c = { 230, 245, 255 }, m = "Ice" },
+		cime = { t = { 1.6, 1.6, 1.6 }, ecart = 18, c = { 150, 230, 255 }, y = 17, neon = true },
+	},
+	Volcan = {
+		lisses = {
+			{ y = 7, h = 14, e = 6, c = { 50, 40, 45 }, m = "Basalt" },
+			{ y = 4, h = 0.6, e = 6.2, c = { 255, 110, 30 }, m = "Neon" },
+		},
+		poteau = { t = { 4, 18, 4 }, ecart = 30, c = { 35, 28, 32 }, m = "Basalt" },
+		cime = { t = { 2, 2, 2 }, ecart = 30, c = { 255, 150, 40 }, y = 18, neon = true },
+	},
+	Galaxie = {
+		lisses = { { y = 10, h = 20, e = 0.4, c = { 170, 120, 255 }, m = "ForceField", tr = 0.3 } },
+		poteau = { t = { 2, 12, 2 }, ecart = 30, c = { 90, 230, 255 }, neon = true },
+		cime = { t = { 1.6, 1.6, 1.6 }, ecart = 30, c = { 255, 120, 220 }, y = 12, neon = true },
+	},
+	Marais = {
+		lisses = {
+			{ y = 2.5, h = 0.8, e = 0.6, c = { 90, 75, 60 }, m = "Wood" },
+			{ y = 5, h = 0.8, e = 0.6, c = { 90, 75, 60 }, m = "Wood" },
+		},
+		poteau = {
+			t = { 1, 7, 1 },
+			ecart = 6,
+			c = { 75, 60, 50 },
+			alterne = { 100, 130, 75 },
+			m = "Wood",
+		},
+	},
+	Recif = {
+		lisses = { { y = 3, h = 6, e = 4, c = { 255, 140, 130 }, m = "Slate" } },
+		poteau = {
+			t = { 1.6, 11, 1.6 },
+			ecart = 8,
+			c = { 255, 170, 70 },
+			alterne = { 170, 110, 230 },
+		},
+		cime = { t = { 2.4, 1.2, 2.4 }, ecart = 16, c = { 80, 210, 200 }, y = 11 },
+	},
+	Bonbon = {
+		lisses = { { y = 3.5, h = 1, e = 1, c = { 255, 255, 255 } } },
+		poteau = {
+			t = { 1.4, 7, 1.4 },
+			ecart = 5,
+			c = { 230, 50, 60 },
+			alterne = { 255, 255, 255 },
+		},
+		cime = { t = { 2, 2, 2 }, ecart = 5, c = { 255, 150, 200 }, y = 7 },
+	},
+	Jungle = {
+		lisses = { { y = 6, h = 12, e = 5, c = { 40, 110, 55 }, m = "Grass" } },
+		poteau = { t = { 3, 16, 3 }, ecart = 26, c = { 105, 75, 50 }, m = "Wood" },
+		cime = { t = { 9, 4, 9 }, ecart = 26, c = { 60, 160, 70 }, y = 15 },
+	},
+	Ciel = {
+		lisses = { { y = 3, h = 6, e = 6, c = { 250, 252, 255 } } },
+		poteau = { t = { 2.4, 12, 2.4 }, ecart = 20, c = { 240, 238, 230 }, m = "Marble" },
+		cime = { t = { 3.2, 1, 3.2 }, ecart = 20, c = { 255, 215, 120 }, y = 12 },
+	},
+	Manoir = {
+		lisses = {
+			{ y = 1, h = 2, e = 1.4, c = { 110, 105, 120 }, m = "Cobblestone" },
+			{ y = 9.5, h = 0.5, e = 0.5, c = { 40, 35, 45 }, m = "Metal" },
+		},
+		poteau = { t = { 0.4, 8, 0.4 }, ecart = 4, c = { 40, 35, 45 }, m = "Metal", y = 2 },
+		cime = { t = { 0.8, 0.8, 0.8 }, ecart = 4, c = { 60, 55, 70 }, y = 10 },
+	},
+}
+
+local function materiau(nom: string?): Enum.Material
+	if nom == nil then
+		return Enum.Material.SmoothPlastic
+	end
+	local ok, m = pcall(function()
+		return (Enum.Material :: any)[nom]
+	end)
+	return if ok and m then m else Enum.Material.SmoothPlastic
+end
+
+local function couleurRgb(c: { number }): Color3
+	return Color3.fromRGB(c[1], c[2], c[3])
+end
+
+-- Rempart de `debut` à `fin` (au sol, en ligne droite), style `spec`.
+local function rempart(parent: Instance, spec: Rempart, debut: Vector3, fin: Vector3)
+	local longueur = (fin - debut).Magnitude
+	if longueur < 1 then
+		return
+	end
+	local axe = CFrame.lookAt(debut, fin) -- -Z = le long du rempart
+	for i, lisse in spec.lisses do
+		local p = bloc(
+			parent,
+			"Lisse" .. i,
+			Vector3.new(lisse.e, lisse.h, longueur),
+			axe * CFrame.new(0, lisse.y, -longueur / 2),
+			couleurRgb(lisse.c),
+			true
+		)
+		p.Material = materiau(lisse.m)
+		if lisse.tr then
+			p.Transparency = lisse.tr
+		end
+	end
+	for _, serie in { spec.poteau, spec.cime } do
+		if serie then
+			local n = math.floor(longueur / serie.ecart)
+			for k = 0, n do
+				local c = if serie.alterne and k % 2 == 1 then serie.alterne else serie.c
+				local p = bloc(
+					parent,
+					"Poteau",
+					Vector3.new(serie.t[1], serie.t[2], serie.t[3]),
+					axe * CFrame.new(0, (serie.y or 0) + serie.t[2] / 2, -k * serie.ecart),
+					couleurRgb(c),
+					true
+				)
+				p.Material = if serie.neon then Enum.Material.Neon else materiau(serie.m)
+			end
+		end
+	end
+end
+
+-- Mur invisible et très haut (collision seulement), découpé en morceaux de
+-- 2 000 studs au plus.
+local function murInvisible(parent: Instance, debut: Vector3, fin: Vector3)
+	local longueur = (fin - debut).Magnitude
+	local morceaux = math.max(1, math.ceil(longueur / 2000))
+	local pas = longueur / morceaux
+	local axe = CFrame.lookAt(debut, fin)
+	for k = 0, morceaux - 1 do
+		local p = bloc(
+			parent,
+			"MurInvisible",
+			Vector3.new(4, 1000, pas + 4),
+			axe * CFrame.new(0, 500, -(k + 0.5) * pas),
+			Color3.new(1, 1, 1),
+			true
+		)
+		p.Transparency = 1
+		p.CastShadow = false
+	end
+end
+
+-- Remparts tout autour : chaque biome sur ses deux côtés, la Prairie derrière
+-- les bases, le dernier biome au bout de la carte ; puis les murs invisibles.
+local function creerLimites(racine: Instance)
+	local dossierLimites = dossier(racine, "Limites")
+	local x = DEMI_LARGEUR - 2
+	local arriere = BORD_BASES - 140
+	local fin = BORD_BASES + Biomes.nombre() * Biomes.Longueur
+	for numero, biome in Biomes.Liste do
+		local spec = REMPARTS[biome.Id] or REMPARTS.Prairie
+		local z1 = if numero == 1 then arriere else BORD_BASES + Biomes.debut(numero)
+		local z2 = BORD_BASES + Biomes.debut(numero) + Biomes.Longueur
+		local groupe = dossier(dossierLimites, biome.Id)
+		rempart(groupe, spec, Vector3.new(-x, 0, z1), Vector3.new(-x, 0, z2))
+		rempart(groupe, spec, Vector3.new(x, 0, z1), Vector3.new(x, 0, z2))
+	end
+	rempart(
+		dossierLimites,
+		REMPARTS.Prairie,
+		Vector3.new(-x, 0, arriere),
+		Vector3.new(x, 0, arriere)
+	)
+	local dernier = Biomes.Liste[Biomes.nombre()]
+	rempart(
+		dossierLimites,
+		REMPARTS[dernier.Id] or REMPARTS.Prairie,
+		Vector3.new(-x, 0, fin - 2),
+		Vector3.new(x, 0, fin - 2)
+	)
+	local bord = DEMI_LARGEUR + 2
+	murInvisible(dossierLimites, Vector3.new(-bord, 0, arriere - 4), Vector3.new(-bord, 0, fin + 4))
+	murInvisible(dossierLimites, Vector3.new(bord, 0, arriere - 4), Vector3.new(bord, 0, fin + 4))
+	murInvisible(
+		dossierLimites,
+		Vector3.new(-bord, 0, arriere - 4),
+		Vector3.new(bord, 0, arriere - 4)
+	)
+	murInvisible(dossierLimites, Vector3.new(-bord, 0, fin + 2), Vector3.new(bord, 0, fin + 2))
+end
+
+---------------------------------------------------------------------------
 -- Construction du monde
 
 function Decor.creer(): Folder
@@ -1798,6 +2022,9 @@ function Decor.creer(): Folder
 		colline(bord, Vector3.new(DEMI_LARGEUR + 15, 0, z), t, couleur)
 		z += 45
 	end
+
+	-- Remparts décorés et murs invisibles autour de toute la carte.
+	creerLimites(racine)
 
 	-- Décor propre à chaque biome suivant (Forêt, Désert...).
 	for numero = 2, Biomes.nombre() do
