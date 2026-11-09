@@ -12,7 +12,7 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 ## 2026-11-09 — Forge évolutive, écran allégé
 
 - Forge : l'agrès se modernise avec le niveau (5 paliers : Rustique, Club, Pro, Futur, Cosmique). Vitesse : roue en bois, tapis, tapis pro, piste néon, piste cosmique ; Force : rocher, haltères, barre olympique, barre plasma, météorite ; Double : corde lumineuse, laser, arc-en-ciel.
-- Gain de la Forge par niveau : +1, +2, +5, +10, +20, +50… ; bouton « +1 → +2/s ».
+- Gain de la Forge par niveau : +1, +2, +5, +10, +20, +50…, 4 fois par seconde ; « 👟 +N » / « 💪 +N » qui jaillissent autour de la tête.
 - Animation du personnage sur la Forge (course, développé, corde), plus rapide avec les agrès modernes ; objet dans les mains ; « +N » au-dessus de la tête ; fête du nouvel agrès.
 - Taux de rareté derrière un bouton « % » ; plus de noms au-dessus des monstres ; pièces en haut au centre ; textes des boutons de stats corrigés.
 

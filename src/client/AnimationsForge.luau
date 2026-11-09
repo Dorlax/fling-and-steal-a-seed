@@ -651,35 +651,61 @@ local function rendu(dt: number)
 	end
 end
 
--- « +N » qui monte au-dessus de la tête du joueur local.
+-- « +N » qui jaillissent autour de la tête du joueur local à chaque gain
+-- (plusieurs par seconde) : icône, gros chiffres contourés, rebond, envol.
+local ICONES: { [string]: string } = { Force = "💪", Vitesse = "👟" }
+local MAX_JAILLISSEMENTS = 14
+local jaillissements = 0
+
 local function surgir(joueur: Player, texte: string, couleur: Color3)
 	local personnage = joueur.Character
 	local tete = personnage and personnage:FindFirstChild("Head")
-	if tete == nil or not tete:IsA("BasePart") then
+	if tete == nil or not tete:IsA("BasePart") or jaillissements >= MAX_JAILLISSEMENTS then
 		return
 	end
+	jaillissements += 1
 	local panneau = Instance.new("BillboardGui")
-	panneau.Size = UDim2.fromOffset(140, 40)
-	panneau.StudsOffset = Vector3.new(math.random(-10, 10) / 10, 2.2, 0)
+	panneau.Size = UDim2.fromOffset(220, 64)
+	local depart = Vector3.new(math.random(-18, 18) / 10, 1.4 + math.random(0, 14) / 10, 0)
+	panneau.StudsOffset = depart
 	panneau.AlwaysOnTop = true
+	panneau.LightInfluence = 0
 	panneau.Adornee = tete :: BasePart
 	local etiquette = Instance.new("TextLabel")
 	etiquette.Size = UDim2.fromScale(1, 1)
 	etiquette.BackgroundTransparency = 1
 	etiquette.Font = Enum.Font.FredokaOne
 	etiquette.TextScaled = true
-	etiquette.TextColor3 = couleur
-	etiquette.TextStrokeTransparency = 0
+	etiquette.TextColor3 = Color3.new(1, 1, 1)
 	etiquette.Text = texte
 	etiquette.Parent = panneau
+	-- Dégradé clair -> couleur de la stat, contour épais foncé.
+	local degrade = Instance.new("UIGradient")
+	degrade.Color = ColorSequence.new(Color3.new(1, 1, 1):Lerp(couleur, 0.35), couleur)
+	degrade.Rotation = 90
+	degrade.Parent = etiquette
+	local contour = Instance.new("UIStroke")
+	contour.Thickness = 3
+	contour.Color = couleur:Lerp(Color3.new(0, 0, 0), 0.7)
+	contour.Parent = etiquette
+	local echelle = Instance.new("UIScale")
+	echelle.Scale = 0.3
+	echelle.Parent = etiquette
 	panneau.Parent = dossier()
-	local info = TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	TweenService
-		:Create(panneau, info, { StudsOffset = panneau.StudsOffset + Vector3.new(0, 2.2, 0) })
-		:Play()
-	TweenService:Create(etiquette, info, { TextTransparency = 1, TextStrokeTransparency = 1 })
-		:Play()
-	task.delay(1, function()
+	TweenService:Create(
+		echelle,
+		TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{ Scale = 1 }
+	):Play()
+	local envol = TweenInfo.new(0.85, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(panneau, envol, { StudsOffset = depart + Vector3.new(0, 2.6, 0) }):Play()
+	task.delay(0.45, function()
+		local fondu = TweenInfo.new(0.4)
+		TweenService:Create(etiquette, fondu, { TextTransparency = 1 }):Play()
+		TweenService:Create(contour, fondu, { Transparency = 1 }):Play()
+	end)
+	task.delay(0.9, function()
+		jaillissements -= 1
 		panneau:Destroy()
 	end)
 end
@@ -696,7 +722,7 @@ local function suivreGains()
 				and valeur > avant
 				and joueur:GetAttribute("SurForge") == true
 			then
-				surgir(joueur, `+{Nombres.abreger(valeur - avant)}`, COULEURS[nom])
+				surgir(joueur, `{ICONES[nom]} +{Nombres.abreger(valeur - avant)}`, COULEURS[nom])
 			end
 			avant = valeur
 		end)
