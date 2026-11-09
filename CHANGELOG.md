@@ -9,6 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Effets et animations signature des espèces
+- Effets en petits blocs autour de chaque espèce (client `EffetsEspeces`, données `Shared.Effets`) : ambiance de son biome (pollen, lucioles, poussière, flocons, braises, étoiles, bulles, confettis, feuilles, plumes, brume, vapeur, pétales, éclats de cristal, paille, Zzz, gouttes) et effets signature pour ~80 espèces (flammes des créatures de feu, vapeur des machines, notes du piano et du tambour, Zzz des dormeurs, cœurs des peluches, poussière d'étoiles des fées, jets d'eau…).
+- Animations signature : toupie qui tourne, tornade qui tourbillonne, hélices et roues qui tournent, moulin, aiguilles et balancier de l'horloge, cheval à bascule, flammes qui frémissent (nouveaux rôles d'`Anime`).
+- Grosses tailles : effets plus fréquents et plus gros, onde au sol régulière dès Géante, onde de choc et gerbe de poussière quand une Colossale ou une Titan sort de terre.
+- Économie : 14 modèles proches au plus, 180 particules à l'écran au plus.
+
 ## 2026-11-09 — Bestiaire à collectionner et finitions
 - Bouton « Livre » : album du Bestiaire, une page par biome (210 créatures), aperçus 3D qui tournent, silhouette noire tant qu'une espèce n'a pas été récoltée, rareté et revenu de chaque espèce, les 3 monstres du biome ; ouvre sur le biome où se trouve le joueur.
 - Découvertes sauvegardées (`Decouvertes`) : déposer une nouvelle espèce dans sa base l'ajoute (« Nouvelle espèce au Bestiaire : X ! (n/210) ») ; les créatures déjà en base comptent.

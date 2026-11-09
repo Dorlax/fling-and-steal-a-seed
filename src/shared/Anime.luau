@@ -32,7 +32,19 @@ Anime.Pieces = {
 	Tete = { Repos = 0.08, Marche = 0.12, Vitesse = 2.5, Frappe = 0.5 },
 	Antenne = { Repos = 0.25, Marche = 0.35, Vitesse = 4 },
 	Machoire = { Repos = 0.08, Marche = 0.15, Vitesse = 4, Frappe = 0.7 },
+	-- Animations signature (Shared.Effets.Roles) : rotations continues…
+	Toupie = { Repos = 0, Marche = 0, Vitesse = 5 }, -- autour de Y
+	Helice = { Repos = 0, Marche = 0, Vitesse = 14 }, -- autour de Y, très vite
+	Roue = { Repos = 0, Marche = 0, Vitesse = 4 }, -- autour de X
+	Moulin = { Repos = 0, Marche = 0, Vitesse = 1.5 }, -- autour de Z (face avant)
+	-- … et oscillations.
+	Pendule = { Repos = 0.45, Marche = 0.45, Vitesse = 2.6 }, -- autour de Z
+	Bascule = { Repos = 0.22, Marche = 0.3, Vitesse = 2.2 }, -- autour de X
+	Flamme = { Repos = 0.14, Marche = 0.14, Vitesse = 13 }, -- frémissement
 }
+
+-- Rôles qui tournent sans fin (angle = temps × vitesse).
+local CONTINUS = { Toupie = "Y", Helice = "Y", Roue = "X", Moulin = "Z" }
 
 export type Decalage = { Hauteur: number, Lacet: number, Roulis: number }
 export type Rotation = { X: number, Y: number, Z: number }
@@ -60,7 +72,8 @@ function Anime.monstre(t: number, phase: number): Decalage
 end
 
 -- Rotation d'une pièce animée autour de son articulation.
---   role   : Patte, Bras, Aile, Queue, Oreille, Tete, Antenne ou Machoire
+--   role   : Patte, Bras, Aile, Queue, Oreille, Tete, Antenne, Machoire,
+--            Toupie, Helice, Roue, Moulin, Pendule, Bascule ou Flamme
 --   t      : temps (s) ; phase : décalage de la pièce + du modèle
 --   cote   : -1 gauche, 1 droite, 0 au centre
 --   marche : vrai si le modèle se déplace
@@ -76,6 +89,15 @@ function Anime.piece(
 	local r = (Anime.Pieces :: any)[role]
 	if r == nil then
 		return { X = 0, Y = 0, Z = 0 }
+	end
+	local axe = (CONTINUS :: any)[role]
+	if axe then
+		local angle = (t * r.Vitesse + phase) % (2 * math.pi)
+		return {
+			X = if axe == "X" then angle else 0,
+			Y = if axe == "Y" then angle else 0,
+			Z = if axe == "Z" then -angle else 0,
+		}
 	end
 	local amplitude = if marche then r.Marche else r.Repos
 	local onde = math.sin(t * r.Vitesse + phase)
@@ -97,6 +119,12 @@ function Anime.piece(
 			Y = math.sin(t * r.Vitesse * 0.5 + phase) * amplitude,
 			Z = 0,
 		}
+	elseif role == "Pendule" then
+		return { X = 0, Y = 0, Z = onde * amplitude }
+	elseif role == "Bascule" then
+		return { X = onde * amplitude, Y = 0, Z = 0 }
+	elseif role == "Flamme" then
+		return { X = onde * amplitude, Y = 0, Z = math.cos(t * r.Vitesse * 0.8 + phase) * amplitude }
 	elseif role == "Machoire" then
 		-- Négatif : l'avant de la mâchoire descend (la bouche s'ouvre).
 		return { X = -((onde * 0.5 + 0.5) * amplitude + coup), Y = 0, Z = 0 }

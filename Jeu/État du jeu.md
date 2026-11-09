@@ -37,6 +37,7 @@
 - Record de biome (`RecordBiome`, sauvegardé) battu à chaque lancer plus lointain, annoncé à tout le serveur.
 - Classements (`Shared.Classement`, serveur `Classements`) : leaderstats Biome / Revenu/s / Pièces ; bouton « Top » (client `InterfaceClassement`) avec onglets Ce serveur / Monde ; monde via OrderedDataStore `ClassementRevenusV1` (log10 × 1000) et `ClassementBiomesV1`, publié en JSON dans l'attribut `ClassementMonde` de ReplicatedStorage toutes les 2 min.
 - Bestiaire à collectionner (`Shared.Collection`, client `InterfaceBestiaire`, bouton « Livre ») : page par biome, aperçus 3D en ViewportFrame, silhouettes des espèces non récoltées ; découvertes sauvegardées (`Decouvertes`) à chaque dépôt d'une nouvelle espèce.
+- Effets des espèces (client `EffetsEspeces`, `Shared.Effets`) : particules en blocs d'ambiance par biome + signatures par espèce ; animations signature (rôles Toupie, Helice, Roue, Moulin, Pendule, Bascule, Flamme) ; ondes au sol dès Géante, onde de choc des Colossales/Titans à la pousse.
 
 ## Interactions
 - Plaquage : bouton PLAQUER (F / Y), portée 8, délai 6 s, protection 4 s ; le porteur lâche sa créature, libre pour tous ; refusé dans les bases. [[04 Plaquage]]
