@@ -1945,6 +1945,18 @@ local Recif = if script
 local Bonbon = if script
 	then require(script.Parent.EspecesBonbon)
 	else (require :: any)("./EspecesBonbon")
+-- selene: allow(incorrect_standard_library_use)
+local Jungle = if script
+	then require(script.Parent.EspecesJungle)
+	else (require :: any)("./EspecesJungle")
+-- selene: allow(incorrect_standard_library_use)
+local Ciel = if script
+	then require(script.Parent.EspecesCiel)
+	else (require :: any)("./EspecesCiel")
+-- selene: allow(incorrect_standard_library_use)
+local Manoir = if script
+	then require(script.Parent.EspecesManoir)
+	else (require :: any)("./EspecesManoir")
 BoisMoussu(outils)
 Dunes(outils)
 Glacier(outils)
@@ -1953,6 +1965,9 @@ Galaxie(outils)
 Marais(outils)
 Recif(outils)
 Bonbon(outils)
+Jungle(outils)
+Ciel(outils)
+Manoir(outils)
 
 Bestiaire.Especes = especes
 

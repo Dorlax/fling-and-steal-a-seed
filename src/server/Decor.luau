@@ -1230,6 +1230,381 @@ local function dragee(parent: Instance, position: Vector3, hasard: Random)
 	p.CastShadow = false
 end
 
+-- Jungle : grand arbre tropical aux feuilles en éventail et lianes.
+local function arbreTropical(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ArbreTropical"
+	local e = hasard:NextNumber(1, 1.8)
+	local h = 16 * e
+	bloc(
+		modele,
+		"Tronc",
+		Vector3.new(2.4, h, 2.4) * Vector3.new(e, 1, e),
+		CFrame.new(position + Vector3.new(0, h / 2, 0)),
+		Color3.fromRGB(110, 80, 55),
+		true
+	)
+	local vert = teinte(Color3.fromRGB(40, 140, 60), 0, hasard:NextNumber(0, 0.2))
+	for i = 0, 5 do
+		local angle = math.rad(i * 60 + hasard:NextNumber(-10, 10))
+		bloc(
+			modele,
+			"Palme",
+			Vector3.new(2.6, 0.6, 8) * e,
+			CFrame.new(position + Vector3.new(0, h, 0))
+				* CFrame.Angles(0, angle, 0)
+				* CFrame.new(0, 0, -3.6 * e)
+				* CFrame.Angles(math.rad(-20), 0, 0),
+			teinte(vert, 1, (i % 2) * 0.12)
+		)
+	end
+	for _ = 1, hasard:NextInteger(1, 3) do
+		local lh = hasard:NextNumber(4, 9) * e
+		bloc(
+			modele,
+			"Liane",
+			Vector3.new(0.4, lh, 0.4),
+			CFrame.new(
+				position
+					+ Vector3.new(
+						hasard:NextNumber(-4, 4) * e,
+						h - lh / 2,
+						hasard:NextNumber(-4, 4) * e
+					)
+			),
+			Color3.fromRGB(70, 130, 60)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Jungle : fleur géante aux pétales vifs.
+local function fleurGeante(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "FleurGeante"
+	local e = hasard:NextNumber(1, 2)
+	local couleurs =
+		{ Color3.fromRGB(255, 80, 120), Color3.fromRGB(255, 160, 40), Color3.fromRGB(200, 90, 255) }
+	local couleur = couleurs[hasard:NextInteger(1, #couleurs)]
+	local h = 4 * e
+	bloc(
+		modele,
+		"Tige",
+		Vector3.new(0.6, h, 0.6),
+		CFrame.new(position + Vector3.new(0, h / 2, 0)),
+		Color3.fromRGB(70, 150, 60)
+	)
+	for i = 0, 4 do
+		bloc(
+			modele,
+			"Petale",
+			Vector3.new(1.6, 0.4, 2.6) * e,
+			CFrame.new(position + Vector3.new(0, h, 0))
+				* CFrame.Angles(0, math.rad(i * 72), 0)
+				* CFrame.new(0, 0, -1.4 * e)
+				* CFrame.Angles(math.rad(25), 0, 0),
+			couleur
+		)
+	end
+	bloc(
+		modele,
+		"Coeur",
+		Vector3.new(1.4, 0.8, 1.4) * e,
+		CFrame.new(position + Vector3.new(0, h + 0.2, 0)),
+		Color3.fromRGB(255, 230, 80)
+	)
+	modele.Parent = parent
+end
+
+-- Jungle : morceau de ruine moussue.
+local function ruine(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Ruine"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	local pierre = Color3.fromRGB(150, 150, 130)
+	local h = hasard:NextNumber(5, 11)
+	bloc(modele, "Pilier", Vector3.new(2.6, h, 2.6), base * CFrame.new(-3, h / 2, 0), pierre, true)
+	bloc(
+		modele,
+		"Pilier2",
+		Vector3.new(2.6, h * 0.6, 2.6),
+		base * CFrame.new(3, h * 0.3, 0),
+		pierre,
+		true
+	)
+	if hasard:NextNumber() < 0.6 then
+		bloc(
+			modele,
+			"Linteau",
+			Vector3.new(9, 1.6, 2.8),
+			base * CFrame.new(0, h + 0.4, 0) * CFrame.Angles(0, 0, math.rad(-8)),
+			pierre,
+			true
+		)
+	end
+	bloc(
+		modele,
+		"Mousse",
+		Vector3.new(2.8, 0.4, 2.8),
+		base * CFrame.new(-3, h + 0.1, 0),
+		Color3.fromRGB(100, 170, 90)
+	)
+	bloc(
+		modele,
+		"Glyphe",
+		Vector3.new(1, 1, 0.2),
+		base * CFrame.new(-3, h * 0.6, -1.35),
+		Color3.fromRGB(90, 220, 200)
+	).Material =
+		Enum.Material.Neon
+	modele.Parent = parent
+end
+
+-- Jungle : fougère basse.
+local function fougere(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Fougere"
+	for i = 0, 3 do
+		bloc(
+			modele,
+			"Fronde",
+			Vector3.new(0.8, 0.3, 3.2),
+			CFrame.new(position)
+				* CFrame.Angles(0, math.rad(i * 90 + hasard:NextNumber(0, 40)), 0)
+				* CFrame.new(0, 0.8, -1.2)
+				* CFrame.Angles(math.rad(30), 0, 0),
+			Color3.fromRGB(60, 160, 70)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Ciel : gros nuage posé au sol, sur lequel on peut grimper.
+local function nuageSol(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "NuageSol"
+	local e = hasard:NextNumber(1, 2.4)
+	for _ = 1, hasard:NextInteger(3, 5) do
+		local t = hasard:NextNumber(3, 6) * e
+		bloc(
+			modele,
+			"Bouffee",
+			Vector3.new(t, t * 0.6, t),
+			CFrame.new(
+				position
+					+ Vector3.new(
+						hasard:NextNumber(-3, 3) * e,
+						t * 0.3 + hasard:NextNumber(0, 1.5) * e,
+						hasard:NextNumber(-3, 3) * e
+					)
+			),
+			Color3.fromRGB(250, 252, 255),
+			true
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Ciel : colonne de marbre et de nuage.
+local function colonne(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Colonne"
+	local h = hasard:NextNumber(8, 16)
+	local marbre = Color3.fromRGB(240, 238, 230)
+	bloc(
+		modele,
+		"Base",
+		Vector3.new(3.6, 1, 3.6),
+		CFrame.new(position + Vector3.new(0, 0.5, 0)),
+		marbre,
+		true
+	)
+	bloc(
+		modele,
+		"Fut",
+		Vector3.new(2.4, h, 2.4),
+		CFrame.new(position + Vector3.new(0, h / 2 + 1, 0)),
+		marbre,
+		true
+	)
+	bloc(
+		modele,
+		"Chapiteau",
+		Vector3.new(3.6, 1, 3.6),
+		CFrame.new(position + Vector3.new(0, h + 1.5, 0)),
+		Color3.fromRGB(255, 215, 120)
+	)
+	modele.Parent = parent
+end
+
+-- Ciel : arc-en-ciel en blocs.
+local function arcEnCiel(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ArcEnCiel"
+	local couleurs = {
+		Color3.fromRGB(255, 90, 90),
+		Color3.fromRGB(255, 170, 60),
+		Color3.fromRGB(255, 230, 80),
+		Color3.fromRGB(110, 220, 120),
+		Color3.fromRGB(90, 170, 255),
+		Color3.fromRGB(180, 120, 255),
+	}
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	local rayon = hasard:NextNumber(10, 16)
+	for i, couleur in couleurs do
+		local r = rayon - i * 1.2
+		for k = 0, 8 do
+			local a = math.rad(k * 22.5)
+			local p = bloc(
+				modele,
+				"Arc",
+				Vector3.new(1.2, 1.2, 2.4),
+				base * CFrame.new(math.cos(a) * r, math.sin(a) * r, 0) * CFrame.Angles(0, 0, a),
+				couleur
+			)
+			p.Material = Enum.Material.Neon
+			p.Transparency = 0.3
+			p.CastShadow = false
+		end
+	end
+	modele.Parent = parent
+end
+
+-- Ciel : plume dorée qui flotte.
+local function plumeDoree(parent: Instance, position: Vector3, hasard: Random)
+	local p = bloc(
+		parent,
+		"Plume",
+		Vector3.new(0.3, 1.4, 0.5),
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(2, 14), 0))
+			* CFrame.Angles(0, hasard:NextNumber(0, 6), math.rad(30)),
+		Color3.fromRGB(255, 220, 110)
+	)
+	p.Material = Enum.Material.Neon
+	p.CastShadow = false
+end
+
+-- Manoir : pierre tombale arrondie (penchée).
+local function tombe(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Tombe"
+	local base = CFrame.new(position)
+		* CFrame.Angles(
+			math.rad(hasard:NextNumber(-8, 8)),
+			hasard:NextNumber(0, 6),
+			math.rad(hasard:NextNumber(-8, 8))
+		)
+	local pierre = Color3.fromRGB(130, 130, 145)
+	bloc(modele, "Stele", Vector3.new(3, 3.6, 0.8), base * CFrame.new(0, 1.8, 0), pierre, true)
+	piece(
+		modele,
+		"Haut",
+		Enum.PartType.Cylinder,
+		Vector3.new(0.8, 3, 3),
+		base * CFrame.new(0, 3.6, 0) * CFrame.Angles(0, math.rad(90), 0),
+		pierre
+	)
+	bloc(
+		modele,
+		"Croix",
+		Vector3.new(0.3, 1.4, 0.2),
+		base * CFrame.new(0, 2.6, -0.45),
+		Color3.fromRGB(90, 90, 105)
+	)
+	bloc(
+		modele,
+		"Croix2",
+		Vector3.new(1, 0.3, 0.2),
+		base * CFrame.new(0, 2.8, -0.45),
+		Color3.fromRGB(90, 90, 105)
+	)
+	modele.Parent = parent
+end
+
+-- Manoir : arbre mort tordu, branches en griffes.
+local function arbreTordu(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ArbreTordu"
+	local e = hasard:NextNumber(1, 1.8)
+	local ecorce = Color3.fromRGB(50, 40, 55)
+	local cadre = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	for i = 0, 3 do
+		local segment = 3.4 * e
+		bloc(
+			modele,
+			"Tronc",
+			Vector3.new(1.6, segment, 1.6) * Vector3.new(e, 1, e),
+			cadre * CFrame.new(0, segment / 2, 0),
+			ecorce,
+			i < 2
+		)
+		cadre = cadre
+			* CFrame.new(0, segment, 0)
+			* CFrame.Angles(0, 0, math.rad(hasard:NextNumber(-18, 18)))
+		if i >= 1 then
+			bloc(
+				modele,
+				"Branche",
+				Vector3.new(4 * e, 0.6, 0.6),
+				cadre
+					* CFrame.new((i % 2 * 2 - 1) * 2 * e, 0, 0)
+					* CFrame.Angles(0, 0, math.rad((i % 2 * 2 - 1) * 25)),
+				ecorce
+			)
+		end
+	end
+	modele.Parent = parent
+end
+
+-- Manoir : tas de citrouilles lumineuses.
+local function citrouilles(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Citrouilles"
+	for _ = 1, hasard:NextInteger(1, 3) do
+		local t = hasard:NextNumber(1.6, 3.4)
+		local pos = position
+			+ Vector3.new(hasard:NextNumber(-2.5, 2.5), t * 0.4, hasard:NextNumber(-2.5, 2.5))
+		local tour = CFrame.new(pos) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+		bloc(
+			modele,
+			"Citrouille",
+			Vector3.new(t, t * 0.8, t),
+			tour,
+			Color3.fromRGB(255, 140, 40),
+			true
+		)
+		local visage = bloc(
+			modele,
+			"Visage",
+			Vector3.new(t * 0.6, t * 0.2, 0.1),
+			tour * CFrame.new(0, -t * 0.08, -t / 2 - 0.02),
+			Color3.fromRGB(255, 220, 90)
+		)
+		visage.Material = Enum.Material.Neon
+		bloc(
+			modele,
+			"Tige",
+			Vector3.new(0.3, 0.5, 0.3),
+			tour * CFrame.new(0, t * 0.45, 0),
+			Color3.fromRGB(90, 130, 60)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Manoir : lanterne flottante bleutée.
+local function lanterneFantome(parent: Instance, position: Vector3, hasard: Random)
+	local p = bloc(
+		parent,
+		"Lanterne",
+		Vector3.new(0.7, 0.9, 0.7),
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(3, 10), 0)),
+		Color3.fromRGB(150, 190, 255)
+	)
+	p.Material = Enum.Material.Neon
+	p.CastShadow = false
+end
+
 local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombre: number } } } = {
 	Foret = {
 		{ fonction = arbreBloc, nombre = 70 },
@@ -1280,6 +1655,24 @@ local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombr
 		{ fonction = sucreOrge, nombre = 35 },
 		{ fonction = cupcakeGeant, nombre = 14 },
 		{ fonction = dragee, nombre = 70 },
+	},
+	Jungle = {
+		{ fonction = arbreTropical, nombre = 55 },
+		{ fonction = fleurGeante, nombre = 30 },
+		{ fonction = ruine, nombre = 8 },
+		{ fonction = fougere, nombre = 60 },
+	},
+	Ciel = {
+		{ fonction = nuageSol, nombre = 40 },
+		{ fonction = colonne, nombre = 18 },
+		{ fonction = arcEnCiel, nombre = 3 },
+		{ fonction = plumeDoree, nombre = 70 },
+	},
+	Manoir = {
+		{ fonction = tombe, nombre = 45 },
+		{ fonction = arbreTordu, nombre = 35 },
+		{ fonction = citrouilles, nombre = 25 },
+		{ fonction = lanterneFantome, nombre = 60 },
 	},
 }
 

@@ -9,6 +9,10 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Jungle, Îles Célestes, Manoir Hanté
+- Biomes 10 (Jungle Émeraude), 11 (Îles Célestes) et 12 (Manoir Hanté) : 39 nouvelles espèces dessinées à la main (`EspecesJungle`, `EspecesCiel`, `EspecesManoir`).
+- Décors en blocs : arbres tropicaux à lianes, fleurs géantes, ruines à glyphes, fougères ; nuages escaladables, colonnes de marbre, arcs-en-ciel, plumes dorées ; tombes, arbres tordus, citrouilles lumineuses, lanternes fantômes.
+
 ## 2026-11-08 — Marais, Récif, Bonbon
 - Biomes 7 (Marais Brumeux), 8 (Récif Corail) et 9 (Royaume Bonbon) : 39 nouvelles espèces dessinées à la main (`EspecesMarais`, `EspecesRecif`, `EspecesBonbon`).
 - Décors en blocs : arbres morts, flaques à nénuphars, roseaux, feux follets ; coraux, algues, coquillages géants, bulles ; sucettes, sucres d'orge, cupcakes géants, dragées.
