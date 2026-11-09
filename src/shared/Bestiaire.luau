@@ -1967,6 +1967,18 @@ local Mecanique = if script
 	else (require :: any)("./EspecesMecanique")
 -- selene: allow(incorrect_standard_library_use)
 local Zen = if script then require(script.Parent.EspecesZen) else (require :: any)("./EspecesZen")
+-- selene: allow(incorrect_standard_library_use)
+local Cavernes = if script
+	then require(script.Parent.EspecesCavernes)
+	else (require :: any)("./EspecesCavernes")
+-- selene: allow(incorrect_standard_library_use)
+local Jouets = if script
+	then require(script.Parent.EspecesJouets)
+	else (require :: any)("./EspecesJouets")
+-- selene: allow(incorrect_standard_library_use)
+local Automne = if script
+	then require(script.Parent.EspecesAutomne)
+	else (require :: any)("./EspecesAutomne")
 BoisMoussu(outils)
 Dunes(outils)
 Glacier(outils)
@@ -1981,6 +1993,9 @@ Manoir(outils)
 Savane(outils)
 Mecanique(outils)
 Zen(outils)
+Cavernes(outils)
+Jouets(outils)
+Automne(outils)
 
 Bestiaire.Especes = especes
 

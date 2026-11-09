@@ -1947,6 +1947,330 @@ local function portique(parent: Instance, position: Vector3, hasard: Random)
 	modele.Parent = parent
 end
 
+-- Cavernes : grappe de cristaux lumineux.
+local function grappeCristaux(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "GrappeCristaux"
+	local couleurs = {
+		Color3.fromRGB(120, 220, 255),
+		Color3.fromRGB(190, 110, 255),
+		Color3.fromRGB(140, 255, 200),
+	}
+	local couleur = couleurs[hasard:NextInteger(1, #couleurs)]
+	for _ = 1, hasard:NextInteger(3, 6) do
+		local h = hasard:NextNumber(3, 9)
+		local p = bloc(
+			modele,
+			"Cristal",
+			Vector3.new(h * 0.3, h, h * 0.3),
+			CFrame.new(
+				position + Vector3.new(hasard:NextNumber(-2, 2), h * 0.4, hasard:NextNumber(-2, 2))
+			)
+				* CFrame.Angles(
+					math.rad(hasard:NextNumber(-30, 30)),
+					math.rad(hasard:NextNumber(0, 90)),
+					math.rad(hasard:NextNumber(-30, 30))
+				),
+			couleur,
+			true
+		)
+		p.Material = Enum.Material.Neon
+		p.Transparency = 0.2
+	end
+	modele.Parent = parent
+end
+
+-- Cavernes : stalagmite de roche.
+local function stalagmite(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Stalagmite"
+	local h = hasard:NextNumber(6, 16)
+	local roche = Color3.fromRGB(95, 90, 110)
+	for i = 0, 2 do
+		local t = (3.4 - i) * h / 10
+		bloc(
+			modele,
+			"Etage",
+			Vector3.new(t, h / 3, t),
+			CFrame.new(position + Vector3.new(0, h / 6 + i * h / 3, 0)),
+			teinte(roche, 1, i * 0.08),
+			true
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Cavernes : champignon phosphorescent.
+local function champiLumineux(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ChampiLumineux"
+	local e = hasard:NextNumber(1, 2.5)
+	bloc(
+		modele,
+		"Pied",
+		Vector3.new(0.8, 2.4, 0.8) * e,
+		CFrame.new(position + Vector3.new(0, 1.2 * e, 0)),
+		Color3.fromRGB(230, 225, 240)
+	)
+	local chapeau = bloc(
+		modele,
+		"Chapeau",
+		Vector3.new(3, 1, 3) * e,
+		CFrame.new(position + Vector3.new(0, 2.6 * e, 0)),
+		Color3.fromRGB(80, 200, 220)
+	)
+	chapeau.Material = Enum.Material.Neon
+	modele.Parent = parent
+end
+
+-- Cavernes : wagonnet de mine abandonné.
+local function wagonnet(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Wagonnet"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	bloc(
+		modele,
+		"Caisse",
+		Vector3.new(3, 2, 4.4),
+		base * CFrame.new(0, 1.6, 0),
+		Color3.fromRGB(110, 80, 60),
+		true
+	).Material =
+		Enum.Material.WoodPlanks
+	for _, x in { -1.6, 1.6 } do
+		for _, z in { -1.4, 1.4 } do
+			piece(
+				modele,
+				"Roue",
+				Enum.PartType.Cylinder,
+				Vector3.new(0.4, 1.2, 1.2),
+				base * CFrame.new(x, 0.6, z),
+				Color3.fromRGB(60, 60, 70)
+			)
+		end
+	end
+	local or_ = bloc(
+		modele,
+		"Pepites",
+		Vector3.new(2.4, 0.8, 3.6),
+		base * CFrame.new(0, 2.8, 0),
+		Color3.fromRGB(255, 210, 80)
+	)
+	or_.Material = Enum.Material.Neon
+	modele.Parent = parent
+end
+
+-- Coffre à Jouets : pile de cubes à lettres.
+local function pileCubes(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "PileCubes"
+	local couleurs = {
+		Color3.fromRGB(230, 60, 60),
+		Color3.fromRGB(60, 130, 230),
+		Color3.fromRGB(255, 210, 50),
+		Color3.fromRGB(80, 190, 90),
+	}
+	local t = hasard:NextNumber(2.5, 4)
+	for i = 0, hasard:NextInteger(1, 4) do
+		bloc(
+			modele,
+			"Cube",
+			Vector3.one * t,
+			CFrame.new(
+				position
+					+ Vector3.new(
+						hasard:NextNumber(-0.4, 0.4),
+						t / 2 + i * t,
+						hasard:NextNumber(-0.4, 0.4)
+					)
+			) * CFrame.Angles(0, math.rad(hasard:NextNumber(-25, 25)), 0),
+			couleurs[(i % #couleurs) + 1],
+			true
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Coffre à Jouets : crayon de couleur géant planté.
+local function crayon(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Crayon"
+	local couleurs = {
+		Color3.fromRGB(230, 60, 60),
+		Color3.fromRGB(60, 130, 230),
+		Color3.fromRGB(80, 190, 90),
+		Color3.fromRGB(180, 90, 230),
+	}
+	local couleur = couleurs[hasard:NextInteger(1, #couleurs)]
+	local h = hasard:NextNumber(8, 14)
+	local penche = CFrame.new(position)
+		* CFrame.Angles(
+			math.rad(hasard:NextNumber(-12, 12)),
+			hasard:NextNumber(0, 6),
+			math.rad(hasard:NextNumber(-12, 12))
+		)
+	bloc(modele, "Corps", Vector3.new(1.4, h, 1.4), penche * CFrame.new(0, h / 2, 0), couleur, true)
+	bloc(
+		modele,
+		"Bois",
+		Vector3.new(1, 1.2, 1),
+		penche * CFrame.new(0, h + 0.6, 0),
+		Color3.fromRGB(240, 210, 160)
+	)
+	bloc(modele, "Mine", Vector3.new(0.5, 0.6, 0.5), penche * CFrame.new(0, h + 1.5, 0), couleur)
+	modele.Parent = parent
+end
+
+-- Coffre à Jouets : ballon de plage rayé.
+local function ballonPlage(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(3, 6)
+	local couleurs =
+		{ Color3.fromRGB(255, 90, 90), Color3.fromRGB(255, 220, 60), Color3.fromRGB(90, 170, 255) }
+	piece(
+		parent,
+		"BallonPlage",
+		Enum.PartType.Ball,
+		Vector3.one * t,
+		CFrame.new(position + Vector3.new(0, t / 2, 0)),
+		couleurs[hasard:NextInteger(1, #couleurs)],
+		true
+	)
+end
+
+-- Coffre à Jouets : rails de petit train en arc.
+local function arcTrain(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ArcTrain"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	for k = 0, 6 do
+		local a = math.rad(k * 30)
+		bloc(
+			modele,
+			"Rail",
+			Vector3.new(3, 0.6, 1.4),
+			base
+				* CFrame.new(math.cos(a) * 6, math.sin(a) * 6, 0)
+				* CFrame.Angles(0, 0, a + math.pi / 2),
+			Color3.fromRGB(200, 120, 60),
+			true
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Automne : arbre aux feuilles rousses.
+local function arbreRoux(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ArbreRoux"
+	local e = hasard:NextNumber(1, 1.7)
+	local h = 10 * e
+	bloc(
+		modele,
+		"Tronc",
+		Vector3.new(2, h, 2) * Vector3.new(e, 1, e),
+		CFrame.new(position + Vector3.new(0, h / 2, 0)),
+		Color3.fromRGB(100, 70, 50),
+		true
+	)
+	local couleurs =
+		{ Color3.fromRGB(230, 90, 40), Color3.fromRGB(245, 170, 50), Color3.fromRGB(200, 60, 40) }
+	local couleur = couleurs[hasard:NextInteger(1, #couleurs)]
+	for i = 0, 2 do
+		local largeur = (10 - i * 2.6) * e
+		bloc(
+			modele,
+			"Feuillage",
+			Vector3.new(largeur, 3.2 * e, largeur),
+			CFrame.new(position + Vector3.new(0, h + i * 2.8 * e, 0))
+				* CFrame.Angles(0, math.rad(i * 20), 0),
+			teinte(couleur, 1, i * 0.08)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Automne : tas de feuilles mortes.
+local function tasFeuilles(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "TasFeuilles"
+	local couleurs =
+		{ Color3.fromRGB(230, 90, 40), Color3.fromRGB(245, 170, 50), Color3.fromRGB(200, 60, 40) }
+	for _ = 1, hasard:NextInteger(4, 8) do
+		local t = hasard:NextNumber(1.4, 2.6)
+		bloc(
+			modele,
+			"Feuilles",
+			Vector3.new(t, t * 0.4, t),
+			CFrame.new(
+				position + Vector3.new(hasard:NextNumber(-2, 2), t * 0.2, hasard:NextNumber(-2, 2))
+			) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0),
+			couleurs[hasard:NextInteger(1, #couleurs)]
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Automne : citrouille de champ et bottes de paille.
+local function botteFoin(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "BotteFoin"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	bloc(
+		modele,
+		"Botte",
+		Vector3.new(4, 2.4, 2.4),
+		base * CFrame.new(0, 1.2, 0),
+		Color3.fromRGB(235, 200, 100),
+		true
+	)
+	bloc(
+		modele,
+		"Lien",
+		Vector3.new(0.3, 2.5, 2.5),
+		base * CFrame.new(-1, 1.2, 0),
+		Color3.fromRGB(150, 110, 60)
+	)
+	bloc(
+		modele,
+		"Lien2",
+		Vector3.new(0.3, 2.5, 2.5),
+		base * CFrame.new(1, 1.2, 0),
+		Color3.fromRGB(150, 110, 60)
+	)
+	if hasard:NextNumber() < 0.6 then
+		bloc(
+			modele,
+			"Citrouille",
+			Vector3.new(2, 1.6, 2),
+			base * CFrame.new(0, 3.2, 0),
+			Color3.fromRGB(255, 140, 40)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Automne : champignon de sous-bois.
+local function cepe(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Cepe"
+	local e = hasard:NextNumber(0.8, 1.8)
+	bloc(
+		modele,
+		"Pied",
+		Vector3.new(1, 1.6, 1) * e,
+		CFrame.new(position + Vector3.new(0, 0.8 * e, 0)),
+		Color3.fromRGB(240, 225, 200)
+	)
+	bloc(
+		modele,
+		"Chapeau",
+		Vector3.new(2.4, 0.9, 2.4) * e,
+		CFrame.new(position + Vector3.new(0, 1.9 * e, 0)),
+		Color3.fromRGB(150, 90, 50)
+	)
+	modele.Parent = parent
+end
+
 local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombre: number } } } = {
 	Foret = {
 		{ fonction = arbreBloc, nombre = 70 },
@@ -2033,6 +2357,24 @@ local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombr
 		{ fonction = bambous, nombre = 35 },
 		{ fonction = lanternePierre, nombre = 25 },
 		{ fonction = portique, nombre = 5 },
+	},
+	Cavernes = {
+		{ fonction = grappeCristaux, nombre = 45 },
+		{ fonction = stalagmite, nombre = 40 },
+		{ fonction = champiLumineux, nombre = 40 },
+		{ fonction = wagonnet, nombre = 6 },
+	},
+	Jouets = {
+		{ fonction = pileCubes, nombre = 35 },
+		{ fonction = crayon, nombre = 30 },
+		{ fonction = ballonPlage, nombre = 25 },
+		{ fonction = arcTrain, nombre = 6 },
+	},
+	Automne = {
+		{ fonction = arbreRoux, nombre = 60 },
+		{ fonction = tasFeuilles, nombre = 45 },
+		{ fonction = botteFoin, nombre = 15 },
+		{ fonction = cepe, nombre = 40 },
 	},
 }
 
@@ -2187,6 +2529,35 @@ local REMPARTS: { [string]: Rempart } = {
 			{ y = 6.4, h = 0.8, e = 2.4, c = { 60, 55, 60 }, m = "Slate" },
 		},
 		poteau = { t = { 1.6, 7, 1.6 }, ecart = 14, c = { 210, 50, 50 } },
+	},
+	Cavernes = {
+		lisses = { { y = 7, h = 14, e = 5, c = { 80, 75, 95 }, m = "Slate" } },
+		poteau = {
+			t = { 2, 6, 2 },
+			ecart = 12,
+			c = { 120, 220, 255 },
+			alterne = { 190, 110, 255 },
+			y = 14,
+			neon = true,
+		},
+	},
+	Jouets = {
+		lisses = { { y = 2, h = 4, e = 3, c = { 60, 130, 230 } } },
+		poteau = {
+			t = { 3, 3, 3 },
+			ecart = 3,
+			c = { 230, 60, 60 },
+			alterne = { 255, 210, 50 },
+			y = 4,
+		},
+	},
+	Automne = {
+		lisses = {
+			{ y = 1.2, h = 2.4, e = 2.6, c = { 130, 120, 110 }, m = "Cobblestone" },
+			{ y = 2.7, h = 0.6, e = 3, c = { 230, 120, 40 }, m = "Grass" },
+		},
+		poteau = { t = { 2, 12, 2 }, ecart = 22, c = { 100, 70, 50 }, m = "Wood" },
+		cime = { t = { 7, 4, 7 }, ecart = 22, c = { 230, 110, 40 }, y = 11 },
 	},
 }
 
