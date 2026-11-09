@@ -320,10 +320,10 @@ function MachineForge.construire(plateforme: BasePart, sol: number, proprietaire
 	aireDeCorde(modele, origine)
 
 	-- Point où se tient le joueur (au centre, regard vers -Z).
-	local poste = Instance.new("Attachment")
-	poste.Name = "Poste"
-	poste.Parent = plateforme
-	poste.WorldCFrame = CFrame.new(origine)
+	local point = Instance.new("Attachment")
+	point.Name = "Poste"
+	point.Parent = plateforme
+	point.WorldCFrame = CFrame.new(origine)
 
 	modele.Parent = plateforme.Parent
 	CollectionService:AddTag(modele, MachineForge.Tag)
