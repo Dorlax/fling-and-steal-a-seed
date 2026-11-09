@@ -86,7 +86,7 @@ local Config = {
 		MaxCreaturesBase = 10, -- emplacements par base
 		IntervalleRevenus = 1, -- secondes entre deux versements
 		RevenuParSeconde = { Commune = 1, Rare = 3, Epique = 10, Legendaire = 30, Mythique = 100 },
-		PiecesMax = 1e15, -- plafond de sécurité
+		PiecesMax = 1e300, -- plafond de sécurité (progression quasi infinie)
 	},
 
 	-- Étages de base (façon vitrine) : chaque étage ajoute MaxCreaturesBase

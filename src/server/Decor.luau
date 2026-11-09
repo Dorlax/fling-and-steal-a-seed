@@ -1605,6 +1605,348 @@ local function lanterneFantome(parent: Instance, position: Vector3, hasard: Rand
 	p.CastShadow = false
 end
 
+-- Savane : acacia au feuillage plat.
+local function acacia(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Acacia"
+	local e = hasard:NextNumber(1, 1.8)
+	local h = 10 * e
+	local ecorce = Color3.fromRGB(120, 85, 55)
+	local penche = CFrame.new(position)
+		* CFrame.Angles(0, hasard:NextNumber(0, 6), math.rad(hasard:NextNumber(-10, 10)))
+	bloc(
+		modele,
+		"Tronc",
+		Vector3.new(1.6, h, 1.6) * Vector3.new(e, 1, e),
+		penche * CFrame.new(0, h / 2, 0),
+		ecorce,
+		true
+	)
+	local vert = teinte(Color3.fromRGB(110, 150, 60), 0, hasard:NextNumber(0, 0.2))
+	bloc(
+		modele,
+		"Feuillage",
+		Vector3.new(16, 2, 12) * e,
+		penche * CFrame.new(0, h + 0.6 * e, 0),
+		vert
+	)
+	bloc(
+		modele,
+		"Feuillage2",
+		Vector3.new(10, 1.6, 8) * e,
+		penche * CFrame.new(1.5 * e, h + 2.2 * e, 0),
+		teinte(vert, 1, 0.1)
+	)
+	modele.Parent = parent
+end
+
+-- Savane : touffe d'herbes hautes dorées.
+local function herbeHaute(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "HerbeHaute"
+	for _ = 1, hasard:NextInteger(4, 7) do
+		local h = hasard:NextNumber(2, 4)
+		bloc(
+			modele,
+			"Brin",
+			Vector3.new(0.3, h, 0.3),
+			CFrame.new(
+				position
+					+ Vector3.new(hasard:NextNumber(-1.2, 1.2), h / 2, hasard:NextNumber(-1.2, 1.2))
+			)
+				* CFrame.Angles(
+					math.rad(hasard:NextNumber(-12, 12)),
+					0,
+					math.rad(hasard:NextNumber(-12, 12))
+				),
+			Color3.fromRGB(230, 190, 100)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Savane : termitière en tour.
+local function termitiere(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Termitiere"
+	local terre = Color3.fromRGB(180, 110, 70)
+	local h = hasard:NextNumber(5, 10)
+	for i = 0, 2 do
+		local t = 4 - i * 1.1
+		bloc(
+			modele,
+			"Etage",
+			Vector3.new(t, h / 3, t),
+			CFrame.new(position + Vector3.new(0, h / 6 + i * h / 3, 0))
+				* CFrame.Angles(0, math.rad(i * 20), 0),
+			teinte(terre, 1, i * 0.06),
+			true
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Savane : rocher plat (sur lequel on peut grimper).
+local function rocherPlat(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(8, 16)
+	bloc(
+		parent,
+		"RocherPlat",
+		Vector3.new(t, t * 0.3, t * 0.7),
+		CFrame.new(position + Vector3.new(0, t * 0.12, 0))
+			* CFrame.Angles(0, hasard:NextNumber(0, 6), 0),
+		Color3.fromRGB(170, 140, 110),
+		true
+	)
+end
+
+-- Cité Mécanique : engrenage géant planté dans le sol.
+local function engrenageGeant(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "EngrenageGeant"
+	local r = hasard:NextNumber(4, 8)
+	local couleur = if hasard:NextNumber() < 0.5
+		then Color3.fromRGB(215, 170, 80)
+		else Color3.fromRGB(200, 120, 70)
+	local cadre = CFrame.new(position + Vector3.new(0, r * 0.8, 0))
+		* CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	local disque = piece(
+		modele,
+		"Disque",
+		Enum.PartType.Cylinder,
+		Vector3.new(1.2, r * 2, r * 2),
+		cadre,
+		couleur,
+		true
+	)
+	disque.Material = Enum.Material.Metal
+	for k = 0, 9 do
+		local a = math.rad(k * 36)
+		local dent = bloc(
+			modele,
+			"Dent",
+			Vector3.new(1.2, r * 0.3, r * 0.3),
+			cadre * CFrame.new(0, math.cos(a) * r, math.sin(a) * r) * CFrame.Angles(a, 0, 0),
+			couleur,
+			true
+		)
+		dent.Material = Enum.Material.Metal
+	end
+	modele.Parent = parent
+end
+
+-- Cité Mécanique : tuyau coudé qui crache de la vapeur.
+local function tuyau(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Tuyau"
+	local h = hasard:NextNumber(5, 10)
+	local cuivre = Color3.fromRGB(190, 110, 70)
+	bloc(
+		modele,
+		"Montant",
+		Vector3.new(1.6, h, 1.6),
+		CFrame.new(position + Vector3.new(0, h / 2, 0)),
+		cuivre,
+		true
+	).Material =
+		Enum.Material.Metal
+	bloc(
+		modele,
+		"Coude",
+		Vector3.new(4, 1.6, 1.6),
+		CFrame.new(position + Vector3.new(1.2, h, 0)),
+		cuivre
+	).Material =
+		Enum.Material.Metal
+	bloc(
+		modele,
+		"Bague",
+		Vector3.new(2, 0.6, 2),
+		CFrame.new(position + Vector3.new(0, h * 0.5, 0)),
+		Color3.fromRGB(215, 170, 80)
+	).Material =
+		Enum.Material.Metal
+	local vapeur = piece(
+		modele,
+		"Vapeur",
+		Enum.PartType.Ball,
+		Vector3.one * 2.2,
+		CFrame.new(position + Vector3.new(3.6, h + 0.6, 0)),
+		Color3.fromRGB(240, 240, 245)
+	)
+	vapeur.Transparency = 0.4
+	vapeur.CastShadow = false
+	modele.Parent = parent
+end
+
+-- Cité Mécanique : lampadaire à gaz.
+local function lampadaireGaz(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "LampadaireGaz"
+	local h = hasard:NextNumber(8, 11)
+	bloc(
+		modele,
+		"Poteau",
+		Vector3.new(0.6, h, 0.6),
+		CFrame.new(position + Vector3.new(0, h / 2, 0)),
+		Color3.fromRGB(50, 50, 60),
+		true
+	)
+	local lampe = bloc(
+		modele,
+		"Lampe",
+		Vector3.new(1.4, 1.6, 1.4),
+		CFrame.new(position + Vector3.new(0, h + 0.8, 0)),
+		Color3.fromRGB(255, 210, 120)
+	)
+	lampe.Material = Enum.Material.Neon
+	bloc(
+		modele,
+		"Chapeau",
+		Vector3.new(1.8, 0.4, 1.8),
+		CFrame.new(position + Vector3.new(0, h + 1.8, 0)),
+		Color3.fromRGB(50, 50, 60)
+	)
+	modele.Parent = parent
+end
+
+-- Cité Mécanique : caisse de pièces détachées.
+local function caisse(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(2.5, 4.5)
+	local c = bloc(
+		parent,
+		"Caisse",
+		Vector3.one * t,
+		CFrame.new(position + Vector3.new(0, t / 2, 0))
+			* CFrame.Angles(0, hasard:NextNumber(0, 6), 0),
+		Color3.fromRGB(150, 110, 70),
+		true
+	)
+	c.Material = Enum.Material.WoodPlanks
+end
+
+-- Jardin Zen : cerisier en fleurs.
+local function cerisier(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Cerisier"
+	local e = hasard:NextNumber(1, 1.7)
+	local h = 8 * e
+	bloc(
+		modele,
+		"Tronc",
+		Vector3.new(1.6, h, 1.6) * Vector3.new(e, 1, e),
+		CFrame.new(position + Vector3.new(0, h / 2, 0))
+			* CFrame.Angles(0, 0, math.rad(hasard:NextNumber(-8, 8))),
+		Color3.fromRGB(90, 60, 55),
+		true
+	)
+	local rose = teinte(Color3.fromRGB(255, 180, 205), 1, hasard:NextNumber(0, 0.2))
+	for i = 0, 3 do
+		local decal = Vector3.new(
+			hasard:NextNumber(-3, 3),
+			hasard:NextNumber(0, 2.5),
+			hasard:NextNumber(-3, 3)
+		) * e
+		bloc(
+			modele,
+			"Fleurs",
+			Vector3.new(6, 3.6, 6) * e,
+			CFrame.new(position + Vector3.new(0, h, 0) + decal)
+				* CFrame.Angles(0, math.rad(i * 25), 0),
+			teinte(rose, 1, i * 0.05)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Jardin Zen : bosquet de bambous.
+local function bambous(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Bambous"
+	for _ = 1, hasard:NextInteger(3, 6) do
+		local h = hasard:NextNumber(8, 16)
+		local pos = position + Vector3.new(hasard:NextNumber(-2, 2), 0, hasard:NextNumber(-2, 2))
+		bloc(
+			modele,
+			"Tige",
+			Vector3.new(0.7, h, 0.7),
+			CFrame.new(pos + Vector3.new(0, h / 2, 0)),
+			Color3.fromRGB(140, 200, 90),
+			true
+		)
+		for k = 1, math.floor(h / 3) do
+			bloc(
+				modele,
+				"Noeud",
+				Vector3.new(0.85, 0.2, 0.85),
+				CFrame.new(pos + Vector3.new(0, k * 3, 0)),
+				Color3.fromRGB(100, 160, 60)
+			)
+		end
+	end
+	modele.Parent = parent
+end
+
+-- Jardin Zen : lanterne de pierre.
+local function lanternePierre(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "LanternePierre"
+	local pierre = Color3.fromRGB(150, 150, 145)
+	local e = hasard:NextNumber(1, 1.5)
+	bloc(
+		modele,
+		"Pied",
+		Vector3.new(1.2, 3, 1.2) * e,
+		CFrame.new(position + Vector3.new(0, 1.5 * e, 0)),
+		pierre,
+		true
+	)
+	local feu = bloc(
+		modele,
+		"Feu",
+		Vector3.new(2, 1.6, 2) * e,
+		CFrame.new(position + Vector3.new(0, 3.8 * e, 0)),
+		Color3.fromRGB(255, 220, 140)
+	)
+	feu.Material = Enum.Material.Neon
+	bloc(
+		modele,
+		"Toit",
+		Vector3.new(3.4, 0.8, 3.4) * e,
+		CFrame.new(position + Vector3.new(0, 5 * e, 0)),
+		pierre
+	)
+	bloc(
+		modele,
+		"Pointe",
+		Vector3.new(0.8, 0.8, 0.8) * e,
+		CFrame.new(position + Vector3.new(0, 5.8 * e, 0)),
+		pierre
+	)
+	modele.Parent = parent
+end
+
+-- Jardin Zen : portique rouge laqué.
+local function portique(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Portique"
+	local rouge = Color3.fromRGB(210, 50, 50)
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	for _, x in { -4, 4 } do
+		bloc(modele, "Pilier", Vector3.new(1.2, 10, 1.2), base * CFrame.new(x, 5, 0), rouge, true)
+	end
+	bloc(
+		modele,
+		"Linteau",
+		Vector3.new(12, 1, 1.6),
+		base * CFrame.new(0, 10.4, 0),
+		Color3.fromRGB(40, 35, 40),
+		true
+	)
+	bloc(modele, "Traverse", Vector3.new(10, 0.7, 1), base * CFrame.new(0, 8.6, 0), rouge, true)
+	modele.Parent = parent
+end
+
 local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombre: number } } } = {
 	Foret = {
 		{ fonction = arbreBloc, nombre = 70 },
@@ -1673,6 +2015,24 @@ local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombr
 		{ fonction = arbreTordu, nombre = 35 },
 		{ fonction = citrouilles, nombre = 25 },
 		{ fonction = lanterneFantome, nombre = 60 },
+	},
+	Savane = {
+		{ fonction = acacia, nombre = 35 },
+		{ fonction = herbeHaute, nombre = 80 },
+		{ fonction = termitiere, nombre = 12 },
+		{ fonction = rocherPlat, nombre = 10 },
+	},
+	Mecanique = {
+		{ fonction = engrenageGeant, nombre = 25 },
+		{ fonction = tuyau, nombre = 30 },
+		{ fonction = lampadaireGaz, nombre = 30 },
+		{ fonction = caisse, nombre = 35 },
+	},
+	Zen = {
+		{ fonction = cerisier, nombre = 40 },
+		{ fonction = bambous, nombre = 35 },
+		{ fonction = lanternePierre, nombre = 25 },
+		{ fonction = portique, nombre = 5 },
 	},
 }
 
@@ -1804,6 +2164,29 @@ local REMPARTS: { [string]: Rempart } = {
 		},
 		poteau = { t = { 0.4, 8, 0.4 }, ecart = 4, c = { 40, 35, 45 }, m = "Metal", y = 2 },
 		cime = { t = { 0.8, 0.8, 0.8 }, ecart = 4, c = { 60, 55, 70 }, y = 10 },
+	},
+	Savane = {
+		lisses = {
+			{ y = 2.5, h = 0.6, e = 0.6, c = { 160, 120, 70 }, m = "Wood" },
+			{ y = 5, h = 0.6, e = 0.6, c = { 160, 120, 70 }, m = "Wood" },
+		},
+		poteau = { t = { 1, 7, 1 }, ecart = 8, c = { 140, 100, 60 }, m = "Wood" },
+		cime = { t = { 6, 1.2, 4 }, ecart = 48, c = { 120, 160, 60 }, y = 9 },
+	},
+	Mecanique = {
+		lisses = {
+			{ y = 4, h = 8, e = 2, c = { 120, 115, 110 }, m = "DiamondPlate" },
+			{ y = 8.3, h = 0.6, e = 2.2, c = { 215, 170, 80 }, m = "Metal" },
+		},
+		poteau = { t = { 2, 10, 2 }, ecart = 16, c = { 200, 120, 70 }, m = "Metal" },
+		cime = { t = { 1.4, 1.4, 1.4 }, ecart = 16, c = { 255, 210, 120 }, y = 10, neon = true },
+	},
+	Zen = {
+		lisses = {
+			{ y = 3, h = 6, e = 1.4, c = { 245, 240, 225 }, m = "Plaster" },
+			{ y = 6.4, h = 0.8, e = 2.4, c = { 60, 55, 60 }, m = "Slate" },
+		},
+		poteau = { t = { 1.6, 7, 1.6 }, ecart = 14, c = { 210, 50, 50 } },
 	},
 }
 
