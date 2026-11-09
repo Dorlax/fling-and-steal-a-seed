@@ -564,6 +564,27 @@ return function(o: any)
 			a = "Antenne",
 			j = drap,
 		})
+		ajouter(l, {
+			n = "Pointe",
+			t = { 0.2, 0.16, 0.2 },
+			p = { 0.04, 0.28, 0.02 },
+			r = { 0, 0, -20 },
+			c = { 40, 30, 60 },
+			tr = 0.1,
+			a = "Antenne",
+			j = drap,
+		})
+		ajouter(l, {
+			n = "Main",
+			t = { 0.12, 0.08, 0.08 },
+			p = { 0.28, 0.02, -0.1 },
+			r = { 0, 0, 30 },
+			c = { 40, 30, 60 },
+			tr = 0.1,
+			a = "Bras",
+			j = { 0.2, 0.0, -0.06 },
+			ph = 0,
+		}, true)
 	end)
 
 	-- Moyenne : ronfleur géant qui souffle des bulles.
