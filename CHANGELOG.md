@@ -9,6 +9,9 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Ferme Joyeuse, Royaume des Rêves, Plage Soleil
+- Biomes 19 (Ferme Joyeuse), 20 (Royaume des Rêves) et 21 (Plage Soleil) : 39 nouvelles espèces dessinées à la main (`EspecesFerme`, `EspecesReves`, `EspecesPlage`), décors en blocs (granges, enclos, moulins, potagers ; nuages-lits, lunes, étoiles tombées, bulles de rêve ; palmiers à cocos, parasols, châteaux de sable, étoiles de mer) et remparts propres.
+
 ## 2026-11-09 — Cavernes, Coffre à Jouets, Forêt d'Automne
 - Biomes 16 (Cavernes Lumineuses), 17 (Coffre à Jouets) et 18 (Forêt d'Automne) : 39 nouvelles espèces dessinées à la main (`EspecesCavernes`, `EspecesJouets`, `EspecesAutomne`), décors en blocs (cristaux, stalagmites, champignons phosphorescents, wagonnets ; piles de cubes, crayons géants, ballons, rails ; arbres roux, tas de feuilles, bottes de paille, cèpes) et remparts propres.
 

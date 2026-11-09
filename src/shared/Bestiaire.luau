@@ -1979,6 +1979,18 @@ local Jouets = if script
 local Automne = if script
 	then require(script.Parent.EspecesAutomne)
 	else (require :: any)("./EspecesAutomne")
+-- selene: allow(incorrect_standard_library_use)
+local Ferme = if script
+	then require(script.Parent.EspecesFerme)
+	else (require :: any)("./EspecesFerme")
+-- selene: allow(incorrect_standard_library_use)
+local Reves = if script
+	then require(script.Parent.EspecesReves)
+	else (require :: any)("./EspecesReves")
+-- selene: allow(incorrect_standard_library_use)
+local Plage = if script
+	then require(script.Parent.EspecesPlage)
+	else (require :: any)("./EspecesPlage")
 BoisMoussu(outils)
 Dunes(outils)
 Glacier(outils)
@@ -1996,6 +2008,9 @@ Zen(outils)
 Cavernes(outils)
 Jouets(outils)
 Automne(outils)
+Ferme(outils)
+Reves(outils)
+Plage(outils)
 
 Bestiaire.Especes = especes
 
