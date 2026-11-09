@@ -182,9 +182,10 @@ return {
 		assert(poussee and poussee:IsA("LinearVelocity"), "poussée attendue")
 		assert(etourdi == true, "joueur étourdi (PlatformStand) attendu")
 		assert(
-			type(fin) == "number" and math.abs(fin - (t + M.Zones.Proche.Etourdi)) < 0.5,
+			type(fin) == "number" and fin >= t + M.Zones.Proche.Etourdi - 0.5,
 			"EtourdiJusqua attendu"
 		)
+		assert(joueur:GetAttribute("Projection") ~= nil, "style de projection attendu")
 		assert(ok == true, "le coup doit réussir")
 		assert(porte == false, "le joueur ne doit plus rien porter")
 		assert(dans and libre == true, "créature libre dans Workspace.Creatures attendue")

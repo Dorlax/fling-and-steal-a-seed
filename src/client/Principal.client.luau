@@ -5,6 +5,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local Animations = require(script.Parent:WaitForChild("Animations"))
 local Ambiances = require(script.Parent:WaitForChild("Ambiances"))
 local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
+local EffetsComiques = require(script.Parent:WaitForChild("EffetsComiques"))
 local InterfaceClassement = require(script.Parent:WaitForChild("InterfaceClassement"))
 local InterfaceEvenement = require(script.Parent:WaitForChild("InterfaceEvenement"))
 local InterfaceLancer = require(script.Parent:WaitForChild("InterfaceLancer"))
@@ -29,6 +30,8 @@ InterfacePieges.demarrer()
 -- Multijoueur : événement en cours et classements.
 InterfaceEvenement.demarrer()
 InterfaceClassement.demarrer()
+-- Étoiles autour de la tête des joueurs étourdis par un monstre.
+EffetsComiques.demarrer()
 -- Sautillement des créatures et dandinement des monstres (affichage seulement).
 Animations.demarrer()
 -- Ambiance et nom du biome quand le joueur change de biome.

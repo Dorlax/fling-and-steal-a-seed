@@ -39,7 +39,7 @@
 
 ## Interactions
 - Plaquage : bouton PLAQUER (F / Y), portée 8, délai 6 s, protection 4 s ; le porteur lâche sa créature, libre pour tous ; refusé dans les bases. [[04 Plaquage]]
-- Monstres comiques par zone, jamais dans une base ; aucun dégât : leur coup fait lâcher la créature, propulse le joueur (vitesse du monstre × Recul, plafond 500 studs/s, + Hauteur) et l'étourdit (PlatformStand 1 / 1,4 / 1,8 s, attribut `EtourdiJusqua`) ; cycle jour/nuit avec vagues de nuit. [[05 Monstres]]
+- Monstres comiques par zone, jamais dans une base ; aucun dégât : leur coup fait lâcher la créature, propulse le joueur (vitesse du monstre × Recul, plafond 500 studs/s, + Hauteur) et l'étourdit (PlatformStand 1 / 1,4 / 1,8 s, attribut `EtourdiJusqua`), avec un style comique tiré au hasard (`Shared.Projection` : Boing, Toupie, Fusée, Ballon ; traînée arc-en-ciel, onomatopée, étoiles client `EffetsComiques`) ; cycle jour/nuit avec vagues de nuit. [[05 Monstres]]
 - Raids : voler une créature exposée dans la base d'un autre ; verrou de base de 60 s (100 pièces) avec bouclier et décompte. [[06 Raids de bases]]
 - Pièges : filet, glu, fausse graine (coût en pièces, nombre limité, protection après piégeage, pas dans les bases). [[07 Pièges]]
 

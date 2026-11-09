@@ -12,6 +12,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Biomes = require(ReplicatedStorage.Shared.Biomes)
 local Monstre = require(ReplicatedStorage.Shared.Monstre)
+local Projection = require(ReplicatedStorage.Shared.Projection)
 local Bases = require(script.Parent.Bases)
 local Modeleur = require(script.Parent.Modeleur)
 local Portage = require(script.Parent.Portage)
@@ -187,8 +188,8 @@ local function pouf(position: Vector3)
 	end)
 end
 
--- « PAF ! » jaune au-dessus du joueur frappé.
-local function effetPaf(joueur: any)
+-- Onomatopée colorée (« BOING ! », « FIUUUU ! »…) au-dessus du joueur frappé.
+local function effetPaf(joueur: any, mot: string, rgb: { number })
 	local personnage = joueur.Character
 	if typeof(personnage) ~= "Instance" then
 		return
@@ -214,9 +215,9 @@ local function effetPaf(joueur: any)
 	texte.BackgroundTransparency = 1
 	texte.Font = Enum.Font.FredokaOne
 	texte.TextScaled = true
-	texte.TextColor3 = Color3.fromRGB(255, 220, 40)
-	texte.Rotation = 8
-	texte.Text = "PAF !"
+	texte.TextColor3 = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
+	texte.Rotation = aleatoire:NextNumber(-14, 14)
+	texte.Text = mot
 	texte.Parent = effet
 	local trait = Instance.new("UIStroke")
 	trait.Thickness = 4
@@ -229,9 +230,91 @@ local function effetPaf(joueur: any)
 	end)
 end
 
--- Propulse le joueur loin du monstre et l'étourdit (PlatformStand) : la
--- poussée est une LinearVelocity créée par le serveur (répliquée au client
--- qui simule son personnage), retirée après DureePoussee.
+-- Ballons colorés accrochés au-dessus de la tête (sans collision ni masse),
+-- qui éclatent au bout de `duree` secondes.
+local COULEURS_BALLONS = {
+	Color3.fromRGB(255, 90, 120),
+	Color3.fromRGB(90, 200, 255),
+	Color3.fromRGB(255, 220, 60),
+}
+local function ballons(racine: BasePart, duree: number)
+	local grappe = Instance.new("Model")
+	grappe.Name = "BallonsMonstre"
+	for i, couleur in COULEURS_BALLONS do
+		local decalage = Vector3.new((i - 2) * 1.6, 5 + (i % 2) * 0.8, 0)
+		local ballon = Instance.new("Part")
+		ballon.Name = "Ballon"
+		ballon.Shape = Enum.PartType.Ball
+		ballon.Size = Vector3.one * 2.2
+		ballon.Color = couleur
+		ballon.Material = Enum.Material.SmoothPlastic
+		ballon.CanCollide = false
+		ballon.CanQuery = false
+		ballon.CanTouch = false
+		ballon.Massless = true
+		ballon.CFrame = racine.CFrame + decalage
+		ballon.Parent = grappe
+		local fil = Instance.new("Part")
+		fil.Name = "Fil"
+		fil.Size = Vector3.new(0.08, decalage.Y - 1, 0.08)
+		fil.Color = Color3.new(1, 1, 1)
+		fil.CanCollide = false
+		fil.CanQuery = false
+		fil.CanTouch = false
+		fil.Massless = true
+		fil.CFrame = racine.CFrame + Vector3.new(decalage.X / 2, decalage.Y / 2, 0)
+		fil.Parent = grappe
+		for _, piece in { ballon, fil } do
+			local soudure = Instance.new("WeldConstraint")
+			soudure.Part0 = racine
+			soudure.Part1 = piece
+			soudure.Parent = piece
+		end
+	end
+	grappe.Parent = racine.Parent
+	task.delay(duree, function()
+		if grappe.Parent then
+			pouf(grappe:GetPivot().Position)
+		end
+		grappe:Destroy()
+	end)
+end
+
+-- Traînée arc-en-ciel derrière le joueur projeté.
+local function trainee(racine: BasePart, duree: number)
+	local haut = Instance.new("Attachment")
+	haut.Name = "TraineeHaut"
+	haut.Position = Vector3.new(0, 1, 0)
+	haut.Parent = racine
+	local bas = Instance.new("Attachment")
+	bas.Name = "TraineeBas"
+	bas.Position = Vector3.new(0, -1, 0)
+	bas.Parent = racine
+	local trace = Instance.new("Trail")
+	trace.Name = "TraineeMonstre"
+	trace.Attachment0 = haut
+	trace.Attachment1 = bas
+	trace.Lifetime = 0.5
+	trace.LightEmission = 0.6
+	trace.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),
+		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(255, 230, 80)),
+		ColorSequenceKeypoint.new(0.66, Color3.fromRGB(90, 220, 140)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(110, 150, 255)),
+	})
+	trace.Transparency = NumberSequence.new(0.2, 1)
+	trace.Parent = racine
+	task.delay(duree, function()
+		trace:Destroy()
+		haut:Destroy()
+		bas:Destroy()
+	end)
+end
+
+-- Propulse le joueur loin du monstre et l'étourdit (PlatformStand), avec un
+-- style comique tiré au hasard (Shared.Projection) : Boing, Toupie, Fusée ou
+-- Ballon. Les forces sont des contraintes créées par le serveur (répliquées
+-- au client qui simule son personnage). Renvoie le style.
 local etourdis: { [Humanoid]: number } = {}
 local function propulser(
 	joueur: any,
@@ -240,8 +323,11 @@ local function propulser(
 	depuis: Vector3,
 	zone: string,
 	biome: number
-)
-	local horizontal, vertical, duree = Monstre.recul(zone, biome)
+): Projection.Style
+	local style = Projection.tirer(aleatoire:NextNumber())
+	local baseH, baseV, baseDuree = Monstre.recul(zone, biome)
+	local horizontal, vertical = Projection.poussee(style, baseH, baseV)
+	local duree = Projection.duree(style, baseDuree)
 	local ecart = racine.Position - depuis
 	local direction = Vector3.new(ecart.X, 0, ecart.Z)
 	direction = if direction.Magnitude > 0.01 then direction.Unit else Vector3.new(0, 0, 1)
@@ -259,12 +345,44 @@ local function propulser(
 	poussee.Parent = racine
 	task.delay(reglages.DureePoussee, function()
 		poussee:Destroy()
+	end)
+
+	-- Toupie : le joueur tourne sur lui-même pendant tout l'étourdissement.
+	if style.Tourne then
+		local rotation = Instance.new("AngularVelocity")
+		rotation.Name = "ToupieMonstre"
+		rotation.Attachment0 = attache
+		rotation.RelativeTo = Enum.ActuatorRelativeTo.World
+		rotation.MaxTorque = math.huge
+		rotation.AngularVelocity = Vector3.new(0, style.Tourne, 0)
+		rotation.Parent = racine
+		task.delay(duree, function()
+			rotation:Destroy()
+		end)
+	end
+	-- Ballon : une force annule presque la gravité, le joueur flotte puis POP.
+	if style.Ballon then
+		local portance = Instance.new("VectorForce")
+		portance.Name = "BallonMonstre"
+		portance.Attachment0 = attache
+		portance.RelativeTo = Enum.ActuatorRelativeTo.World
+		portance.ApplyAtCenterOfMass = true
+		portance.Force = Vector3.new(0, racine.AssemblyMass * Workspace.Gravity * 1.08, 0)
+		portance.Parent = racine
+		ballons(racine, style.Ballon)
+		task.delay(style.Ballon, function()
+			portance:Destroy()
+		end)
+	end
+	task.delay(duree, function()
 		attache:Destroy()
 	end)
+	trainee(racine, math.min(duree, 1.5))
 
 	local fin = Workspace:GetServerTimeNow() + duree
 	etourdis[humanoide] = fin
 	humanoide.PlatformStand = true
+	joueur:SetAttribute("Projection", style.Id)
 	joueur:SetAttribute("EtourdiJusqua", fin)
 	task.delay(duree, function()
 		if etourdis[humanoide] == fin then
@@ -274,6 +392,7 @@ local function propulser(
 			end
 		end
 	end)
+	return style
 end
 
 -- ----------------------------------------------------------------------------
@@ -389,21 +508,28 @@ function Monstres.frapper(monstre: any, joueur: any, maintenant: number?): (bool
 	if Portage.porte(joueur) then
 		creature = Portage.lacher(joueur, position, instant)
 	end
-	propulser(joueur, racine :: BasePart, humanoide :: Humanoid, position, etat.zone, etat.biome)
+	local style = propulser(
+		joueur,
+		racine :: BasePart,
+		humanoide :: Humanoid,
+		position,
+		etat.zone,
+		etat.biome
+	)
 
 	protection[joueur] = instant + reglages.DureeProtection
 	joueur:SetAttribute("ProtegeMonstreJusqua", instant + reglages.DureeProtection)
 	etat.pretA = instant + Monstre.reglagesZone(etat.zone).Recharge
 
-	effetPaf(joueur)
+	effetPaf(joueur, Projection.mot(style, aleatoire:NextNumber()), style.Couleur)
 	-- Pour l'animation de coup côté client (affichage seulement).
 	if typeof(monstre) == "Instance" then
 		monstre:SetAttribute("FrappeA", Workspace:GetServerTimeNow())
 	end
 	if creature then
-		envoyerMessage(joueur, "BOING ! Un monstre t'a propulsé… tu as lâché ta créature !")
+		envoyerMessage(joueur, style.Message .. " Tu as lâché ta créature !")
 	else
-		envoyerMessage(joueur, "BOING ! Un monstre t'a propulsé !")
+		envoyerMessage(joueur, style.Message)
 	end
 	return true, nil
 end
