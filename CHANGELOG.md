@@ -9,6 +9,11 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Créatures libres dans la base, vente et gains hors ligne
+- Plus de socles : chaque créature se promène librement autour de sa place (marche, pauses, sauts et pirouettes), calculé de la même façon par le serveur et les clients à partir de l'heure du serveur (`Shared.Promenade`) ; les vols restent vérifiés par le serveur.
+- Bouton « Base » : liste des créatures (aperçu 3D, rareté, taille, revenu, étage), vente avec confirmation (prix = 2 min de revenu), « Ranger par valeur » (les meilleures au rez-de-chaussée). RemoteEvents `VendreCreature` et `TrierBase`, tout vérifié par le serveur.
+- Gains hors ligne : au retour, 50 % du revenu pendant l'absence (12 h au plus), annoncé au joueur.
+
 ## 2026-11-09 — Optimisation et identité du Pays des Graines
 - Streaming activé (rayon 640, minimum 160) : chaque joueur ne charge que les biomes autour de lui, au lieu des 21 biomes d'un coup.
 - Petits éléments de décor sans ombre portée ; animations des créatures à pleine cadence de près, une image sur 2 ou 3 au-delà de 50 / 100 studs.

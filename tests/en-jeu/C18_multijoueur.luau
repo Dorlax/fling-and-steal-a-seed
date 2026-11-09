@@ -94,4 +94,29 @@ return {
 		Sauvegarde.terminer(j)
 		assert(ok, err)
 	end,
+
+	["C18 base : vendre encaisse le prix, trier range par valeur"] = function()
+		local Sauvegarde = module("Sauvegarde")
+		local GestionBase = require(ReplicatedStorage.Shared.GestionBase)
+		local j = fauxJoueur()
+		assert(Sauvegarde.ajouterCreature(j, "Commune"), "commune")
+		assert(Sauvegarde.ajouterCreature(j, "Mythique"), "mythique")
+		local ok, err = pcall(function()
+			assert(Sauvegarde.trier(j), "tri")
+			assert(Sauvegarde.creaturesDe(j)[1] == "Mythique", "mythique en premier")
+			local prix = Sauvegarde.vendre(j, 2)
+			assert(
+				prix == GestionBase.prixVente("Commune") and j:GetAttribute("Pieces") == prix,
+				"vente"
+			)
+			assert(#Sauvegarde.creaturesDe(j) == 1, "une créature en moins")
+			assert(Sauvegarde.vendre(j, 5) == 0, "numéro invalide refusé")
+			assert(
+				GestionBase.decoder(j:GetAttribute("CreaturesBase"))[1] == "Mythique",
+				"liste client"
+			)
+		end)
+		Sauvegarde.terminer(j)
+		assert(ok, err)
+	end,
 }

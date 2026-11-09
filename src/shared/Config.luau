@@ -289,6 +289,19 @@ local Config = {
 		NomBiomes = "ClassementBiomesV1",
 	},
 
+	-- Vente d'une créature de la base : son revenu pendant Secondes.
+	Vente = {
+		Secondes = 120,
+	},
+
+	-- Gains hors ligne : au retour, Taux du revenu par seconde pendant
+	-- l'absence (au plus MaxSecondes, rien sous MinSecondes).
+	HorsLigne = {
+		Taux = 0.5,
+		MaxSecondes = 12 * 3600,
+		MinSecondes = 60,
+	},
+
 	-- Bords de la carte : remparts décorés + murs invisibles (Decor) ;
 	-- sous cette hauteur, un joueur est ramené dans sa base.
 	Limites = {

@@ -12,6 +12,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local Anime = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Anime"))
+local Promenade = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Promenade"))
 
 local Animations = {}
 
@@ -31,6 +32,10 @@ type Suivi = {
 	monstre: boolean,
 	pieces: { Piece },
 	bougeA: number, -- dernier déplacement par le serveur (os.clock)
+	-- Créature de base qui se promène (Shared.Promenade), sinon nil.
+	centre: Vector3?,
+	graine: number,
+	rayon: number,
 }
 
 local suivis: { [Model]: Suivi } = {}
@@ -146,7 +151,13 @@ function suivre(objet: Instance)
 		return
 	end
 	local base = modele:GetPivot()
+	local centre = modele:GetAttribute("PromenadeCentre")
+	local graine = modele:GetAttribute("Graine")
+	local rayon = modele:GetAttribute("PromenadeRayon")
 	suivis[modele] = {
+		centre = if typeof(centre) == "Vector3" and type(graine) == "number" then centre else nil,
+		graine = if type(graine) == "number" then graine else 0,
+		rayon = if type(rayon) == "number" then rayon else Promenade.Rayon,
 		base = base,
 		pose = nil,
 		phase = math.random() * math.pi * 2,
@@ -208,7 +219,14 @@ local function pas()
 		end
 		local actuel = modele:GetPivot()
 		local pose = s.pose
-		if pose == nil or not identiques(actuel, pose) then
+		local promenade: Promenade.Etat? = nil
+		if s.centre then
+			-- Promenade dans la base : position calculée depuis l'heure du serveur.
+			local etat = Promenade.etat(s.graine, serveur, s.rayon)
+			promenade = etat
+			s.base = CFrame.new((s.centre :: Vector3) + Vector3.new(etat.X, etat.Saut, etat.Z))
+				* CFrame.Angles(0, etat.Cap + etat.Tour, 0)
+		elseif pose == nil or not identiques(actuel, pose) then
 			-- Le serveur a déplacé le modèle : nouvelle position de repos.
 			if (actuel.Position - s.base.Position).Magnitude > 0.05 then
 				s.bougeA = t
@@ -230,7 +248,8 @@ local function pas()
 			end
 			continue
 		end
-		local marche = s.monstre and t - s.bougeA < Anime.DureeMarche
+		local marche = (s.monstre and t - s.bougeA < Anime.DureeMarche)
+			or (promenade ~= nil and (promenade :: Promenade.Etat).Marche)
 		local frappeA = modele:GetAttribute("FrappeA")
 		local frappe = 0
 		if type(frappeA) == "number" and serveur - frappeA < Anime.DureeFrappe then

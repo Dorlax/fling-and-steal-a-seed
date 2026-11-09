@@ -22,6 +22,7 @@ export type DonneesJoueur = {
 	Agrandissement: number,
 	RecordBiome: number,
 	Decouvertes: { string }, -- espèces de créatures déjà récoltées (Bestiaire)
+	DerniereConnexion: number, -- os.time() de la dernière sauvegarde (0 = jamais)
 	Pieces: number,
 	CreaturesBase: { string },
 }
@@ -38,6 +39,7 @@ function Donnees.parDefaut(): DonneesJoueur
 		Agrandissement = 1,
 		RecordBiome = 1,
 		Decouvertes = {},
+		DerniereConnexion = 0,
 		Pieces = 0,
 		CreaturesBase = {},
 	}
@@ -108,6 +110,15 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 		donnees.RecordBiome = math.floor(record)
 	end
 	donnees.Decouvertes = Collection.nettoyer(brut.Decouvertes)
+	local derniere = brut.DerniereConnexion
+	if
+		type(derniere) == "number"
+		and derniere == derniere
+		and derniere > 0
+		and derniere < math.huge
+	then
+		donnees.DerniereConnexion = math.floor(derniere)
+	end
 	donnees.Pieces = nettoyerPieces(brut.Pieces)
 	donnees.CreaturesBase = nettoyerCreatures(brut.CreaturesBase)
 	return donnees

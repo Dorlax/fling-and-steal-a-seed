@@ -8,6 +8,7 @@ local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Fiche = require(ReplicatedStorage.Shared.Fiche)
+local Promenade = require(ReplicatedStorage.Shared.Promenade)
 local Modeleur = require(script.Parent.Modeleur)
 
 local Bases = {}
@@ -33,7 +34,6 @@ local raretes: any = Config.Raretes -- indexé par des noms dynamiques
 local BORD_BASES = 20 -- bord des bases côté Terres Sauvages (Z)
 local HAUTEUR_BASE = 12 -- « dans la base » : jusqu'à 12 studs au-dessus du sol
 local TAILLE_EXPOSEE = 3 -- diamètre des créatures exposées (leur vraie taille)
-local HAUTEUR_SOCLE = 1.4 -- les créatures exposées trônent sur un socle
 local NOMBRE_EMPLACEMENTS = 12
 
 local COULEUR_SOL = Color3.fromRGB(110, 215, 80)
@@ -452,9 +452,8 @@ local function creerCreatureExposee(
 	corps.CanCollide = false
 	corps.Color = couleur
 	corps.Material = if precieuse then Enum.Material.Neon else Enum.Material.SmoothPlastic
-	-- Yeux tournés vers le centre de la base (axe X).
-	local regard = if position.X > 0 then -1 else 1
-	corps.CFrame = CFrame.lookAt(position, position + Vector3.new(regard, 0, 0))
+	-- Le client la fait se promener autour de cette position (Shared.Promenade).
+	corps.CFrame = CFrame.new(position)
 	corps.Parent = modele
 
 	local espece = Bestiaire.especeCreature(rarete, infos.Espece)
@@ -500,14 +499,31 @@ local function creerCreatureExposee(
 	modele:SetAttribute("Rarete", rarete)
 	modele:SetAttribute("Taille", infos.Taille)
 	modele:SetAttribute("Emplacement", numero)
+	-- Promenade libre dans la base : centre, rayon et graine (déterministe).
+	modele:SetAttribute("PromenadeCentre", position)
+	modele:SetAttribute("PromenadeRayon", Promenade.Rayon)
+	modele:SetAttribute("Graine", numero * 3.17 + (proprietaire.UserId % 97) * 0.61)
 	return modele
+end
+
+-- Position actuelle d'une créature qui se promène (même calcul que le client).
+function Bases.positionCreature(modele: Model, t: number): Vector3
+	local centre = modele:GetAttribute("PromenadeCentre")
+	local graine = modele:GetAttribute("Graine")
+	local rayon = modele:GetAttribute("PromenadeRayon")
+	if typeof(centre) ~= "Vector3" or type(graine) ~= "number" then
+		return modele:GetPivot().Position
+	end
+	local etat = Promenade.etat(graine :: number, t, if type(rayon) == "number" then rayon else nil)
+	return (centre :: Vector3) + Vector3.new(etat.X, etat.Saut, etat.Z)
 end
 
 -- Position (relative au centre de la base) de l'emplacement `numero` :
 -- deux rangées le long des bords X, loin de la Forge (centre, Z +4..+12)
 -- et du point d'apparition (centre, Z -8).
 local function positionEmplacement(numeroGlobal: number, taille: number): Vector3
-	local BORD_EXPOSITION = taille / 2 - 4
+	-- Assez loin du bord pour que la promenade reste sur le plancher.
+	local BORD_EXPOSITION = taille / 2 - 2 - Promenade.Rayon
 	-- 10 places par étage : l'étage est donné par le numéro.
 	local parEtage = Config.Creatures.MaxCreaturesBase
 	local etage = math.floor((numeroGlobal - 1) / parEtage)
@@ -518,7 +534,7 @@ local function positionEmplacement(numeroGlobal: number, taille: number): Vector
 	local x = (if rangee == 0 then -1 else 1) * BORD_EXPOSITION
 	local pas = if parRangee > 1 then (2 * BORD_EXPOSITION) / (parRangee - 1) else 0
 	local z = -BORD_EXPOSITION + rang * pas
-	return Vector3.new(x, etage * Config.Bases.HauteurEtage + HAUTEUR_SOCLE + TAILLE_EXPOSEE / 2, z)
+	return Vector3.new(x, etage * Config.Bases.HauteurEtage + TAILLE_EXPOSEE / 2, z)
 end
 
 -- Ascenseur (plaque lumineuse) : téléporte le personnage à un autre étage.
@@ -680,71 +696,8 @@ function Bases.acheterEtage(joueur: any): boolean
 	return true
 end
 
--- Socle d'exposition (façon vitrine) sous l'emplacement `numero` : bloc
--- sombre, plateau, liseré lumineux à la couleur de la créature posée (gris
--- si vide) et numéro de l'emplacement. Purement visuel.
-local function creerSocle(numero: number, sol: Vector3, couleur: Color3?, parent: Instance)
-	local modele = Instance.new("Model")
-	modele.Name = "Socle" .. numero
-	local function bloc(nom: string, taille: Vector3, y: number, c: Color3, neon: boolean?): Part
-		local p = Instance.new("Part")
-		p.Name = nom
-		p.Anchored = true
-		p.CanCollide = false
-		p.CanQuery = false
-		p.CanTouch = false
-		p.Size = taille
-		p.Position = sol + Vector3.new(0, y, 0)
-		p.Color = c
-		p.Material = if neon then Enum.Material.Neon else Enum.Material.SmoothPlastic
-		p.TopSurface = Enum.SurfaceType.Smooth
-		p.BottomSurface = Enum.SurfaceType.Smooth
-		p.Parent = modele
-		return p
-	end
-	local occupe = couleur ~= nil
-	bloc(
-		"Pied",
-		Vector3.new(3.4, HAUTEUR_SOCLE - 0.25, 3.4),
-		(HAUTEUR_SOCLE - 0.25) / 2,
-		Color3.fromRGB(70, 60, 90)
-	)
-	bloc(
-		"Lisere",
-		Vector3.new(3.6, 0.15, 3.6),
-		HAUTEUR_SOCLE - 0.2,
-		couleur or Color3.fromRGB(150, 150, 160),
-		occupe
-	)
-	bloc(
-		"Plateau",
-		Vector3.new(3.2, 0.12, 3.2),
-		HAUTEUR_SOCLE - 0.06,
-		Color3.fromRGB(245, 240, 230)
-	)
-	local face = modele:FindFirstChild("Pied") :: Part
-	for _, cote in
-		{ Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
-	do
-		local panneau = Instance.new("SurfaceGui")
-		panneau.Face = cote
-		panneau.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-		panneau.PixelsPerStud = 40
-		panneau.Parent = face
-		local texte = Instance.new("TextLabel")
-		texte.Size = UDim2.fromScale(1, 1)
-		texte.BackgroundTransparency = 1
-		texte.Font = Enum.Font.FredokaOne
-		texte.TextScaled = true
-		texte.TextColor3 = Color3.new(1, 1, 1)
-		texte.TextTransparency = if occupe then 0 else 0.5
-		texte.Text = `#{numero}`
-		texte.Parent = panneau
-	end
-	modele.Parent = parent
-end
-
--- (Re)crée les créatures exposées de la base, une par emplacement.
+-- (Re)crée les créatures de la base, une par emplacement, chacune libre de
+-- se promener autour de sa place.
 function Bases.afficherCreatures(joueur: any, liste: { string })
 	local base = basesParJoueur[joueur]
 	if base == nil then
@@ -761,27 +714,11 @@ function Bases.afficherCreatures(joueur: any, liste: { string })
 	afficherEtages(joueur, base)
 	local capacite = Config.Creatures.MaxCreaturesBase * Bases.etagesDe(joueur)
 
-	-- Un socle par emplacement, coloré par la rareté de la créature posée.
+	-- Plus de socles : les créatures se promènent librement (Shared.Promenade).
 	local anciensSocles = base.modele:FindFirstChild("Socles")
 	if anciensSocles then
 		anciensSocles:Destroy()
 	end
-	local socles = Instance.new("Folder")
-	socles.Name = "Socles"
-	for numero = 1, capacite do
-		local fiche = liste[numero]
-		local infos = if type(fiche) == "string" then Fiche.lire(fiche) else nil
-		local couleur: Color3? = nil
-		if infos then
-			local rgb = raretes.Couleurs[infos.Rarete] or { 255, 255, 255 }
-			couleur = Color3.fromRGB(rgb[1], rgb[2], rgb[3])
-		end
-		local position = centre + positionEmplacement(numero, tailleDe(joueur))
-		local etage = math.floor((numero - 1) / Config.Creatures.MaxCreaturesBase)
-		local y = centre.Y + etage * Config.Bases.HauteurEtage
-		creerSocle(numero, Vector3.new(position.X, y, position.Z), couleur, socles)
-	end
-	socles.Parent = base.modele
 
 	for numero, rarete in liste do
 		if numero > capacite then

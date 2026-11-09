@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Nombres = require(ReplicatedStorage.Shared.Nombres)
 local Bases = require(script.Parent.Bases)
 local Classements = require(script.Parent.Classements)
 local CycleJourNuit = require(script.Parent.CycleJourNuit)
@@ -55,6 +56,35 @@ end)
 -- Achat de l'étage de base suivant : aucun argument ; le serveur vérifie tout.
 remote("AcheterEtage").OnServerEvent:Connect(function(joueur: Player)
 	if Sauvegarde.estCharge(joueur) and Bases.acheterEtage(joueur) then
+		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
+	end
+end)
+
+-- Gestion de la base : vendre la créature n° N, ranger par valeur. Le client
+-- n'envoie qu'un numéro ; tout est vérifié par Sauvegarde. Anti-spam simple.
+local derniereGestion: { [Player]: number } = {}
+local function gestionPermise(joueur: Player): boolean
+	local maintenant = os.clock()
+	if not Sauvegarde.estCharge(joueur) or maintenant - (derniereGestion[joueur] or 0) < 0.25 then
+		return false
+	end
+	derniereGestion[joueur] = maintenant
+	return true
+end
+remote("VendreCreature").OnServerEvent:Connect(function(joueur: Player, numero: any)
+	if gestionPermise(joueur) then
+		local prix = Sauvegarde.vendre(joueur, numero)
+		if prix > 0 then
+			Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
+			remote("MessageJeu"):FireClient(
+				joueur,
+				`Créature vendue : +{Nombres.abreger(prix)} pièces`
+			)
+		end
+	end
+end)
+remote("TrierBase").OnServerEvent:Connect(function(joueur: Player)
+	if gestionPermise(joueur) and Sauvegarde.trier(joueur) then
 		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
 	end
 end)
@@ -156,6 +186,17 @@ local function surArrivee(joueur: Player)
 	Sauvegarde.charger(joueur)
 	if Sauvegarde.estCharge(joueur) then
 		Classements.suivre(joueur)
+		local gain = Sauvegarde.prendreGainHorsLigne(joueur)
+		if gain > 0 then
+			task.delay(5, function()
+				if joueur.Parent then
+					remote("MessageJeu"):FireClient(
+						joueur,
+						`Pendant ton absence, tes créatures ont gagné {Nombres.abreger(gain)} pièces !`
+					)
+				end
+			end)
+		end
 		Entrainement.appliquerVitesse(joueur)
 		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
 	end
@@ -167,6 +208,7 @@ for _, joueur in Players:GetPlayers() do
 end
 
 Players.PlayerRemoving:Connect(function(joueur)
+	derniereGestion[joueur] = nil
 	Portage.nettoyer(joueur)
 	Plaquages.nettoyer(joueur)
 	Pieges.nettoyer(joueur)

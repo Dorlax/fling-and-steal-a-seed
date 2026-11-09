@@ -14,7 +14,9 @@
       "MessageJeu": { "$className": "RemoteEvent" },
       "Plaquer": { "$className": "RemoteEvent" },
       "AlerteVol": { "$className": "RemoteEvent" },
-      "PoserPiege": { "$className": "RemoteEvent" }
+      "PoserPiege": { "$className": "RemoteEvent" },
+      "VendreCreature": { "$className": "RemoteEvent" },
+      "TrierBase": { "$className": "RemoteEvent" }
     },
     "Workspace": {
       "$properties": {
