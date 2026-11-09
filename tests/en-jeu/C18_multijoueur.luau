@@ -94,4 +94,69 @@ return {
 		Sauvegarde.terminer(j)
 		assert(ok, err)
 	end,
+
+	["C18 base : vendre encaisse le prix, trier range par valeur"] = function()
+		local Sauvegarde = module("Sauvegarde")
+		local GestionBase = require(ReplicatedStorage.Shared.GestionBase)
+		local j = fauxJoueur()
+		assert(Sauvegarde.ajouterCreature(j, "Commune"), "commune")
+		assert(Sauvegarde.ajouterCreature(j, "Mythique"), "mythique")
+		local ok, err = pcall(function()
+			assert(Sauvegarde.trier(j), "tri")
+			assert(Sauvegarde.creaturesDe(j)[1] == "Mythique", "mythique en premier")
+			local prix = Sauvegarde.vendre(j, 2)
+			assert(
+				prix == GestionBase.prixVente("Commune") and j:GetAttribute("Pieces") == prix,
+				"vente"
+			)
+			assert(#Sauvegarde.creaturesDe(j) == 1, "une créature en moins")
+			assert(Sauvegarde.vendre(j, 5) == 0, "numéro invalide refusé")
+			assert(
+				GestionBase.decoder(j:GetAttribute("CreaturesBase"))[1] == "Mythique",
+				"liste client"
+			)
+		end)
+		Sauvegarde.terminer(j)
+		assert(ok, err)
+	end,
+
+	["C18 progression : renaissance, graine, roue et traînée"] = function()
+		local Progression = module("Progression")
+		local Sauvegarde = module("Sauvegarde")
+		local Bonus = require(ReplicatedStorage.Shared.Bonus)
+		local Config = require(ReplicatedStorage.Shared.Config)
+		local j = fauxJoueur()
+		j:SetAttribute("Graines", "Simple")
+		j:SetAttribute("Graine", "Simple")
+		j:SetAttribute("Trainees", "")
+		j:SetAttribute("Trainee", "")
+		j:SetAttribute("ProchaineRoue", 0)
+		local ok, err = pcall(function()
+			assert(Progression.renaitre(j) == false, "pas assez de pièces")
+			j:SetAttribute("Pieces", Bonus.prixRenaissance(0))
+			assert(Progression.renaitre(j) == true, "renaissance")
+			assert(
+				j:GetAttribute("Pieces") == 0 and j:GetAttribute("Renaissances") == 1,
+				"remise à 0"
+			)
+			assert(
+				string.find(j:GetAttribute("Trainees"), "Arcenciel"),
+				"traînée de la 1re renaissance"
+			)
+			assert(Progression.equiperTrainee(j, "Arcenciel"), "traînée équipée")
+			assert(not Progression.equiperTrainee(j, "Galaxie"), "traînée verrouillée refusée")
+			j:SetAttribute("Pieces", Config.Graines.Liste.Doree.Prix)
+			assert(Progression.acheterGraine(j, "Doree"), "achat")
+			assert(
+				j:GetAttribute("Graine") == "Doree" and j:GetAttribute("Pieces") == 0,
+				"équipée et payée"
+			)
+			assert(not Progression.acheterGraine(j, "Doree"), "déjà achetée")
+			assert(not Progression.equiperGraine(j, "Cosmique"), "graine non possédée")
+			assert(Progression.tournerRoue(j, 0.5) ~= nil, "premier tour")
+			assert(Progression.tournerRoue(j, 0.5) == nil, "il faut attendre")
+		end)
+		Sauvegarde.terminer(j)
+		assert(ok, err)
+	end,
 }

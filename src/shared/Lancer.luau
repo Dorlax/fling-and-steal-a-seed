@@ -66,6 +66,44 @@ function Lancer.tirerRarete(zone: string, aleatoire: number): string
 	return raretes.Ordre[#raretes.Ordre]
 end
 
+-- Taux (en %) d'une zone avec une graine de `chance` : le poids de la rareté
+-- de rang r est multiplié par (1 + chance)^(r - 1), puis tout est ramené à
+-- 100 %. Sans graine (chance 0) : exactement les taux du Plan.
+function Lancer.tauxAvecChance(zone: string, chance: number?): { [string]: number }
+	local raretes: any = Config.Raretes
+	local taux = raretes.Taux[zone] or raretes.Taux[Config.Lancer.Zones[1].Nom]
+	local c = if estNombreFini(chance) and (chance :: number) > 0 then chance :: number else 0
+	local poids: { [string]: number } = {}
+	local total = 0
+	for rang, rarete in raretes.Ordre do
+		local p = taux[rarete] * (1 + c) ^ (rang - 1)
+		poids[rarete] = p
+		total += p
+	end
+	for rarete, p in poids do
+		poids[rarete] = p / total * 100
+	end
+	return poids
+end
+
+-- Tirage de la rareté avec une graine (ne dépend pas non plus de la jauge).
+function Lancer.tirerRareteChance(zone: string, aleatoire: number, chance: number?): string
+	local raretes: any = Config.Raretes
+	if not estNombreFini(chance) or (chance :: number) <= 0 then
+		return Lancer.tirerRarete(zone, aleatoire)
+	end
+	local taux = Lancer.tauxAvecChance(zone, chance)
+	local valeur = if estNombreFini(aleatoire) then math.clamp(aleatoire, 0, 1) else 0
+	local cumul = 0
+	for _, rarete in raretes.Ordre do
+		cumul += taux[rarete] / 100
+		if valeur < cumul then
+			return rarete
+		end
+	end
+	return raretes.Ordre[#raretes.Ordre]
+end
+
 -- Nombre à la française : « 70 », « 1,8 », « 0,2 » (jamais « 1,0 »).
 local function formaterNombre(n: number): string
 	if n == math.floor(n) then
@@ -77,11 +115,17 @@ local function formaterNombre(n: number): string
 end
 
 -- Ex. « Proche : Commune 70 % · Rare 22 % · Épique 6 % · Légendaire 1,8 % · Mythique 0,2 % »
-function Lancer.texteTaux(zone: string): string
+-- `chance` (facultatif) : taux avec la graine équipée.
+function Lancer.texteTaux(zone: string, chance: number?): string
 	local raretes: any = Config.Raretes -- indexé par des noms dynamiques
-	local taux = raretes.Taux[zone]
-	if taux == nil then
+	if raretes.Taux[zone] == nil then
 		return zone
+	end
+	local brut = Lancer.tauxAvecChance(zone, chance)
+	local taux: { [string]: number } = {}
+	for rarete, valeur in brut do
+		-- Arrondi à 0,01 % pour l'affichage.
+		taux[rarete] = math.floor(valeur * 100 + 0.5) / 100
 	end
 	local morceaux = {}
 	for _, rarete in raretes.Ordre do

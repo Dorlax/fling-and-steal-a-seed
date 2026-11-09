@@ -29,7 +29,7 @@ local function fauxJoueur(pieces: number): any
 end
 
 return {
-	["C17 acheter un étage : pièces retirées, 10 socles de plus, plancher créé"] = function()
+	["C17 acheter un étage : pièces retirées, 10 places de plus, plancher créé"] = function()
 		local Bases, Sauvegarde = module("Bases"), module("Sauvegarde")
 		local prix = Config.Bases.PrixEtages[1]
 		local j = fauxJoueur(prix + 5)
@@ -47,10 +47,9 @@ return {
 			Bases.afficherCreatures(j, {})
 			local etages = (base :: Model):FindFirstChild("Etages")
 			assert(etages and etages:FindFirstChild("Plancher2"), "plancher de l'étage 2 attendu")
-			local socles = (base :: Model):FindFirstChild("Socles")
 			assert(
-				socles and #socles:GetChildren() == 2 * Config.Creatures.MaxCreaturesBase,
-				"20 socles"
+				(base :: Model):FindFirstChild("Socles") == nil,
+				"plus de socles : promenade libre"
 			)
 		end)
 		Bases.liberer(j)

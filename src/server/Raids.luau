@@ -237,7 +237,9 @@ function Raids.voler(voleur: any, proprietaire: any, numero: any, maintenant: nu
 	local racine = racineEtHumanoide(voleur)
 	local exposee = if emplacementValide then creatureExposee(proprietaire, numero) else nil
 	if racine ~= nil and exposee ~= nil then
-		distance = (racine.Position - exposee:GetPivot().Position).Magnitude
+		-- La créature se promène : position calculée comme chez le client.
+		local position = Bases.positionCreature(exposee, Workspace:GetServerTimeNow())
+		distance = (racine.Position - position).Magnitude
 	end
 
 	local ok = Raid.verifierVol({

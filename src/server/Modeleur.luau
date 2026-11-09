@@ -7,6 +7,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
+local Config = require(ReplicatedStorage.Shared.Config)
 
 local Modeleur = {}
 
@@ -120,6 +121,89 @@ function Modeleur.construire(
 	-- Le client reçoit le modèle en entier (pour relever toutes ses pièces).
 	modele.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	return #espece.Blocs
+end
+
+-- Mutation (Dorée, Cristal, Arc-en-ciel) : les blocs changent de teinte et
+-- de matière, et de petites étincelles de la couleur de la mutation
+-- l'entourent. Sans mutation : rien ne change.
+local ARC = {
+	Color3.fromRGB(255, 90, 90),
+	Color3.fromRGB(255, 180, 60),
+	Color3.fromRGB(255, 240, 80),
+	Color3.fromRGB(90, 220, 120),
+	Color3.fromRGB(80, 170, 255),
+	Color3.fromRGB(190, 110, 255),
+}
+-- Particules de chaque effet de mutation.
+local EFFETS: { [string]: { any } } = {
+	-- { texture, taille, durée, vitesse, débit, accélération Y }
+	Etincelles = { "rbxasset://textures/particles/sparkles_main.dds", 0.4, 1.1, 1, 10, 0 },
+	Givre = { "rbxasset://textures/particles/smoke_main.dds", 0.6, 1.6, 0.4, 6, -1 },
+	Flammes = { "rbxasset://textures/particles/fire_main.dds", 0.9, 0.8, 1.5, 14, 4 },
+	Eclairs = { "rbxasset://textures/particles/sparkles_main.dds", 0.5, 0.25, 6, 18, 0 },
+	Etoiles = { "rbxasset://textures/particles/sparkles_main.dds", 0.7, 2, 0.3, 8, 0 },
+}
+
+function Modeleur.muter(modele: Model, corps: BasePart, mutation: string?)
+	if mutation == nil then
+		return
+	end
+	local infos = (Config.Mutations.Liste :: any)[mutation]
+	if infos == nil then
+		return
+	end
+	local teinte = Color3.fromRGB(infos.Couleur[1], infos.Couleur[2], infos.Couleur[3])
+	local matiere = if infos.Matiere
+		then (Enum.Material :: any)[infos.Matiere] :: Enum.Material?
+		else nil
+	local melange = infos.Melange or 0.5
+	local i = 0
+	for _, p in modele:GetChildren() do
+		if p:IsA("BasePart") and p ~= corps and string.sub(p.Name, 1, 4) ~= "Oeil" then
+			i += 1
+			local cible = if infos.Arc then ARC[(i % #ARC) + 1] else teinte
+			p.Color = p.Color:Lerp(cible, melange)
+			if matiere then
+				p.Material = matiere
+			end
+			if infos.Transparence then
+				p.Transparency = math.max(p.Transparency, infos.Transparence)
+			end
+			for _, motif in p:GetChildren() do
+				if motif:IsA("Texture") then
+					motif.Color3 = p.Color
+				end
+			end
+		end
+	end
+	local effet = EFFETS[infos.Effet] or EFFETS.Etincelles
+	local e = Instance.new("ParticleEmitter")
+	e.Name = "Mutation"
+	e.Texture = effet[1]
+	e.Color = if infos.Arc
+		then ColorSequence.new({
+			ColorSequenceKeypoint.new(0, ARC[1]),
+			ColorSequenceKeypoint.new(0.5, ARC[4]),
+			ColorSequenceKeypoint.new(1, ARC[6]),
+		})
+		else ColorSequence.new(teinte, Color3.new(1, 1, 1))
+	e.LightEmission = 1
+	e.Size = NumberSequence.new(effet[2], 0)
+	e.Lifetime = NumberRange.new(effet[3] * 0.7, effet[3] * 1.3)
+	e.Speed = NumberRange.new(effet[4] * 0.6, effet[4] * 1.4)
+	e.Acceleration = Vector3.new(0, effet[6], 0)
+	e.SpreadAngle = Vector2.new(180, 180)
+	e.Rate = effet[5]
+	e.Parent = corps
+	if infos.Effet == "Etoiles" then
+		local lueur = Instance.new("PointLight")
+		lueur.Name = "LueurMutation"
+		lueur.Color = Color3.fromRGB(170, 120, 255)
+		lueur.Range = 10
+		lueur.Brightness = 1.5
+		lueur.Parent = corps
+	end
+	modele:SetAttribute("Mutation", mutation)
 end
 
 -- Aura de rareté : étincelles dès Épique, plus nombreuses ensuite ;

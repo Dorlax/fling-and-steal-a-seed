@@ -15,6 +15,7 @@ local Bases = require(script.Parent.Bases)
 local TerresSauvages = require(script.Parent.TerresSauvages)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Fiche = require(ReplicatedStorage.Shared.Fiche)
+local Bonus = require(ReplicatedStorage.Shared.Bonus)
 local Biomes = require(ReplicatedStorage.Shared.Biomes)
 local Modeleur = require(script.Parent.Modeleur)
 local Classements = require(script.Parent.Classements)
@@ -29,6 +30,8 @@ export type Resultat = {
 	Rarete: string,
 	Taille: string?, -- Normale, Grande, Geante, Colossale ou Titan
 	Espece: string?,
+	Mutation: string?, -- voir Config.Mutations (rare)
+	Graine: string?, -- graine lancée
 }
 
 type Etat = {
@@ -150,6 +153,7 @@ local function creerCreature(
 	local espece = Bestiaire.especeCreature(resultat.Rarete, resultat.Espece)
 	Modeleur.construire(modele, corps, espece, diametre, couleur)
 	Modeleur.aura(corps, couleur, table.find(raretes.Ordre, resultat.Rarete) or 1)
+	Modeleur.muter(modele, corps, resultat.Mutation)
 
 	if precieuse then
 		local lumiere = Instance.new("PointLight")
@@ -173,7 +177,7 @@ local function creerCreature(
 	texte.TextColor3 = couleur
 	texte.TextStrokeTransparency = 0
 	texte.TextStrokeColor3 = Color3.new(0, 0, 0)
-	texte.Text = Fiche.texte(resultat.Rarete, taille)
+	texte.Text = Fiche.texte(resultat.Rarete, taille, resultat.Mutation)
 	texte.Parent = panneau
 
 	-- Bouton « Récolter » (tactile, touche, manette) ; validé par le serveur.
@@ -196,6 +200,7 @@ local function creerCreature(
 	modele:SetAttribute("Rarete", resultat.Rarete)
 	modele:SetAttribute("Taille", taille)
 	modele:SetAttribute("Espece", espece.Nom)
+	modele:SetAttribute("Mutation", resultat.Mutation)
 	modele:SetAttribute("Zone", resultat.Zone)
 	modele:SetAttribute("Proprietaire", joueur.UserId)
 	modele:SetAttribute("Distance", resultat.Distance)
@@ -300,8 +305,17 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 	)
 	local zone = Lancer.zone(distance)
 	local tirage = if estNombreFini(aleatoire) then aleatoire :: number else hasard:NextNumber()
-	local rarete = Lancer.tirerRarete(zone, tirage)
+	-- Graine équipée (ou celle offerte par la roue pour ce lancer, si meilleure).
+	local offerte = joueur:GetAttribute("LancerGraine")
+	local idGraine = Bonus.meilleureGraine(joueur:GetAttribute("Graine"), offerte)
+	if offerte ~= nil then
+		joueur:SetAttribute("LancerGraine", nil)
+	end
+	local graine = Bonus.graine(idGraine)
+	local rarete = Lancer.tirerRareteChance(zone, tirage, graine.Chance)
 	local biome = Biomes.index(distance)
+	local bonusMutation = graine.Mutation
+		* (if evenement ~= nil then Config.Mutations.BonusEvenement else 1)
 	local resultat: Resultat = {
 		Distance = distance,
 		Couleur = palier.Couleur,
@@ -309,9 +323,14 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 		Zone = zone,
 		Rarete = rarete,
 		-- Taille et espèce : tirages serveur indépendants de la rareté.
-		-- Graines géantes : taux de taille de quelques biomes plus loin.
-		Taille = Fiche.tirerTaille(hasard:NextNumber(), biome + Evenement.bonusTailles(evenement)),
+		-- Graines géantes et graine équipée : taux de taille de biomes plus loin.
+		Taille = Fiche.tirerTaille(
+			hasard:NextNumber(),
+			biome + Evenement.bonusTailles(evenement) + graine.Tailles
+		),
 		Espece = Bestiaire.tirerEspece(rarete, hasard:NextNumber(), biome).Nom,
+		Mutation = Fiche.tirerMutation(hasard:NextNumber(), bonusMutation),
+		Graine = idGraine,
 	}
 
 	Classements.noterBiome(joueur, biome)
@@ -354,7 +373,7 @@ end
 -- Rarete, Proprietaire = joueur), marquée Volee, au point donné (raid).
 -- Elle n'entre pas dans la liste « au sol » du joueur.
 function Lancers.creerCreaturePortable(joueur: any, fiche: string, point: Vector3): Model
-	local infos = Fiche.lire(fiche) or { Rarete = "Commune", Taille = "Normale", Espece = nil }
+	local infos = Fiche.lire(fiche) or ({ Rarete = "Commune", Taille = "Normale" } :: Fiche.Infos)
 	local modele = creerCreature(joueur, {
 		Distance = 0,
 		Couleur = "",
@@ -363,6 +382,7 @@ function Lancers.creerCreaturePortable(joueur: any, fiche: string, point: Vector
 		Rarete = infos.Rarete,
 		Taille = infos.Taille,
 		Espece = infos.Espece,
+		Mutation = infos.Mutation,
 	}, point, false)
 	modele:SetAttribute("Volee", true)
 	return modele

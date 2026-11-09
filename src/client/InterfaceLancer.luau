@@ -16,6 +16,7 @@ local Lancer = require(Shared:WaitForChild("Lancer")) :: any
 local Fiche = require(Shared:WaitForChild("Fiche"))
 local Biomes = require(Shared:WaitForChild("Biomes"))
 local Evenement = require(Shared:WaitForChild("Evenement"))
+local Bonus = require(Shared:WaitForChild("Bonus"))
 local Style = require(Shared:WaitForChild("Style"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
@@ -77,6 +78,7 @@ local function creerPanneauTaux(ecran: ScreenGui)
 	titre.Parent = cadre
 
 	local lignes: { TextLabel } = {}
+	local lignesZones: { [string]: TextLabel } = {}
 	for i, zone in Config.Lancer.Zones do
 		local ligne = Habillage.texte(cadre, "Taux" .. zone.Nom, {
 			couleur = Habillage.couleur(Style.couleurZone(zone.Nom)),
@@ -86,6 +88,7 @@ local function creerPanneauTaux(ecran: ScreenGui)
 		ligne.Size = UDim2.new(1, 0, 0, Style.TailleTexteMin + 2)
 		ligne.Text = Lancer.texteTaux(zone.Nom)
 		table.insert(lignes, ligne)
+		lignesZones[zone.Nom] = ligne
 	end
 
 	-- Taux de taille du biome que le lancer atteint avec la Force actuelle :
@@ -98,6 +101,7 @@ local function creerPanneauTaux(ecran: ScreenGui)
 	ligneTailles.Size = UDim2.new(1, 0, 0, Style.TailleTexteMin + 2)
 	table.insert(lignes, ligneTailles)
 	local joueur = Players.LocalPlayer
+	local ouvert = true
 	local function majTailles()
 		local force = joueur:GetAttribute("Force")
 		local evenement = Workspace:GetAttribute("Evenement")
@@ -105,8 +109,16 @@ local function creerPanneauTaux(ecran: ScreenGui)
 			Lancer.distance(if type(force) == "number" then force else 0, 0)
 				+ Evenement.bonusDistance(evenement)
 		)
-		-- Graines géantes : taux de quelques biomes plus loin (affichés tels quels).
-		local taux = Fiche.tauxTailles(biome + Evenement.bonusTailles(evenement))
+		-- Graines géantes et graine équipée : taux de biomes plus loin (affichés tels quels).
+		local graine = Bonus.graine(joueur:GetAttribute("Graine"))
+		local taux = Fiche.tauxTailles(biome + Evenement.bonusTailles(evenement) + graine.Tailles)
+		-- Taux de rareté avec la graine équipée (ceux du Plan avec la graine simple).
+		for nom, ligneZone in lignesZones do
+			ligneZone.Text = Lancer.texteTaux(nom, graine.Chance)
+		end
+		titre.Text = if ouvert
+			then `Taux de rareté · {graine.Nom} ▲`
+			else `Taux de rareté · {graine.Nom} ▼`
 		local morceaux = {}
 		for _, taille in Config.Tailles.Ordre do
 			local nom = (Config.Tailles.Noms :: any)[taille]
@@ -119,12 +131,12 @@ local function creerPanneauTaux(ecran: ScreenGui)
 	end
 	majTailles()
 	joueur:GetAttributeChangedSignal("Force"):Connect(majTailles)
+	joueur:GetAttributeChangedSignal("Graine"):Connect(majTailles)
 	Workspace:GetAttributeChangedSignal("Evenement"):Connect(majTailles)
 
-	local ouvert = true
 	titre.Activated:Connect(function()
 		ouvert = not ouvert
-		titre.Text = if ouvert then "Taux de rareté ▲" else "Taux de rareté ▼"
+		majTailles()
 		for _, ligne in lignes do
 			ligne.Visible = ouvert
 		end

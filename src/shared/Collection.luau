@@ -90,4 +90,16 @@ function Collection.progression(liste: { string }, biome: number): (number, numb
 	return trouvees, total
 end
 
+-- Nombre de pages de biome complètes (toutes leurs créatures découvertes).
+function Collection.pagesCompletes(liste: { string }): number
+	local n = 0
+	for numero = 1, #Biomes.Liste do
+		local trouvees, total = Collection.progression(liste, numero)
+		if total > 0 and trouvees == total then
+			n += 1
+		end
+	end
+	return n
+end
+
 return Collection

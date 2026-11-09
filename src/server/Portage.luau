@@ -15,6 +15,7 @@ local Lancers = require(script.Parent.Lancers)
 local Sauvegarde = require(script.Parent.Sauvegarde)
 local Evenements = require(script.Parent.Evenements)
 local Evenement = require(ReplicatedStorage.Shared.Evenement)
+local Bonus = require(ReplicatedStorage.Shared.Bonus)
 local TerresSauvages = require(script.Parent.TerresSauvages)
 
 type Portee = {
@@ -215,13 +216,15 @@ function Portage.recolter(joueur: any, creature: any): boolean
 	local attributRarete = modele:GetAttribute("Rarete")
 	local attributTaille = modele:GetAttribute("Taille")
 	local attributEspece = modele:GetAttribute("Espece")
+	local attributMutation = modele:GetAttribute("Mutation")
 	if type(attributRarete) ~= "string" then
 		return false
 	end
 	local fiche = Fiche.ecrire(
 		attributRarete :: string,
 		if type(attributTaille) == "string" then attributTaille :: string else nil,
-		if type(attributEspece) == "string" then attributEspece :: string else nil
+		if type(attributEspece) == "string" then attributEspece :: string else nil,
+		if type(attributMutation) == "string" then attributMutation :: string else nil
 	)
 	if not Fiche.valide(fiche) then
 		return false
@@ -389,8 +392,12 @@ end
 -- Un tick de revenus : Pieces += somme des revenus des créatures de la base
 -- (× 2 pendant la Pluie dorée).
 function Portage.tickRevenus(joueur: any)
-	local gain = Revenus.total(Sauvegarde.creaturesDe(joueur))
+	-- Revenu de la base (bonus permanents compris), × événement, × boost de la roue.
+	local revenu = joueur:GetAttribute("RevenuParSeconde")
+	local base = if type(revenu) == "number" and revenu == revenu then revenu else 0
+	local gain = base
 		* Evenement.multiplicateurRevenus(Evenements.actuel())
+		* Bonus.boost(joueur:GetAttribute("BoostJusqua"), Workspace:GetServerTimeNow())
 	if gain <= 0 then
 		return
 	end

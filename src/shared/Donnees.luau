@@ -22,6 +22,13 @@ export type DonneesJoueur = {
 	Agrandissement: number,
 	RecordBiome: number,
 	Decouvertes: { string }, -- espèces de créatures déjà récoltées (Bestiaire)
+	DerniereConnexion: number, -- os.time() de la dernière sauvegarde (0 = jamais)
+	Renaissances: number,
+	Graines: { string }, -- graines achetées (la Simple est toujours là)
+	Graine: string, -- graine équipée
+	Trainees: { string }, -- traînées débloquées
+	Trainee: string, -- traînée équipée ("" = aucune)
+	ProchaineRoue: number, -- os.time() du prochain tour de roue gratuit
 	Pieces: number,
 	CreaturesBase: { string },
 }
@@ -38,6 +45,13 @@ function Donnees.parDefaut(): DonneesJoueur
 		Agrandissement = 1,
 		RecordBiome = 1,
 		Decouvertes = {},
+		DerniereConnexion = 0,
+		Renaissances = 0,
+		Graines = { "Simple" },
+		Graine = "Simple",
+		Trainees = {},
+		Trainee = "",
+		ProchaineRoue = 0,
 		Pieces = 0,
 		CreaturesBase = {},
 	}
@@ -76,6 +90,28 @@ local function nettoyerCreatures(valeur: any): { string }
 	return liste
 end
 
+-- Liste de noms connus (dans l'ordre de `ordre`), sans doublon, avec `toujours`.
+local function nettoyerNoms(valeur: any, ordre: { string }, toujours: { string }): { string }
+	local vus: { [string]: boolean } = {}
+	for _, nom in toujours do
+		vus[nom] = true
+	end
+	if type(valeur) == "table" then
+		for _, nom in ipairs(valeur) do
+			if type(nom) == "string" and table.find(ordre, nom) then
+				vus[nom] = true
+			end
+		end
+	end
+	local liste = {}
+	for _, nom in ordre do
+		if vus[nom] then
+			table.insert(liste, nom)
+		end
+	end
+	return liste
+end
+
 -- Corrige des données chargées (ou reçues) : jamais de confiance aveugle.
 function Donnees.nettoyer(brut: any): DonneesJoueur
 	local donnees = Donnees.parDefaut()
@@ -108,6 +144,36 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 		donnees.RecordBiome = math.floor(record)
 	end
 	donnees.Decouvertes = Collection.nettoyer(brut.Decouvertes)
+	local derniere = brut.DerniereConnexion
+	if
+		type(derniere) == "number"
+		and derniere == derniere
+		and derniere > 0
+		and derniere < math.huge
+	then
+		donnees.DerniereConnexion = math.floor(derniere)
+	end
+	local renaissances = brut.Renaissances
+	if
+		type(renaissances) == "number"
+		and renaissances == renaissances
+		and renaissances >= 0
+		and renaissances < 1e6
+	then
+		donnees.Renaissances = math.floor(renaissances)
+	end
+	donnees.Graines = nettoyerNoms(brut.Graines, Config.Graines.Ordre, { "Simple" })
+	if type(brut.Graine) == "string" and table.find(donnees.Graines, brut.Graine) then
+		donnees.Graine = brut.Graine
+	end
+	donnees.Trainees = nettoyerNoms(brut.Trainees, Config.Trainees.Ordre, {})
+	if type(brut.Trainee) == "string" and table.find(donnees.Trainees, brut.Trainee) then
+		donnees.Trainee = brut.Trainee
+	end
+	local roue = brut.ProchaineRoue
+	if type(roue) == "number" and roue == roue and roue >= 0 and roue < math.huge then
+		donnees.ProchaineRoue = math.floor(roue)
+	end
 	donnees.Pieces = nettoyerPieces(brut.Pieces)
 	donnees.CreaturesBase = nettoyerCreatures(brut.CreaturesBase)
 	return donnees

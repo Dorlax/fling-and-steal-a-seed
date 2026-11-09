@@ -41,7 +41,7 @@ function InterfaceBestiaire.demarrer()
 		rond = true,
 	})
 	bouton.AnchorPoint = Vector2.new(1, 0.5)
-	bouton.Position = UDim2.new(1, -12, 0.42, Style.TailleBoutonMin + 12)
+	bouton.Position = UDim2.new(1, -12, 0.42, -(Style.TailleBoutonMin / 2 + 6))
 
 	local panneau = Instance.new("Frame")
 	panneau.Name = "Panneau"

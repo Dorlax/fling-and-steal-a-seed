@@ -289,6 +289,311 @@ local Config = {
 		NomBiomes = "ClassementBiomesV1",
 	},
 
+	-- Renaissance : repartir à 0 pièce contre des bonus permanents. Le Bestiaire
+	-- donne aussi un bonus par page de biome complète.
+	Renaissance = {
+		PrixBase = 1e6, -- pièces pour la 1re renaissance
+		CroissancePrix = 10, -- chaque renaissance coûte × 10
+		MultRevenus = 2, -- revenus × 2 par renaissance
+		BonusForge = 0.5, -- gain de la Forge + 50 % par renaissance
+		BonusPage = 0.1, -- revenus + 10 % par page de biome complète
+	},
+
+	-- Graines : achetées une fois pour toutes, la graine équipée rend les
+	-- raretés hautes plus fréquentes (Chance, taux affichés au lancer), les
+	-- grosses tailles aussi (Tailles = biomes de plus) et les mutations
+	-- (Mutation = multiplicateur de chance). Toutes les raretés restent possibles.
+	Graines = {
+		Ordre = {
+			"Simple",
+			"Doree",
+			"Emeraude",
+			"Cristal",
+			"Rubis",
+			"Etoilee",
+			"Solaire",
+			"Cosmique",
+			"Arcenciel",
+			"Nebuleuse",
+			"Eternelle",
+		},
+		Liste = {
+			Simple = {
+				Nom = "Graine simple",
+				Prix = 0,
+				Chance = 0,
+				Tailles = 0,
+				Mutation = 1,
+				Couleur = { 170, 120, 70 },
+			},
+			Doree = {
+				Nom = "Graine dorée",
+				Prix = 25000,
+				Chance = 0.4,
+				Tailles = 1,
+				Mutation = 1.2,
+				Couleur = { 255, 200, 60 },
+			},
+			Emeraude = {
+				Nom = "Graine émeraude",
+				Prix = 2.5e5,
+				Chance = 0.7,
+				Tailles = 1,
+				Mutation = 1.3,
+				Couleur = { 70, 210, 120 },
+			},
+			Cristal = {
+				Nom = "Graine cristal",
+				Prix = 2.5e6,
+				Chance = 1,
+				Tailles = 2,
+				Mutation = 1.5,
+				Couleur = { 120, 220, 255 },
+			},
+			Rubis = {
+				Nom = "Graine rubis",
+				Prix = 3e7,
+				Chance = 1.5,
+				Tailles = 2,
+				Mutation = 1.7,
+				Couleur = { 230, 60, 90 },
+			},
+			Etoilee = {
+				Nom = "Graine étoilée",
+				Prix = 4e8,
+				Chance = 2,
+				Tailles = 3,
+				Mutation = 2,
+				Couleur = { 200, 150, 255 },
+			},
+			Solaire = {
+				Nom = "Graine solaire",
+				Prix = 6e9,
+				Chance = 2.7,
+				Tailles = 3,
+				Mutation = 2.5,
+				Couleur = { 255, 160, 40 },
+			},
+			Cosmique = {
+				Nom = "Graine cosmique",
+				Prix = 1e11,
+				Chance = 3.5,
+				Tailles = 4,
+				Mutation = 3,
+				Couleur = { 110, 90, 255 },
+			},
+			Arcenciel = {
+				Nom = "Graine arc-en-ciel",
+				Prix = 5e13,
+				Chance = 6,
+				Tailles = 6,
+				Mutation = 5,
+				Couleur = { 255, 120, 200 },
+			},
+			Nebuleuse = {
+				Nom = "Graine nébuleuse",
+				Prix = 3e16,
+				Chance = 9,
+				Tailles = 8,
+				Mutation = 7,
+				Couleur = { 150, 70, 220 },
+			},
+			Eternelle = {
+				Nom = "Graine éternelle",
+				Prix = 2e20,
+				Chance = 13,
+				Tailles = 10,
+				Mutation = 9,
+				Couleur = { 255, 245, 210 },
+			},
+		},
+	},
+
+	-- Mutations : tirées à la pousse, indépendamment du reste ; revenus × Mult.
+	-- Chances doublées pendant un événement de serveur.
+	Mutations = {
+		-- Du plus courant au plus rare. Matiere : Enum.Material appliqué ;
+		-- Melange : part de la couleur de la mutation ; Effet : particules.
+		Ordre = {
+			"Givree",
+			"Doree",
+			"Enflammee",
+			"Cristal",
+			"Electrique",
+			"Arcenciel",
+			"Galactique",
+		},
+		Liste = {
+			Givree = {
+				Nom = "Givrée",
+				Chance = 0.03,
+				Mult = 2,
+				Couleur = { 190, 235, 255 },
+				Matiere = "Ice",
+				Melange = 0.5,
+				Effet = "Givre",
+			},
+			Doree = {
+				Nom = "Dorée",
+				Chance = 0.025,
+				Mult = 3,
+				Couleur = { 255, 210, 60 },
+				Matiere = "Foil",
+				Melange = 0.6,
+				Effet = "Etincelles",
+			},
+			Enflammee = {
+				Nom = "Enflammée",
+				Chance = 0.015,
+				Mult = 4,
+				Couleur = { 255, 110, 40 },
+				Matiere = "CrackedLava",
+				Melange = 0.45,
+				Effet = "Flammes",
+			},
+			Cristal = {
+				Nom = "Cristal",
+				Chance = 0.01,
+				Mult = 6,
+				Couleur = { 140, 230, 255 },
+				Matiere = "Glass",
+				Melange = 0.55,
+				Transparence = 0.15,
+				Effet = "Etincelles",
+			},
+			Electrique = {
+				Nom = "Électrique",
+				Chance = 0.005,
+				Mult = 9,
+				Couleur = { 90, 200, 255 },
+				Matiere = "Neon",
+				Melange = 0.4,
+				Effet = "Eclairs",
+			},
+			Arcenciel = {
+				Nom = "Arc-en-ciel",
+				Chance = 0.0025,
+				Mult = 15,
+				Couleur = { 255, 140, 220 },
+				Arc = true,
+				Melange = 0.65,
+				Effet = "Etincelles",
+			},
+			Galactique = {
+				Nom = "Galactique",
+				Chance = 0.0008,
+				Mult = 30,
+				Couleur = { 70, 40, 140 },
+				Matiere = "SmoothPlastic",
+				Melange = 0.75,
+				Effet = "Etoiles",
+			},
+		},
+		BonusEvenement = 2,
+	},
+
+	-- Roue gratuite : un tour toutes les Intervalle secondes.
+	Roue = {
+		Intervalle = 4 * 3600,
+		Boost = 2, -- revenus × 2…
+		DureeBoost = 600, -- … pendant 10 min
+		Lots = {
+			{ Id = "Pieces5", Nom = "5 min de revenus", Poids = 30, Type = "Pieces", Valeur = 300 },
+			{
+				Id = "Pieces15",
+				Nom = "15 min de revenus",
+				Poids = 22,
+				Type = "Pieces",
+				Valeur = 900,
+			},
+			{ Id = "Pieces60", Nom = "1 h de revenus", Poids = 8, Type = "Pieces", Valeur = 3600 },
+			{ Id = "Boost", Nom = "Revenus × 2 (10 min)", Poids = 20, Type = "Boost" },
+			{
+				Id = "Lancer",
+				Nom = "Prochain lancer : graine cristal",
+				Poids = 12,
+				Type = "Lancer",
+				Valeur = "Cristal",
+			},
+			{ Id = "Trainee", Nom = "Traînée surprise", Poids = 8, Type = "Trainee" },
+		} :: { any },
+	},
+
+	-- Traînées cosmétiques (aucun avantage) : débloquées par les renaissances,
+	-- les pages complètes du Bestiaire ou la roue.
+	Trainees = {
+		Ordre = {
+			"Arcenciel",
+			"Flammes",
+			"Galaxie",
+			"Feuilles",
+			"Etoiles",
+			"Bulles",
+			"Neige",
+			"Bonbon",
+		},
+		Liste = {
+			Arcenciel = {
+				Nom = "Arc-en-ciel",
+				Couleurs = {
+					{ 255, 90, 90 },
+					{ 255, 230, 80 },
+					{ 90, 220, 140 },
+					{ 110, 150, 255 },
+				},
+				Renaissances = 1,
+			},
+			Flammes = {
+				Nom = "Flammes",
+				Couleurs = { { 255, 220, 80 }, { 255, 120, 30 }, { 200, 40, 30 } },
+				Renaissances = 2,
+			},
+			Galaxie = {
+				Nom = "Galaxie",
+				Couleurs = { { 200, 150, 255 }, { 80, 60, 200 }, { 20, 20, 60 } },
+				Renaissances = 3,
+			},
+			Feuilles = {
+				Nom = "Feuilles",
+				Couleurs = { { 140, 220, 90 }, { 60, 150, 70 } },
+				Pages = 3,
+			},
+			Etoiles = {
+				Nom = "Étoiles",
+				Couleurs = { { 255, 250, 200 }, { 255, 210, 80 } },
+				Pages = 10,
+			},
+			Bulles = {
+				Nom = "Bulles",
+				Couleurs = { { 200, 240, 255 }, { 90, 190, 240 } },
+				Roue = true,
+			},
+			Neige = {
+				Nom = "Neige",
+				Couleurs = { { 255, 255, 255 }, { 170, 220, 255 } },
+				Roue = true,
+			},
+			Bonbon = {
+				Nom = "Bonbon",
+				Couleurs = { { 255, 150, 200 }, { 255, 255, 255 }, { 140, 230, 200 } },
+				Roue = true,
+			},
+		},
+	},
+
+	-- Vente d'une créature de la base : son revenu pendant Secondes.
+	Vente = {
+		Secondes = 120,
+	},
+
+	-- Gains hors ligne : au retour, Taux du revenu par seconde pendant
+	-- l'absence (au plus MaxSecondes, rien sous MinSecondes).
+	HorsLigne = {
+		Taux = 0.5,
+		MaxSecondes = 12 * 3600,
+		MinSecondes = 60,
+	},
+
 	-- Bords de la carte : remparts décorés + murs invisibles (Decor) ;
 	-- sous cette hauteur, un joueur est ramené dans sa base.
 	Limites = {

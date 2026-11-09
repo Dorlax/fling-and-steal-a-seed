@@ -9,6 +9,26 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Plus de graines et de mutations
+
+- 5 nouvelles graines (11 en tout) : émeraude, rubis, solaire, nébuleuse, éternelle.
+- 4 nouvelles mutations (7 en tout) : Givrée ×2, Enflammée ×4, Électrique ×9, Galactique ×30.
+- Visuel des mutations piloté par Config (matière, mélange, particules : givre, flammes, éclairs, étoiles).
+
+## 2026-11-09 — Renaissance, graines, mutations, roue et traînées
+- Renaissance (Boutique) : pièces remises à 0, créatures/Forge/stats gardées ; revenus × 2 et gain de Forge + 50 % par renaissance ; prix 1 M × 10ⁿ ; annoncée au serveur.
+- Bestiaire : chaque page de biome complète donne + 10 % de revenus pour toujours.
+- Graines (Boutique) : simple, dorée, cristal, étoilée, cosmique, arc-en-ciel ; raretés hautes plus fréquentes (taux recalculés et affichés au lancer, graine simple = taux du Plan, toutes les raretés restent possibles), grosses tailles et mutations plus fréquentes.
+- Mutations à la pousse : Dorée (× 3), Cristal (× 6), Arc-en-ciel (× 15), chances × 2 pendant un événement ; visuel propre (doré, cristal translucide, arc-en-ciel) et étincelles.
+- Roue gratuite toutes les 4 h : pièces (5 min à 1 h de revenus), revenus × 2 pendant 10 min, graine cristal pour le prochain lancer, traînée surprise.
+- Traînées cosmétiques (aucun avantage) : débloquées par renaissances, pages du Bestiaire ou roue.
+- Boutons à droite rangés en carré : Top, Livre, Base, Shop.
+
+## 2026-11-09 — Créatures libres dans la base, vente et gains hors ligne
+- Plus de socles : chaque créature se promène librement autour de sa place (marche, pauses, sauts et pirouettes), calculé de la même façon par le serveur et les clients à partir de l'heure du serveur (`Shared.Promenade`) ; les vols restent vérifiés par le serveur.
+- Bouton « Base » : liste des créatures (aperçu 3D, rareté, taille, revenu, étage), vente avec confirmation (prix = 2 min de revenu), « Ranger par valeur » (les meilleures au rez-de-chaussée). RemoteEvents `VendreCreature` et `TrierBase`, tout vérifié par le serveur.
+- Gains hors ligne : au retour, 50 % du revenu pendant l'absence (12 h au plus), annoncé au joueur.
+
 ## 2026-11-09 — Optimisation et identité du Pays des Graines
 - Streaming activé (rayon 640, minimum 160) : chaque joueur ne charge que les biomes autour de lui, au lieu des 21 biomes d'un coup.
 - Petits éléments de décor sans ombre portée ; animations des créatures à pleine cadence de près, une image sur 2 ou 3 au-delà de 50 / 100 studs.

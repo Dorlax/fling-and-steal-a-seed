@@ -26,7 +26,8 @@
 - La créature pousse depuis la graine (croissance animée de 0,7 s, récolte possible ensuite).
 
 ## Porter et revenus
-- Bases façon vitrine : un socle numéroté par emplacement, liseré lumineux à la couleur de la rareté posée ; les créatures trônent dessus.
+- Créatures libres dans la base : chacune se promène autour de sa place (`Shared.Promenade`, déterministe serveur/client), sauts et pirouettes ; vol vérifié sur sa position calculée. Plus de socles.
+- Gestion (bouton « Base », `InterfaceBase`) : vente (2 min de revenu, `VendreCreature`), rangement par valeur (`TrierBase`) ; gains hors ligne 50 % jusqu'à 12 h (`DerniereConnexion`).
 - Étages de base (`Config.Bases`) : jusqu'à 3 étages, 10 socles chacun ; étage 2 = 2 500 pièces, étage 3 = 150 000 (bouton sous les stats, RemoteEvent `AcheterEtage`, sauvegardé `Etages`) ; plancher, garde-corps, ascenseurs (plaques lumineuses, touche G) ; raids possibles à tous les étages.
 - Agrandissements de base (`Config.Bases.Tailles`) : sol 40, 56 puis 72 studs (6 000 puis 250 000 pièces, RemoteEvent `AgrandirBase`, sauvegardé `Agrandissement`) ; bord avant toujours à Z = 20 ; socles plus espacés ; créatures exposées à leur vraie taille jusqu'à × 1,3 / 2,1 / 2,8 selon le niveau. Bases espacées de 90 studs, monde élargi à 1 200 studs.
 - Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (10 emplacements, « Base pleine ! »). [[03 Porter et revenus]]
@@ -39,7 +40,11 @@
 - Bestiaire à collectionner (`Shared.Collection`, client `InterfaceBestiaire`, bouton « Livre ») : page par biome, aperçus 3D en ViewportFrame, silhouettes des espèces non récoltées ; découvertes sauvegardées (`Decouvertes`) à chaque dépôt d'une nouvelle espèce.
 - Effets des espèces (client `EffetsEspeces`, `Shared.Effets`) : particules en blocs d'ambiance par biome + signatures par espèce ; animations signature (rôles Toupie, Helice, Roue, Moulin, Pendule, Bascule, Flamme) ; ondes au sol dès Géante, onde de choc des Colossales/Titans à la pousse.
 
-## Interactions
+## Progression avancée
+- Multiplicateurs permanents (`Shared.Bonus`) : renaissances (revenus × 2ⁿ, Forge + 50 %·n, prix 1 M × 10ⁿ) et pages complètes du Bestiaire (+ 10 % chacune), inclus dans `RevenuParSeconde` ; boost de la roue (× 2, `BoostJusqua`) et événement appliqués au versement.
+- Graines (`Config.Graines`, `Lancer.tauxAvecChance`) achetées et équipées (`Graines`, `Graine`) ; mutations (`Config.Mutations`, fiche « Rarete:Taille:Espece:Mutation », `Modeleur.muter`).
+- Roue gratuite toutes les 4 h (`ProchaineRoue`, `TournerRoue`/`ResultatRoue`) ; traînées cosmétiques (`Trainees`, `Trainee`). Serveur `Progression`, client `InterfaceBoutique` (bouton « Shop »).
+
 - Plaquage : bouton PLAQUER (F / Y), portée 8, délai 6 s, protection 4 s ; le porteur lâche sa créature, libre pour tous ; refusé dans les bases. [[04 Plaquage]]
 - Monstres comiques par zone, jamais dans une base ; aucun dégât : leur coup fait lâcher la créature, propulse le joueur (vitesse du monstre × Recul, plafond 500 studs/s, + Hauteur) et l'étourdit (PlatformStand 1 / 1,4 / 1,8 s, attribut `EtourdiJusqua`), avec un style comique tiré au hasard (`Shared.Projection` : Boing, Toupie, Fusée, Ballon ; traînée arc-en-ciel, onomatopée, étoiles client `EffetsComiques`) ; cycle jour/nuit avec vagues de nuit. [[05 Monstres]]
 - Raids : voler une créature exposée dans la base d'un autre ; verrou de base de 60 s (100 pièces) avec bouclier et décompte. [[06 Raids de bases]]
