@@ -39,11 +39,12 @@
 
 ## Interactions
 - Plaquage : bouton PLAQUER (F / Y), portée 8, délai 6 s, protection 4 s ; le porteur lâche sa créature, libre pour tous ; refusé dans les bases. [[04 Plaquage]]
-- Monstres comiques par zone (Gloupinou, Ronchonbulle, Grobidou), jamais dans une base ; leur coup fait lâcher la créature ; cycle jour/nuit avec vagues de nuit. [[05 Monstres]]
+- Monstres comiques par zone, jamais dans une base ; aucun dégât : leur coup fait lâcher la créature, propulse le joueur (vitesse du monstre × Recul, plafond 500 studs/s, + Hauteur) et l'étourdit (PlatformStand 1 / 1,4 / 1,8 s, attribut `EtourdiJusqua`) ; cycle jour/nuit avec vagues de nuit. [[05 Monstres]]
 - Raids : voler une créature exposée dans la base d'un autre ; verrou de base de 60 s (100 pièces) avec bouclier et décompte. [[06 Raids de bases]]
 - Pièges : filet, glu, fausse graine (coût en pièces, nombre limité, protection après piégeage, pas dans les bases). [[07 Pièges]]
 
 ## Décor et ambiance
+- Bords de la carte : rempart décoré propre à chaque biome des deux côtés (palissade, mur moussu, muraille de grès, mur de glace, falaise de lave, champ de force, corail, sucres d'orge, végétation, nuages et colonnes, grille de manoir), Prairie derrière les bases, dernier biome au bout ; murs invisibles de 1 000 studs derrière ; un joueur sous Y = -30 revient dans sa base (`Config.Limites`).
 - Décor cartoon généré par le serveur (`Decor`) : éclairage coloré (atmosphère, saturation, éclat), place de sable sous les bases, chemins devant les portes, arbres (dont roses et dorés), rochers, champignons, fleurs, nuages, collines de bordure.
 - Bases ornées : bordure colorée (sans collision) et lampadaires-sucettes ; sol vert vif.
 - Bestiaire en blocs (`Shared.Bestiaire`, construit par `Modeleur`) : deux espèces de créature par rareté (Poussigraine/Champichou, Lapinou/Tortipousse, Renardelle/Hibouflor, Cerfaurore/Lionfeuille, Dragonnet/Phenigraine), tirées au hasard ; deux monstres par zone (Gloupinou/Piquerelle, Ronchonbulle/Croquelune, Grobidou/Brasaurus). Le `Corps` reste la racine invisible (taille et règles inchangées).

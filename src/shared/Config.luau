@@ -151,7 +151,10 @@ local Config = {
 				Couleur = { 120, 230, 255 },
 				Taille = 4,
 				Vitesse = 10,
-				Degats = 10,
+				-- Pas de dégâts : le coup propulse et étourdit (recul = vitesse du monstre × Recul).
+				Recul = 2.5,
+				Hauteur = 25, -- studs/s vers le haut
+				Etourdi = 1.0, -- secondes au sol
 				PorteeDetection = 30,
 				PorteeCoup = 5,
 				Recharge = 2.0,
@@ -163,7 +166,9 @@ local Config = {
 				Couleur = { 255, 170, 60 },
 				Taille = 5,
 				Vitesse = 13,
-				Degats = 20,
+				Recul = 3,
+				Hauteur = 35,
+				Etourdi = 1.4,
 				PorteeDetection = 40,
 				PorteeCoup = 6,
 				Recharge = 1.6,
@@ -175,7 +180,9 @@ local Config = {
 				Couleur = { 200, 90, 255 },
 				Taille = 6,
 				Vitesse = 16,
-				Degats = 30,
+				Recul = 3.5,
+				Hauteur = 45,
+				Etourdi = 1.8,
 				PorteeDetection = 50,
 				PorteeCoup = 7,
 				Recharge = 1.2,
@@ -184,6 +191,8 @@ local Config = {
 			},
 		},
 		IntervalleVague = 30, -- la nuit, une vague complète les zones toutes les 30 s
+		ReculMax = 500, -- studs/s : plafond de la propulsion horizontale
+		DureePoussee = 0.2, -- secondes de poussée
 	},
 
 	-- Raids de bases : vol d'une créature exposée et verrou de la base.
@@ -278,6 +287,12 @@ local Config = {
 		Taille = 10, -- lignes affichées
 		NomRevenus = "ClassementRevenusV1",
 		NomBiomes = "ClassementBiomesV1",
+	},
+
+	-- Bords de la carte : remparts décorés + murs invisibles (Decor) ;
+	-- sous cette hauteur, un joueur est ramené dans sa base.
+	Limites = {
+		HauteurChute = -30,
 	},
 
 	-- Sauvegarde des joueurs (DataStore).

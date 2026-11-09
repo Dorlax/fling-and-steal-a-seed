@@ -229,6 +229,53 @@ local function effetPaf(joueur: any)
 	end)
 end
 
+-- Propulse le joueur loin du monstre et l'étourdit (PlatformStand) : la
+-- poussée est une LinearVelocity créée par le serveur (répliquée au client
+-- qui simule son personnage), retirée après DureePoussee.
+local etourdis: { [Humanoid]: number } = {}
+local function propulser(
+	joueur: any,
+	racine: BasePart,
+	humanoide: Humanoid,
+	depuis: Vector3,
+	zone: string,
+	biome: number
+)
+	local horizontal, vertical, duree = Monstre.recul(zone, biome)
+	local ecart = racine.Position - depuis
+	local direction = Vector3.new(ecart.X, 0, ecart.Z)
+	direction = if direction.Magnitude > 0.01 then direction.Unit else Vector3.new(0, 0, 1)
+
+	local attache = Instance.new("Attachment")
+	attache.Name = "PousseeMonstre"
+	attache.Parent = racine
+	local poussee = Instance.new("LinearVelocity")
+	poussee.Name = "PousseeMonstre"
+	poussee.Attachment0 = attache
+	poussee.RelativeTo = Enum.ActuatorRelativeTo.World
+	poussee.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+	poussee.MaxForce = math.huge
+	poussee.VectorVelocity = direction * horizontal + Vector3.new(0, vertical, 0)
+	poussee.Parent = racine
+	task.delay(reglages.DureePoussee, function()
+		poussee:Destroy()
+		attache:Destroy()
+	end)
+
+	local fin = Workspace:GetServerTimeNow() + duree
+	etourdis[humanoide] = fin
+	humanoide.PlatformStand = true
+	joueur:SetAttribute("EtourdiJusqua", fin)
+	task.delay(duree, function()
+		if etourdis[humanoide] == fin then
+			etourdis[humanoide] = nil
+			if humanoide.Parent then
+				humanoide.PlatformStand = false
+			end
+		end
+	end)
+end
+
 -- ----------------------------------------------------------------------------
 -- Apparition et disparition
 
@@ -337,13 +384,12 @@ function Monstres.frapper(monstre: any, joueur: any, maintenant: number?): (bool
 		return false, raison
 	end
 
-	local hum = humanoide :: Humanoid
-	hum:TakeDamage(Monstre.reglagesZone(etat.zone).Degats)
-	-- S'il meurt, la règle de Portage (mort = la créature retombe) s'applique.
+	-- Aucun dégât : la créature tombe, puis le joueur est propulsé et étourdi.
 	local creature: Model? = nil
-	if hum.Health > 0 and Portage.porte(joueur) then
+	if Portage.porte(joueur) then
 		creature = Portage.lacher(joueur, position, instant)
 	end
+	propulser(joueur, racine :: BasePart, humanoide :: Humanoid, position, etat.zone, etat.biome)
 
 	protection[joueur] = instant + reglages.DureeProtection
 	joueur:SetAttribute("ProtegeMonstreJusqua", instant + reglages.DureeProtection)
@@ -355,9 +401,9 @@ function Monstres.frapper(monstre: any, joueur: any, maintenant: number?): (bool
 		monstre:SetAttribute("FrappeA", Workspace:GetServerTimeNow())
 	end
 	if creature then
-		envoyerMessage(joueur, "Un monstre t'a frappé… tu as lâché ta créature !")
+		envoyerMessage(joueur, "BOING ! Un monstre t'a propulsé… tu as lâché ta créature !")
 	else
-		envoyerMessage(joueur, "Un monstre t'a frappé !")
+		envoyerMessage(joueur, "BOING ! Un monstre t'a propulsé !")
 	end
 	return true, nil
 end

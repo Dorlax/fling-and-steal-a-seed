@@ -169,6 +169,15 @@ function Monstre.vitesse(zone: string, biome: number?): number
 	return reference * facteur
 end
 
+-- Coup d'un monstre : vitesse horizontale et verticale de la propulsion
+-- (studs/s) et durée d'étourdissement. Plus le monstre est rapide (biomes
+-- lointains), plus le joueur vole loin ; plafond Config.Monstres.ReculMax.
+function Monstre.recul(zone: string, biome: number?): (number, number, number)
+	local r = Monstre.reglagesZone(zone)
+	local horizontal = math.min(Monstre.vitesse(zone, biome) * r.Recul, Config.Monstres.ReculMax)
+	return horizontal, r.Hauteur, r.Etourdi
+end
+
 -- Phase du cycle à l'instant `t` et secondes restantes dans cette phase.
 function Monstre.phase(t: number): (string, number)
 	local cycle = Config.Cycle

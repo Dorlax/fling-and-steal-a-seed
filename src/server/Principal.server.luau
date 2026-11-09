@@ -205,6 +205,28 @@ task.spawn(function()
 	end
 end)
 
+-- Filet de sécurité : un joueur tombé sous la carte revient dans sa base.
+task.spawn(function()
+	while true do
+		task.wait(1)
+		for _, joueur in Players:GetPlayers() do
+			local personnage = joueur.Character
+			local racine = personnage and personnage:FindFirstChild("HumanoidRootPart")
+			if
+				racine
+				and racine:IsA("BasePart")
+				and racine.Position.Y < Config.Limites.HauteurChute
+			then
+				local apparition = Bases.apparitionDe(joueur)
+				if apparition and personnage then
+					racine.AssemblyLinearVelocity = Vector3.zero
+					personnage:PivotTo(apparition)
+				end
+			end
+		end
+	end
+end)
+
 -- Revenus : chaque créature de la base rapporte des pièces, AFK compris.
 task.spawn(function()
 	while true do

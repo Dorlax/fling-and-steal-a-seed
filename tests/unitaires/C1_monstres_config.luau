@@ -15,9 +15,19 @@ return {
 		end
 	end,
 
-	["C1 Vitesse, Degats, PorteeDetection, NombreJour, NombreNuit strictement croissants"] = function()
+	["C1 Vitesse, Recul, Hauteur, Etourdi, PorteeDetection, NombreJour, NombreNuit strictement croissants"] = function()
 		local z = Config.Monstres.Zones
-		for _, champ in { "Vitesse", "Degats", "PorteeDetection", "NombreJour", "NombreNuit" } do
+		for _, champ in
+			{
+				"Vitesse",
+				"Recul",
+				"Hauteur",
+				"Etourdi",
+				"PorteeDetection",
+				"NombreJour",
+				"NombreNuit",
+			}
+		do
 			assert(z.Proche[champ] < z.Moyenne[champ], champ .. " : Proche < Moyenne attendu")
 			assert(z.Moyenne[champ] < z.Lointaine[champ], champ .. " : Moyenne < Lointaine attendu")
 		end
