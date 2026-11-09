@@ -42,12 +42,13 @@ local function colorer(machine: Machine, mode: string)
 	local couleur = COULEURS[mode] or COULEURS.Force
 	machine.mode = mode
 	for _, p in machine.modele:GetDescendants() do
-		if p:IsA("BasePart") and (p.Name == "Anneau" or p.Name == "Foyer" or p.Name == "Bande") then
-			p.Color = couleur
+		local teinte = (
+			p:IsA("BasePart") and (p.Name == "Anneau" or p.Name == "Foyer" or p.Name == "Bande")
+		) or (p:IsA("PointLight") and p.Name == "Lueur")
+		if teinte then
+			(p :: any).Color = couleur
 		elseif p:IsA("ParticleEmitter") and p.Name == "Flammes" then
 			p.Color = ColorSequence.new(couleur, Color3.fromRGB(255, 230, 140))
-		elseif p:IsA("PointLight") and p.Name == "Lueur" then
-			p.Color = couleur
 		end
 	end
 	if machine.etincelles then
