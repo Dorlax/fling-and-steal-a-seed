@@ -9,6 +9,9 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Cavernes, Coffre à Jouets, Forêt d'Automne
+- Biomes 16 (Cavernes Lumineuses), 17 (Coffre à Jouets) et 18 (Forêt d'Automne) : 39 nouvelles espèces dessinées à la main (`EspecesCavernes`, `EspecesJouets`, `EspecesAutomne`), décors en blocs (cristaux, stalagmites, champignons phosphorescents, wagonnets ; piles de cubes, crayons géants, ballons, rails ; arbres roux, tas de feuilles, bottes de paille, cèpes) et remparts propres.
+
 ## 2026-11-09 — Savane, Cité Mécanique, Jardin Zen
 - Biomes 13 (Savane Dorée), 14 (Cité Mécanique) et 15 (Jardin Zen) : 39 nouvelles espèces dessinées à la main (`EspecesSavane`, `EspecesMecanique`, `EspecesZen`), décors en blocs (acacias, termitières, herbes hautes ; engrenages géants, tuyaux à vapeur, lampadaires à gaz ; cerisiers, bambous, lanternes de pierre, portiques) et remparts propres.
 - Plafond de pièces relevé à 1e300 (progression quasi infinie) ; grands nombres : suffixes jusqu'à « Vg » (1e63), puis notation « 1,23e75 ».
