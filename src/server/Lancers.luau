@@ -17,6 +17,9 @@ local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Fiche = require(ReplicatedStorage.Shared.Fiche)
 local Biomes = require(ReplicatedStorage.Shared.Biomes)
 local Modeleur = require(script.Parent.Modeleur)
+local Classements = require(script.Parent.Classements)
+local Evenements = require(script.Parent.Evenements)
+local Evenement = require(ReplicatedStorage.Shared.Evenement)
 
 export type Resultat = {
 	Distance: number,
@@ -288,7 +291,13 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 	etat.dernierLacher = instant
 
 	local palier = Jauge.palier(Jauge.position(t))
-	local distance = Lancer.distance(joueur:GetAttribute("Force"), palier.Bonus)
+	local evenement = Evenements.actuel()
+	-- Vent porteur : studs en plus, sans dépasser la fin du dernier biome.
+	local distance = math.min(
+		Lancer.distance(joueur:GetAttribute("Force"), palier.Bonus)
+			+ Evenement.bonusDistance(evenement),
+		Biomes.distanceMax()
+	)
 	local zone = Lancer.zone(distance)
 	local tirage = if estNombreFini(aleatoire) then aleatoire :: number else hasard:NextNumber()
 	local rarete = Lancer.tirerRarete(zone, tirage)
@@ -300,9 +309,12 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 		Zone = zone,
 		Rarete = rarete,
 		-- Taille et espèce : tirages serveur indépendants de la rareté.
-		Taille = Fiche.tirerTaille(hasard:NextNumber(), biome),
+		-- Graines géantes : taux de taille de quelques biomes plus loin.
+		Taille = Fiche.tirerTaille(hasard:NextNumber(), biome + Evenement.bonusTailles(evenement)),
 		Espece = Bestiaire.tirerEspece(rarete, hasard:NextNumber(), biome).Nom,
 	}
+
+	Classements.noterBiome(joueur, biome)
 
 	local bord = bordDeBase(modele :: Model)
 	local point = bord + Vector3.new(0, 0, distance)

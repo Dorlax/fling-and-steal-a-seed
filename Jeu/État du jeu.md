@@ -32,6 +32,11 @@
 - Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (10 emplacements, « Base pleine ! »). [[03 Porter et revenus]]
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 
+## Multijoueur
+- Événements de serveur (`Shared.Evenement`, serveur `Evenements`) : un toutes les 8 min pendant 2 min 30, jamais deux fois de suite le même ; Pluie dorée (revenus × 2), Vent porteur (lancers + 300 studs), Graines géantes (taux de taille de 3 biomes plus loin, affichés). Attributs Workspace `Evenement` / `EvenementFin` ; annonce à tous ; pastille en haut à gauche (client `InterfaceEvenement`). Taux de rareté inchangés.
+- Record de biome (`RecordBiome`, sauvegardé) battu à chaque lancer plus lointain, annoncé à tout le serveur.
+- Classements (`Shared.Classement`, serveur `Classements`) : leaderstats Biome / Revenu/s / Pièces ; bouton « Top » (client `InterfaceClassement`) avec onglets Ce serveur / Monde ; monde via OrderedDataStore `ClassementRevenusV1` (log10 × 1000) et `ClassementBiomesV1`, publié en JSON dans l'attribut `ClassementMonde` de ReplicatedStorage toutes les 2 min.
+
 ## Interactions
 - Plaquage : bouton PLAQUER (F / Y), portée 8, délai 6 s, protection 4 s ; le porteur lâche sa créature, libre pour tous ; refusé dans les bases. [[04 Plaquage]]
 - Monstres comiques par zone (Gloupinou, Ronchonbulle, Grobidou), jamais dans une base ; leur coup fait lâcher la créature ; cycle jour/nuit avec vagues de nuit. [[05 Monstres]]
