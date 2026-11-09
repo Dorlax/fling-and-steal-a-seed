@@ -9,6 +9,9 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Jungle, Îles Célestes, Manoir Hanté
+- Biomes 10 (Jungle Émeraude), 11 (Îles Célestes) et 12 (Manoir Hanté) : 39 nouvelles espèces dessinées à la main (`EspecesJungle`, `EspecesCiel`, `EspecesManoir`).
+- Décors en blocs : arbres tropicaux à lianes, fleurs géantes, ruines à glyphes, fougères ; nuages escaladables, colonnes de marbre, arcs-en-ciel, plumes dorées ; tombes, arbres tordus, citrouilles lumineuses, lanternes fantômes.
 ## 2026-11-09 — Multijoueur : événements et classements
 - Événements de serveur pour tout le monde, un toutes les 8 min pendant 2 min 30 : Pluie dorée (revenus × 2), Vent porteur (lancers + 300 studs), Graines géantes (tailles comme 3 biomes plus loin). Annonce à tous, pastille avec le temps restant ; les taux de rareté ne changent jamais.
 - Record de biome par joueur (sauvegardé `RecordBiome`), annoncé à tout le serveur quand il est battu.
