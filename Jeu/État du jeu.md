@@ -8,13 +8,13 @@
 - Pièces et créatures de la base sauvegardées ; revenus par seconde selon la rareté (1/3/10/30/100).
 
 ## Biomes et progression
-- Les Terres Sauvages sont une route de biomes de 600 studs (`Shared.Biomes`) : 1 Prairie Pétillante, 2 Bois Moussu, 3 Dunes Dorées, 4 Glacier Givré, 5 Volcan Ardent, 6 Galaxie Étoilée, 7 Marais Brumeux, 8 Récif Corail, 9 Royaume Bonbon, 10 Jungle Émeraude, 11 Îles Célestes, 12 Manoir Hanté. Chaque biome garde Proche / Moyenne / Lointaine et les taux du Plan ; sol, arche d'entrée, décor en blocs et ambiance (client `Ambiances`) propres.
+- Les Terres Sauvages sont une route de biomes de 600 studs (`Shared.Biomes`) : 1 Prairie Pétillante, 2 Bois Moussu, 3 Dunes Dorées, 4 Glacier Givré, 5 Volcan Ardent, 6 Galaxie Étoilée, 7 Marais Brumeux, 8 Récif Corail, 9 Royaume Bonbon, 10 Jungle Émeraude, 11 Îles Célestes, 12 Manoir Hanté, 13 Savane Dorée, 14 Cité Mécanique, 15 Jardin Zen. Chaque biome garde Proche / Moyenne / Lointaine et les taux du Plan ; sol, arche d'entrée, décor en blocs et ambiance (client `Ambiances`) propres.
 - Valeur des créatures × 1,5 par biome (espèce -> biome) ; chaque biome a 2 créatures par rareté et 1 monstre par sous-zone (un fichier `Especes<Biome>` par biome).
 - Monstres plus rapides à chaque biome (`Monstre.vitesse`) : biome 1 = vitesse de Config ; ensuite vitesse d'un joueur au seuil du biome × 0,9 / 1,05 / 1,2 (Proche / Moyenne / Lointaine).
 - Monstres seulement dans les biomes où il y a un joueur (et le biome 1), 12 au plus par biome la nuit.
 - Force et Vitesse sans limite : linéaires jusqu'à 1 000, puis chaque doublement = un biome de plus au lancer / +20 de vitesse ; aucune limite réelle (PlafondStat 1e300, WalkSpeedMax 1e9).
 - Niveaux de Forge achetés en pièces (bouton sous les stats, RemoteEvent `AmeliorerForge`) : gain × 1,6 par niveau, coût 100 × 1,9^(n-1) ; sauvegardés (`NiveauForge`).
-- Grands nombres raccourcis (`Shared.Nombres` : 1,23 M, 4,5 T).
+- Grands nombres raccourcis (`Shared.Nombres` : 1,23 M, 4,5 T… jusqu'à Vg = 1e63, puis « 1,23e75 ») ; pièces plafonnées à 1e300.
 
 ## Lancer et raretés
 - Lancer une graine avec jauge de timing (Force + bonus de jauge) vers les Terres Sauvages ; zones Proche / Moyenne / Lointaine ; taux de rareté du Plan affichés. [[02 Lancer et raretés]]

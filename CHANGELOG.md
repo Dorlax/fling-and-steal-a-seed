@@ -9,6 +9,10 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Savane, Cité Mécanique, Jardin Zen
+- Biomes 13 (Savane Dorée), 14 (Cité Mécanique) et 15 (Jardin Zen) : 39 nouvelles espèces dessinées à la main (`EspecesSavane`, `EspecesMecanique`, `EspecesZen`), décors en blocs (acacias, termitières, herbes hautes ; engrenages géants, tuyaux à vapeur, lampadaires à gaz ; cerisiers, bambous, lanternes de pierre, portiques) et remparts propres.
+- Plafond de pièces relevé à 1e300 (progression quasi infinie) ; grands nombres : suffixes jusqu'à « Vg » (1e63), puis notation « 1,23e75 ».
+
 ## 2026-11-09 — Bords de carte et coups de monstres
 - Remparts décorés autour de la carte, un style par biome, avec murs invisibles très hauts ; filet de sécurité qui ramène à la base un joueur tombé.
 - Les monstres ne font plus de dégâts : leur coup fait lâcher la créature, propulse le joueur (plus fort dans les biomes lointains, car le monstre est plus rapide) et l'étourdit 1 à 1,8 s.
