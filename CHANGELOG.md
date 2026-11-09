@@ -9,12 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
-## 2026-11-09 — Forge salle de sport, écran allégé
+## 2026-11-09 — Forge évolutive, écran allégé
 
-- Forge : tapis de course (Vitesse), barre de musculation (Force), corde à sauter (Double) ; seul l'agrès du mode est affiché.
-- Animation du personnage sur la Forge (course, développé, corde), de plus en plus rapide pendant la série ; barre et corde dans les mains ; « +N » au-dessus de la tête.
-- Série : rester sur la Forge augmente le gain jusqu'à × 2 en 30 s (serveur, attribut `SerieDebut`).
-- Taux de rareté derrière un bouton « % » ; plus de noms au-dessus des monstres ; pièces en haut au centre.
+- Forge : l'agrès se modernise avec le niveau (5 paliers : Rustique, Club, Pro, Futur, Cosmique). Vitesse : roue en bois, tapis, tapis pro, piste néon, piste cosmique ; Force : rocher, haltères, barre olympique, barre plasma, météorite ; Double : corde lumineuse, laser, arc-en-ciel.
+- Gain de la Forge par niveau : +1, +2, +5, +10, +20, +50… ; bouton « +1 → +2/s ».
+- Animation du personnage sur la Forge (course, développé, corde), plus rapide avec les agrès modernes ; objet dans les mains ; « +N » au-dessus de la tête ; fête du nouvel agrès.
+- Taux de rareté derrière un bouton « % » ; plus de noms au-dessus des monstres ; pièces en haut au centre ; textes des boutons de stats corrigés.
 
 ## 2026-11-09 — Vrai design de la Forge
 
