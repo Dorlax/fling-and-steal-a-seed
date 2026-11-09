@@ -104,4 +104,17 @@ function Forge.statsDuMode(mode: any): ({ string }, number)
 	return {}, 0
 end
 
+-- Intensité de la série (0 au départ, 1 après Serie.DureeMax secondes).
+function Forge.intensiteSerie(duree: any): number
+	if type(duree) ~= "number" or duree ~= duree or duree <= 0 then
+		return 0
+	end
+	return math.min(duree / Config.Forge.Serie.DureeMax, 1)
+end
+
+-- Multiplicateur de gain de la série (1 au départ, 1 + BonusMax au plafond).
+function Forge.bonusSerie(duree: any): number
+	return 1 + Config.Forge.Serie.BonusMax * Forge.intensiteSerie(duree)
+end
+
 return Forge

@@ -1,6 +1,6 @@
 --!strict
 -- Interface du lancer : bouton LANCER, jauge de timing, message de résultat
--- et panneau des taux de rareté (toujours visible).
+-- et panneau des taux de rareté (ouvert par le petit bouton « % »).
 -- Le client ne calcule ni distance ni rareté : il affiche ce que le serveur renvoie.
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
@@ -40,8 +40,9 @@ local function creerPanneauTaux(ecran: ScreenGui)
 	local cadre = Instance.new("Frame")
 	cadre.Name = "TauxRarete"
 	cadre.AnchorPoint = Vector2.new(0.5, 0)
-	cadre.Position = UDim2.new(0.5, 0, 0, 8)
+	cadre.Position = UDim2.new(0.5, 0, 0, 120)
 	cadre.Size = UDim2.new(0.6, 0, 0, 0)
+	cadre.Visible = false
 	cadre.AutomaticSize = Enum.AutomaticSize.Y
 	cadre.BackgroundColor3 = COULEUR_FOND
 	cadre.BackgroundTransparency = 0.25
@@ -139,6 +140,22 @@ local function creerPanneauTaux(ecran: ScreenGui)
 		majTailles()
 		for _, ligne in lignes do
 			ligne.Visible = ouvert
+		end
+	end)
+
+	-- Taux disponibles à tout moment, sans encombrer l'écran : bouton « % ».
+	local bouton = Habillage.bouton(ecran, "BoutonTaux", {
+		texte = "%",
+		couleur = Color3.fromRGB(255, 190, 60),
+		taille = Vector2.new(48, 48),
+		rond = true,
+	})
+	bouton.AnchorPoint = Vector2.new(1, 0)
+	bouton.Position = UDim2.new(1, -12, 0, 8)
+	bouton.Activated:Connect(function()
+		cadre.Visible = not cadre.Visible
+		if cadre.Visible then
+			Habillage.apparaitre(cadre)
 		end
 	end)
 end

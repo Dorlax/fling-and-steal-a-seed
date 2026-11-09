@@ -1,340 +1,329 @@
 --!strict
--- Machine de la Forge : décor cartoon autour de la plateforme « Forge »
--- (fourneau en briques, bouche de feu, cheminée fumante, soufflets, enclume
--- et grand marteau). Purement visuel : la zone d'entraînement reste la
--- plateforme. Les couleurs du mode et les coups de marteau sont animés par le
--- client (AnimationsForge) à partir des attributs du propriétaire.
+-- La Forge : une seule machine (Plan), qui change d'agrès selon le mode du
+-- propriétaire. Vitesse : tapis de course ; Force : barre de musculation sur
+-- son support ; Double : tapis rond et corde à sauter. Les trois agrès sont
+-- construits ici ; le client (AnimationsForge) n'affiche que celui du mode
+-- et anime le personnage (course, soulevé, corde). Rien n'entre en collision
+-- sauf la plateforme : la zone d'entraînement reste la Part « Forge ».
 local CollectionService = game:GetService("CollectionService")
 
 local MachineForge = {}
 
 MachineForge.Tag = "MachineForge"
 
-local BRIQUE = Color3.fromRGB(196, 92, 62)
-local BRIQUE_CLAIRE = Color3.fromRGB(226, 128, 88)
-local PIERRE = Color3.fromRGB(92, 88, 104)
-local PIERRE_CLAIRE = Color3.fromRGB(132, 128, 146)
-local BOIS = Color3.fromRGB(150, 96, 52)
-local CUIR = Color3.fromRGB(120, 70, 40)
-local METAL = Color3.fromRGB(70, 74, 88)
-local FEU = Color3.fromRGB(255, 120, 40)
+local BLANC = Color3.fromRGB(236, 240, 248)
+local GRIS = Color3.fromRGB(150, 156, 172)
+local NOIR = Color3.fromRGB(38, 40, 52)
+local ACIER = Color3.fromRGB(196, 202, 214)
+local BLEU = Color3.fromRGB(70, 165, 255)
+local BLEU_FONCE = Color3.fromRGB(30, 60, 120)
+local ROUGE = Color3.fromRGB(235, 70, 60)
+local JAUNE = Color3.fromRGB(255, 205, 50)
+local VIOLET = Color3.fromRGB(175, 95, 255)
+local ROSE = Color3.fromRGB(255, 140, 210)
+local SOL = Color3.fromRGB(58, 62, 84)
 
-local function bloc(
+local function piece(
 	parent: Instance,
 	nom: string,
 	taille: Vector3,
 	cf: CFrame,
 	couleur: Color3,
-	matiere: Enum.Material,
+	matiere: Enum.Material?,
 	forme: Enum.PartType?
 ): Part
 	local p = Instance.new("Part")
 	p.Name = nom
 	p.Anchored = true
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
 	p.Size = taille
 	p.CFrame = cf
 	p.Color = couleur
-	p.Material = matiere
+	p.Material = matiere or Enum.Material.SmoothPlastic
 	p.TopSurface = Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	if forme then
 		p.Shape = forme
 	end
-	p.CastShadow = math.max(taille.X, taille.Y, taille.Z) >= 4
+	p.CastShadow = math.max(taille.X, taille.Y, taille.Z) >= 3
 	p.Parent = parent
 	return p
 end
 
--- Construit la machine autour de `plateforme` (la Part « Forge », posée sur
--- le sol dont le dessus est à `sol` en Y). Renvoie le modèle.
-function MachineForge.construire(plateforme: BasePart, sol: number, proprietaire: any): Model
-	local modele = Instance.new("Model")
-	modele.Name = "MachineForge"
-	modele:SetAttribute("Proprietaire", proprietaire)
-
-	local centre = plateforme.Position
-	local demi = plateforme.Size.Z / 2
-
-	-- Plateforme : dalle de pierre et anneau lumineux à la couleur du mode.
-	plateforme.Material = Enum.Material.Slate
-	plateforme.Color = PIERRE_CLAIRE
-	local haut = centre.Y + plateforme.Size.Y / 2
-	local largeur = plateforme.Size.X
-	for i, cote in { Vector3.new(0, 0, 1), Vector3.new(0, 0, -1) } do
-		bloc(
-			modele,
-			"Anneau",
-			Vector3.new(largeur, 0.12, 0.5),
-			CFrame.new(centre.X, haut + 0.06, centre.Z + cote.Z * (demi - 0.25)),
-			FEU,
-			Enum.Material.Neon
-		).CanCollide =
-			false
-		bloc(
-			modele,
-			"Anneau",
-			Vector3.new(0.5, 0.12, largeur - 1),
-			CFrame.new(centre.X + (if i == 1 then 1 else -1) * (demi - 0.25), haut + 0.06, centre.Z),
-			FEU,
-			Enum.Material.Neon
-		).CanCollide =
-			false
-	end
-	local rune = bloc(
-		modele,
-		"Anneau",
-		Vector3.new(0.1, 3.4, 3.4),
-		CFrame.new(centre.X, haut + 0.05, centre.Z) * CFrame.Angles(0, 0, math.rad(90)),
-		FEU,
-		Enum.Material.Neon,
+-- Cylindre dont l'axe suit `axe` ("X", "Y" ou "Z").
+local function cylindre(
+	parent: Instance,
+	nom: string,
+	longueur: number,
+	diametre: number,
+	position: Vector3,
+	axe: string,
+	couleur: Color3,
+	matiere: Enum.Material?
+): Part
+	local rotation = if axe == "Y"
+		then CFrame.Angles(0, 0, math.rad(90))
+		elseif axe == "Z" then CFrame.Angles(0, math.rad(90), 0)
+		else CFrame.new()
+	return piece(
+		parent,
+		nom,
+		Vector3.new(longueur, diametre, diametre),
+		CFrame.new(position) * rotation,
+		couleur,
+		matiere,
 		Enum.PartType.Cylinder
 	)
-	rune.CanCollide = false
-	rune.Transparency = 0.35
+end
 
-	-- Fourneau, derrière la plateforme (côté apparition).
-	local zF = centre.Z - demi - 2
-	local x0 = centre.X
-	local function cf(x: number, y: number, z: number): CFrame
-		return CFrame.new(x0 + x, sol + y, zF + z)
+local function boule(
+	parent: Instance,
+	nom: string,
+	d: number,
+	position: Vector3,
+	couleur: Color3
+): Part
+	return piece(
+		parent,
+		nom,
+		Vector3.new(d, d, d),
+		CFrame.new(position),
+		couleur,
+		nil,
+		Enum.PartType.Ball
+	)
+end
+
+local function poste(modele: Model, mode: string): Model
+	local m = Instance.new("Model")
+	m.Name = "Poste" .. mode
+	m:SetAttribute("Mode", mode)
+	m.Parent = modele
+	return m
+end
+
+-- Tapis de course, console vers -Z (le joueur regarde -Z).
+local function tapisDeCourse(modele: Model, o: Vector3)
+	local m = poste(modele, "Vitesse")
+	local function p(x: number, y: number, z: number): Vector3
+		return o + Vector3.new(x, y, z)
 	end
-	bloc(modele, "Socle", Vector3.new(8.4, 0.8, 4), cf(0, 0.4, 0), PIERRE, Enum.Material.Slate)
-	bloc(modele, "Fourneau", Vector3.new(7, 4.8, 3.2), cf(0, 3.2, 0), BRIQUE, Enum.Material.Brick)
-	for _, x in { -3.3, 3.3 } do
-		bloc(
-			modele,
-			"Pilier",
-			Vector3.new(1, 5, 3.6),
-			cf(x, 3.3, 0),
-			BRIQUE_CLAIRE,
-			Enum.Material.Brick
+	piece(m, "Cadre", Vector3.new(3.8, 0.4, 7), CFrame.new(p(0, 0.2, 0.3)), BLANC)
+	piece(m, "Jupe", Vector3.new(3.9, 0.15, 7.1), CFrame.new(p(0, 0.08, 0.3)), BLEU)
+	for _, z in { -3.2, 3.8 } do
+		cylindre(m, "Rouleau", 3.9, 0.55, p(0, 0.3, z), "X", GRIS, Enum.Material.Metal)
+	end
+	piece(m, "Tapis", Vector3.new(3.1, 0.06, 6.8), CFrame.new(p(0, 0.43, 0.3)), NOIR)
+	-- Bandes du tapis : le client les fait défiler.
+	for i = 1, 8 do
+		local bande = piece(
+			m,
+			"Bande",
+			Vector3.new(3.1, 0.07, 0.22),
+			CFrame.new(p(0, 0.44, -3 + i * 0.85)),
+			Color3.fromRGB(70, 75, 98)
 		)
+		bande:SetAttribute("Indice", i)
 	end
-	bloc(modele, "Corniche", Vector3.new(8, 0.9, 4), cf(0, 6, 0), PIERRE, Enum.Material.Slate)
-
-	-- Bouche de feu, tournée vers la plateforme.
-	local zBouche = 1.6
-	bloc(
-		modele,
-		"Arche",
-		Vector3.new(4, 0.7, 0.6),
-		cf(0, 4.3, zBouche + 0.1),
-		PIERRE_CLAIRE,
-		Enum.Material.Slate
+	for _, x in { -1.75, 1.75 } do
+		-- Montant penché vers l'avant, poignée latérale, embout arrondi.
+		piece(
+			m,
+			"Montant",
+			Vector3.new(0.35, 3.8, 0.35),
+			CFrame.new(p(x, 2.2, -3.25)) * CFrame.Angles(math.rad(-12), 0, 0),
+			BLEU
+		)
+		cylindre(m, "Poignee", 2.4, 0.3, p(x, 3.3, -2.2), "Z", BLANC)
+		boule(m, "Embout", 0.42, p(x, 3.3, -1), BLEU)
+	end
+	cylindre(m, "Traverse", 3.5, 0.32, p(0, 3.85, -3.55), "X", BLANC)
+	-- Console inclinée et écran tourné vers le joueur.
+	local console = piece(
+		m,
+		"Console",
+		Vector3.new(3.2, 1.3, 0.5),
+		CFrame.new(p(0, 4.45, -3.55)) * CFrame.Angles(math.rad(25), 0, 0),
+		BLANC
 	)
-	bloc(
-		modele,
-		"Bouche",
-		Vector3.new(3.2, 2.4, 0.3),
-		cf(0, 2.6, zBouche),
-		Color3.fromRGB(35, 20, 25),
-		Enum.Material.SmoothPlastic
-	)
-	local foyer = bloc(
-		modele,
-		"Foyer",
-		Vector3.new(2.6, 1.6, 0.3),
-		cf(0, 2.2, zBouche + 0.05),
-		FEU,
+	local ecran = piece(
+		m,
+		"Ecran",
+		Vector3.new(2.4, 0.8, 0.06),
+		console.CFrame * CFrame.new(0, 0.05, 0.28),
+		BLEU_FONCE,
 		Enum.Material.Neon
-	)
-	foyer.CanCollide = false
-	local flammes = Instance.new("ParticleEmitter")
-	flammes.Name = "Flammes"
-	flammes.Texture = "rbxasset://textures/particles/fire_main.dds"
-	flammes.Color = ColorSequence.new(FEU)
-	flammes.LightEmission = 1
-	flammes.Size =
-		NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.2), NumberSequenceKeypoint.new(1, 0) })
-	flammes.Lifetime = NumberRange.new(0.4, 0.8)
-	flammes.Speed = NumberRange.new(1, 2.5)
-	flammes.SpreadAngle = Vector2.new(25, 10)
-	flammes.Acceleration = Vector3.new(0, 4, 0)
-	flammes.Rate = 14
-	flammes.EmissionDirection = Enum.NormalId.Front
-	flammes.Parent = foyer
-	local lueur = Instance.new("PointLight")
-	lueur.Name = "Lueur"
-	lueur.Color = FEU
-	lueur.Range = 14
-	lueur.Brightness = 2
-	lueur.Parent = foyer
-
-	-- Cheminée fumante.
-	bloc(
-		modele,
-		"Cheminee",
-		Vector3.new(3.4, 1.8, 1.8),
-		cf(2.4, 8.1, -0.6) * CFrame.Angles(0, 0, math.rad(90)),
-		BRIQUE_CLAIRE,
-		Enum.Material.Brick,
-		Enum.PartType.Cylinder
-	)
-	local chapeau = bloc(
-		modele,
-		"ChapeauCheminee",
-		Vector3.new(0.6, 2.4, 2.4),
-		cf(2.4, 9.9, -0.6) * CFrame.Angles(0, 0, math.rad(90)),
-		PIERRE,
-		Enum.Material.Slate,
-		Enum.PartType.Cylinder
-	)
-	local fumee = Instance.new("ParticleEmitter")
-	fumee.Name = "Fumee"
-	fumee.Texture = "rbxasset://textures/particles/smoke_main.dds"
-	fumee.Color = ColorSequence.new(Color3.fromRGB(230, 225, 235))
-	fumee.Transparency = NumberSequence.new(0.3, 1)
-	fumee.Size = NumberSequence.new(1.2, 3.5)
-	fumee.Lifetime = NumberRange.new(2, 3)
-	fumee.Speed = NumberRange.new(2, 3)
-	fumee.SpreadAngle = Vector2.new(12, 12)
-	fumee.Rate = 3
-	fumee.EmissionDirection = Enum.NormalId.Right -- axe du cylindre = vers le haut
-	fumee.Parent = chapeau
-
-	-- Soufflets de chaque côté : la planche du haut pivote sur sa charnière.
-	for i, x in { -4.9, 4.9 } do
-		local soufflet = Instance.new("Model")
-		soufflet.Name = "Soufflet" .. i
-		soufflet.Parent = modele
-		bloc(
-			soufflet,
-			"Bas",
-			Vector3.new(1.6, 0.3, 2.6),
-			cf(x, 1.15, 0.4),
-			BOIS,
-			Enum.Material.Wood
-		)
-		bloc(
-			soufflet,
-			"Cuir",
-			Vector3.new(1.3, 0.7, 2.2),
-			cf(x, 1.6, 0.3),
-			CUIR,
-			Enum.Material.Fabric
-		)
-		local planche = bloc(
-			soufflet,
-			"Planche",
-			Vector3.new(1.6, 0.3, 2.6),
-			cf(x, 2.05, 0.4),
-			BOIS,
-			Enum.Material.Wood
-		)
-		bloc(
-			soufflet,
-			"Bec",
-			Vector3.new(0.4, 0.4, 1),
-			cf(x, 1.6, -1.2),
-			METAL,
-			Enum.Material.Metal
-		)
-		-- Charnière : bord arrière (côté bec) de la planche.
-		planche:SetAttribute("Charniere", planche.CFrame * CFrame.new(0, 0, -1.3))
-		planche:SetAttribute("Repos", planche.CFrame)
-	end
-
-	-- Enclume sur la corniche et grand marteau sur son poteau.
-	local yCorniche = 6.45
-	bloc(
-		modele,
-		"PiedEnclume",
-		Vector3.new(1, 0.8, 1),
-		cf(0, yCorniche + 0.4, 0),
-		METAL,
-		Enum.Material.Metal
-	)
-	local enclume = bloc(
-		modele,
-		"Enclume",
-		Vector3.new(2.6, 0.7, 1.4),
-		cf(0, yCorniche + 1.15, 0),
-		METAL,
-		Enum.Material.Metal
-	)
-	bloc(
-		modele,
-		"BecEnclume",
-		Vector3.new(0.9, 0.5, 0.9),
-		cf(1.6, yCorniche + 1.2, 0) * CFrame.Angles(0, 0, math.rad(-20)),
-		METAL,
-		Enum.Material.Metal
-	)
-	local etincelles = Instance.new("Attachment")
-	etincelles.Name = "PointFrappe"
-	etincelles.Position = Vector3.new(0, 0.4, 0)
-	etincelles.Parent = enclume
-
-	local hautEnclume = yCorniche + 1.5
-	local yPivot = hautEnclume + 0.9 -- marteau à l'horizontale = tête posée
-	bloc(
-		modele,
-		"Poteau",
-		Vector3.new(0.6, yPivot - yCorniche, 0.6),
-		cf(-3.2, (yCorniche + yPivot) / 2, 0),
-		BOIS,
-		Enum.Material.Wood
-	)
-	local marteau = Instance.new("Model")
-	marteau.Name = "Marteau"
-	marteau.Parent = modele
-	local pivot = cf(-3.2, yPivot, 0)
-	bloc(
-		marteau,
-		"Manche",
-		Vector3.new(3.4, 0.45, 0.45),
-		pivot * CFrame.new(1.7, 0, 0),
-		BOIS,
-		Enum.Material.Wood
-	)
-	local tete = bloc(
-		marteau,
-		"Tete",
-		Vector3.new(1.4, 1.8, 1.8),
-		pivot * CFrame.new(3.2, 0, 0),
-		METAL,
-		Enum.Material.Metal
-	)
-	bloc(
-		marteau,
-		"Bande",
-		Vector3.new(1.5, 0.3, 1.9),
-		pivot * CFrame.new(3.2, 0.5, 0),
-		FEU,
-		Enum.Material.Neon
-	).CanCollide =
-		false
-	marteau.PrimaryPart = tete
-	marteau:SetAttribute("Pivot", pivot)
-	for _, p in marteau:GetChildren() do
-		if p:IsA("BasePart") then
-			p.CanCollide = false
-			p:SetAttribute("Decalage", pivot:ToObjectSpace(p.CFrame))
-		end
-	end
-
-	-- Petit panneau en bois sur le devant de la corniche.
-	local panneau = bloc(
-		modele,
-		"Enseigne",
-		Vector3.new(3.6, 1, 0.3),
-		cf(0, 5.25, 2.1),
-		BOIS,
-		Enum.Material.Wood
 	)
 	local surface = Instance.new("SurfaceGui")
-	surface.Face = Enum.NormalId.Front
-	surface.PixelsPerStud = 40
-	surface.Parent = panneau
+	surface.Name = "Affichage"
+	surface.Face = Enum.NormalId.Back
+	surface.PixelsPerStud = 60
+	surface.LightInfluence = 0
+	surface.Parent = ecran
 	local texte = Instance.new("TextLabel")
+	texte.Name = "Texte"
 	texte.Size = UDim2.fromScale(1, 1)
 	texte.BackgroundTransparency = 1
 	texte.Font = Enum.Font.FredokaOne
 	texte.TextScaled = true
-	texte.TextColor3 = Color3.fromRGB(255, 230, 150)
-	texte.TextStrokeTransparency = 0
-	texte.Text = "FORGE"
+	texte.TextColor3 = Color3.fromRGB(140, 255, 200)
+	texte.Text = "VITESSE"
 	texte.Parent = surface
+	for i, couleur in { ROUGE, JAUNE, Color3.fromRGB(90, 230, 120) } do
+		boule(
+			m,
+			"Voyant",
+			0.22,
+			console.CFrame * CFrame.new(-1.2 + i * 0.6, -0.5, 0.26).Position,
+			couleur
+		).Material =
+			Enum.Material.Neon
+	end
+end
+
+-- Support de musculation et barre chargée, derrière le joueur.
+local function supportDeBarre(modele: Model, o: Vector3)
+	local m = poste(modele, "Force")
+	local function p(x: number, y: number, z: number): Vector3
+		return o + Vector3.new(x, y, z)
+	end
+	piece(
+		m,
+		"TapisSol",
+		Vector3.new(6.4, 0.1, 4.6),
+		CFrame.new(p(0, 0.05, 0.4)),
+		NOIR,
+		Enum.Material.Fabric
+	)
+	piece(m, "Liseré", Vector3.new(6.6, 0.08, 4.8), CFrame.new(p(0, 0.03, 0.4)), ROUGE)
+	for _, x in { -3, 3 } do
+		piece(m, "Pied", Vector3.new(0.9, 0.3, 1.8), CFrame.new(p(x, 0.25, 1.3)), ROUGE)
+		piece(m, "Montant", Vector3.new(0.45, 5.4, 0.45), CFrame.new(p(x, 2.9, 1.3)), ROUGE)
+		boule(m, "Capuchon", 0.6, p(x, 5.65, 1.3), JAUNE)
+		-- Crochet en J qui tient la barre.
+		piece(
+			m,
+			"Crochet",
+			Vector3.new(0.3, 0.2, 0.7),
+			CFrame.new(p(x, 4.45, 0.85)),
+			ACIER,
+			Enum.Material.Metal
+		)
+		piece(
+			m,
+			"Bec",
+			Vector3.new(0.3, 0.45, 0.15),
+			CFrame.new(p(x, 4.62, 0.55)),
+			ACIER,
+			Enum.Material.Metal
+		)
+	end
+	cylindre(m, "Entretoise", 6, 0.3, p(0, 0.6, 2.1), "X", ROUGE)
+	-- Barre posée sur les crochets (cachée par le client pendant le soulevé).
+	local barre = Instance.new("Model")
+	barre.Name = "Barre"
+	barre.Parent = m
+	local y, z = 4.72, 0.75
+	cylindre(barre, "Tige", 7.2, 0.24, p(0, y, z), "X", ACIER, Enum.Material.Metal)
+	for _, cote in { -1, 1 } do
+		cylindre(barre, "Disque", 0.35, 1.9, p(cote * 2.45, y, z), "X", ROUGE)
+		cylindre(barre, "Disque", 0.3, 1.4, p(cote * 2.8, y, z), "X", JAUNE)
+		cylindre(barre, "Bague", 0.25, 0.45, p(cote * 3.1, y, z), "X", ACIER, Enum.Material.Metal)
+	end
+	-- Petite gourde et serviette pour la vie.
+	cylindre(m, "Gourde", 0.9, 0.5, p(2.4, 0.55, -1.6), "Y", BLEU)
+	cylindre(m, "Bouchon", 0.2, 0.36, p(2.4, 1.1, -1.6), "Y", BLANC)
+	piece(
+		m,
+		"Serviette",
+		Vector3.new(1.2, 0.12, 0.8),
+		CFrame.new(p(-2.4, 0.16, -1.6)) * CFrame.Angles(0, 0.4, 0),
+		ROSE,
+		Enum.Material.Fabric
+	)
+end
+
+-- Tapis rond et corde enroulée (la corde qui tourne est celle du client).
+local function aireDeCorde(modele: Model, o: Vector3)
+	local m = poste(modele, "Double")
+	local function p(x: number, y: number, z: number): Vector3
+		return o + Vector3.new(x, y, z)
+	end
+	cylindre(m, "Tapis", 0.12, 6.6, p(0, 0.06, 0), "Y", VIOLET, Enum.Material.Fabric)
+	cylindre(m, "Cercle", 0.13, 4.6, p(0, 0.07, 0), "Y", ROSE, Enum.Material.Fabric)
+	cylindre(m, "Coeur", 0.14, 2.2, p(0, 0.08, 0), "Y", VIOLET, Enum.Material.Fabric)
+	-- Étoiles du tapis.
+	for i = 0, 4 do
+		local a = i * 2 * math.pi / 5
+		boule(m, "Etoile", 0.35, p(math.cos(a) * 2.8, 0.1, math.sin(a) * 2.8), JAUNE).Material =
+			Enum.Material.Neon
+	end
+	-- Corde enroulée posée au sol.
+	local corde = Instance.new("Model")
+	corde.Name = "CordeRangee"
+	corde.Parent = m
+	for i = 0, 13 do
+		local a = i * 2 * math.pi / 14
+		piece(
+			corde,
+			"Brin",
+			Vector3.new(0.36, 0.14, 0.14),
+			CFrame.new(p(2.9 + math.cos(a) * 0.6, 0.2, -2.6 + math.sin(a) * 0.6))
+				* CFrame.Angles(0, -a, 0),
+			JAUNE
+		)
+	end
+	for _, x in { 2.1, 3.7 } do
+		cylindre(corde, "Manche", 0.7, 0.26, p(x, 0.25, -1.7), "Z", ROUGE)
+	end
+end
+
+-- Construit la Forge autour de `plateforme` (la Part « Forge »). `sol` :
+-- hauteur du dessus du sol de la base. Renvoie le modèle.
+function MachineForge.construire(plateforme: BasePart, sol: number, proprietaire: any): Model
+	local _ = sol
+	local modele = Instance.new("Model")
+	modele.Name = "MachineForge"
+	modele:SetAttribute("Proprietaire", proprietaire)
+	-- Streaming : la machine arrive chez le client en une fois.
+	modele.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+
+	-- Plateforme : sol de salle de sport, bord lumineux à la couleur du mode.
+	plateforme.Material = Enum.Material.SmoothPlastic
+	plateforme.Color = SOL
+	local centre = plateforme.Position
+	local haut = centre.Y + plateforme.Size.Y / 2
+	local demi = plateforme.Size.X / 2
+	for _, cote in { -1, 1 } do
+		piece(
+			modele,
+			"Anneau",
+			Vector3.new(plateforme.Size.X, 0.1, 0.35),
+			CFrame.new(centre.X, haut + 0.05, centre.Z + cote * (demi - 0.2)),
+			BLEU,
+			Enum.Material.Neon
+		)
+		piece(
+			modele,
+			"Anneau",
+			Vector3.new(0.35, 0.1, plateforme.Size.Z - 0.7),
+			CFrame.new(centre.X + cote * (demi - 0.2), haut + 0.05, centre.Z),
+			BLEU,
+			Enum.Material.Neon
+		)
+	end
+	local origine = Vector3.new(centre.X, haut, centre.Z)
+	tapisDeCourse(modele, origine)
+	supportDeBarre(modele, origine)
+	aireDeCorde(modele, origine)
+
+	-- Point où se tient le joueur (au centre, regard vers -Z).
+	local poste = Instance.new("Attachment")
+	poste.Name = "Poste"
+	poste.Parent = plateforme
+	poste.WorldCFrame = CFrame.new(origine)
 
 	modele.Parent = plateforme.Parent
 	CollectionService:AddTag(modele, MachineForge.Tag)

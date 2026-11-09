@@ -139,24 +139,6 @@ local function creerModele(zone: string, position: Vector3, biome: number): Mode
 	local espece = Bestiaire.especeMonstre(zone, aleatoire:NextNumber(), biome)
 	Modeleur.construire(modele, corps, espece, t, couleurDe(r.Couleur))
 
-	local panneau = Instance.new("BillboardGui")
-	panneau.Name = "Panneau"
-	panneau.Size = UDim2.fromOffset(160, 36)
-	panneau.StudsOffset = Vector3.new(0, t * espece.Hauteur + 1.5, 0)
-	panneau.MaxDistance = 150
-	panneau.Parent = corps
-	local texte = Instance.new("TextLabel")
-	texte.Name = "Nom"
-	texte.Size = UDim2.fromScale(1, 1)
-	texte.BackgroundTransparency = 1
-	texte.Font = Enum.Font.FredokaOne
-	texte.TextScaled = true
-	texte.TextColor3 = couleurDe(r.Couleur)
-	texte.TextStrokeColor3 = Color3.new(0, 0, 0)
-	texte.TextStrokeTransparency = 0
-	texte.Text = espece.Nom
-	texte.Parent = panneau
-
 	modele:SetAttribute("Monstre", true)
 	modele:SetAttribute("Zone", zone)
 	modele:SetAttribute("Biome", biome)

@@ -19,7 +19,7 @@ local InterfacePieces = {}
 
 local COULEUR_PIECES = Habillage.nommee("Pieces")
 local COULEUR_REVENU = Color3.fromRGB(150, 255, 140)
-local DESCENTE = 112 -- sous le panneau des taux de rareté
+local DESCENTE = 10 -- en haut au centre (taux de rareté derrière le bouton « % »)
 
 -- 1234 -> « 1 234 », 1234567 -> « 1,23 M » (voir Shared.Nombres)
 local function formater(n: number): string

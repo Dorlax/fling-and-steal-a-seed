@@ -29,6 +29,10 @@ local Config = {
 		-- Mode « Double » : Force et Vitesse à la fois, chacune à Part du gain,
 		-- débloqué à partir du niveau de Forge NiveauMin.
 		Double = { NiveauMin = 12, Part = 0.6 },
+		-- Série : rester sur la Forge sans s'arrêter accélère l'entraînement
+		-- (gain × (1 + BonusMax × durée / DureeMax), plafonné), et le
+		-- personnage court / soulève / saute de plus en plus vite.
+		Serie = { DureeMax = 30, BonusMax = 1 },
 	},
 
 	-- Passes Robux autorisés par le propriétaire (Plan/Règles du jeu.md).
