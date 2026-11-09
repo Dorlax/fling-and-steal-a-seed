@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Animations = require(script.Parent:WaitForChild("Animations"))
+local AnimationsForge = require(script.Parent:WaitForChild("AnimationsForge"))
 local Ambiances = require(script.Parent:WaitForChild("Ambiances"))
 local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
 local EffetsComiques = require(script.Parent:WaitForChild("EffetsComiques"))
@@ -41,6 +42,8 @@ InterfaceBoutique.demarrer()
 EffetsComiques.demarrer()
 -- Sautillement des créatures et dandinement des monstres (affichage seulement).
 Animations.demarrer()
+-- Machines de Forge : couleur du mode, soufflets, marteau et étincelles.
+AnimationsForge.demarrer()
 -- Effets en blocs des espèces (ambiance du biome, signatures, grosses tailles).
 EffetsEspeces.demarrer()
 -- Ambiance et nom du biome quand le joueur change de biome.

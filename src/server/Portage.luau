@@ -16,6 +16,7 @@ local Sauvegarde = require(script.Parent.Sauvegarde)
 local Evenements = require(script.Parent.Evenements)
 local Evenement = require(ReplicatedStorage.Shared.Evenement)
 local Bonus = require(ReplicatedStorage.Shared.Bonus)
+local Passes = require(ReplicatedStorage.Shared.Passes)
 local TerresSauvages = require(script.Parent.TerresSauvages)
 
 type Portee = {
@@ -398,6 +399,7 @@ function Portage.tickRevenus(joueur: any)
 	local gain = base
 		* Evenement.multiplicateurRevenus(Evenements.actuel())
 		* Bonus.boost(joueur:GetAttribute("BoostJusqua"), Workspace:GetServerTimeNow())
+		* Passes.multiplicateurPieces(joueur:GetAttribute(Passes.attribut("X2Pieces")))
 	if gain <= 0 then
 		return
 	end

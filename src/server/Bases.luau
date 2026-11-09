@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local MachineForge = require(script.Parent.MachineForge)
 local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
@@ -117,6 +118,7 @@ local function construire(joueur: any, centre: Vector3): Model
 	forge.Material = Enum.Material.Neon
 	forge.TopSurface = Enum.SurfaceType.Smooth
 	forge.Parent = modele
+	MachineForge.construire(forge, centre.Y, joueur.UserId)
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"

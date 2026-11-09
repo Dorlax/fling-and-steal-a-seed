@@ -33,6 +33,11 @@
 - Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (10 emplacements, « Base pleine ! »). [[03 Porter et revenus]]
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 
+## Passes et Forge double
+- Forge habillée (`MachineForge`, tag `MachineForge`) : fourneau, soufflets, enclume, marteau ; animée par le client (`AnimationsForge`) selon le mode et les gains du propriétaire.
+- Mode Double de la Forge (`Config.Forge.Double`) : Force et Vitesse ensemble, 60 % chacune, dès le niveau 12 (bouton « Double »).
+- Passes Robux (`Config.Passes`, `Shared.Passes`, serveur `PassesRobux`) : × 2 Force, × 2 Vitesse, × 2 Pièces, Ramassage auto ; attributs `Pass<Id>` écrits par le serveur ; onglet « Passes » du Shop (« Bientôt » tant que Id = 0).
+
 ## Multijoueur
 - Événements de serveur (`Shared.Evenement`, serveur `Evenements`) : un toutes les 8 min pendant 2 min 30, jamais deux fois de suite le même ; Pluie dorée (revenus × 2), Vent porteur (lancers + 300 studs), Graines géantes (taux de taille de 3 biomes plus loin, affichés). Attributs Workspace `Evenement` / `EvenementFin` ; annonce à tous ; pastille en haut à gauche (client `InterfaceEvenement`). Taux de rareté inchangés.
 - Record de biome (`RecordBiome`, sauvegardé) battu à chaque lancer plus lointain, annoncé à tout le serveur.
@@ -63,5 +68,6 @@
 - Interface : boutons de pièges en rangée en bas à gauche (ne recouvrent plus les stats).
 
 ## À faire
-- Passes Robux (x2 Force, x2 Vitesse, x2 Pièces, Ramassage auto), cosmétiques.
+- Créer les 4 passes sur Roblox et mettre leurs Id dans `Config.Passes`.
+- Skins de graines (cosmétiques du Plan).
 - Test du cycle jour/nuit à la main (vérifié seulement par les tests automatiques).

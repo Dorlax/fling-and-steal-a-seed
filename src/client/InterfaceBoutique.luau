@@ -1,8 +1,9 @@
 --!strict
--- Bouton « Shop » et boutique en 4 onglets : Graines (achat, équipement),
--- Renaissance, Roue gratuite et Traînées. Le client n'envoie que des
+-- Bouton « Shop » et boutique en 5 onglets : Graines (achat, équipement),
+-- Renaissance, Roue gratuite, Traînées et Passes Robux. Le client n'envoie que des
 -- identifiants ; le serveur (Progression) vérifie tout. Les infos viennent
 -- des attributs du joueur.
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -12,6 +13,7 @@ local Bonus = require(Shared:WaitForChild("Bonus"))
 local Config = require(Shared:WaitForChild("Config"))
 local Lancer = require(Shared:WaitForChild("Lancer"))
 local Nombres = require(Shared:WaitForChild("Nombres"))
+local Passes = require(Shared:WaitForChild("Passes"))
 local Style = require(Shared:WaitForChild("Style"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
@@ -120,14 +122,14 @@ function InterfaceBoutique.demarrer()
 	local boutonsOnglets: { [string]: TextButton } = {}
 	local afficher: () -> ()
 
-	for ordre, nom in { "Graines", "Renaissance", "Roue", "Traînées" } do
+	for ordre, nom in { "Graines", "Renaissance", "Roue", "Traînées", "Passes" } do
 		local b = Habillage.bouton(barre, nom, {
 			texte = nom,
 			couleur = INACTIF,
 			taille = Vector2.new(140, 44),
 		})
 		b.LayoutOrder = ordre
-		b.Size = UDim2.new(0.25, -5, 1, 0)
+		b.Size = UDim2.new(0.2, -5, 1, 0)
 		b.Activated:Connect(function()
 			onglet = nom
 			afficher()
@@ -312,6 +314,29 @@ function InterfaceBoutique.demarrer()
 		end
 	end
 
+	-- Passes Robux : la fenêtre d'achat est celle de Roblox ; le serveur
+	-- (PassesRobux) vérifie l'achat et écrit l'attribut « Pass<Id> ».
+	local function passesOnglet()
+		for ordre, id in Config.Passes.Ordre do
+			local p = (Config.Passes.Liste :: any)[id]
+			local possede = joueur:GetAttribute(Passes.attribut(id)) == true
+			local cree = type(p.Id) == "number" and p.Id > 0
+			ligne(
+				ordre,
+				p.Nom,
+				p.Detail,
+				couleur(p.Couleur),
+				if possede then "Possédé" elseif cree then "Acheter" else "Bientôt",
+				cree and not possede,
+				if cree and not possede
+					then function()
+						MarketplaceService:PromptGamePassPurchase(joueur, p.Id)
+					end
+					else nil
+			)
+		end
+	end
+
 	local function traineesOnglet()
 		local possedees = liste("Trainees")
 		local equipee = joueur:GetAttribute("Trainee")
@@ -374,6 +399,8 @@ function InterfaceBoutique.demarrer()
 			renaissanceOnglet()
 		elseif onglet == "Roue" then
 			roueOnglet()
+		elseif onglet == "Passes" then
+			passesOnglet()
 		else
 			traineesOnglet()
 		end
@@ -423,6 +450,10 @@ function InterfaceBoutique.demarrer()
 			"Trainees",
 			"Trainee",
 			"PagesCompletes",
+			Passes.attribut("X2Force"),
+			Passes.attribut("X2Vitesse"),
+			Passes.attribut("X2Pieces"),
+			Passes.attribut("RamassageAuto"),
 		}
 	do
 		joueur:GetAttributeChangedSignal(nom):Connect(function()
