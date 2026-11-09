@@ -7,6 +7,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config")) :: any
@@ -14,6 +15,7 @@ local Jauge = require(Shared:WaitForChild("Jauge")) :: any
 local Lancer = require(Shared:WaitForChild("Lancer")) :: any
 local Fiche = require(Shared:WaitForChild("Fiche"))
 local Biomes = require(Shared:WaitForChild("Biomes"))
+local Evenement = require(Shared:WaitForChild("Evenement"))
 local Style = require(Shared:WaitForChild("Style"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
@@ -98,8 +100,13 @@ local function creerPanneauTaux(ecran: ScreenGui)
 	local joueur = Players.LocalPlayer
 	local function majTailles()
 		local force = joueur:GetAttribute("Force")
-		local biome = Biomes.index(Lancer.distance(if type(force) == "number" then force else 0, 0))
-		local taux = Fiche.tauxTailles(biome)
+		local evenement = Workspace:GetAttribute("Evenement")
+		local biome = Biomes.index(
+			Lancer.distance(if type(force) == "number" then force else 0, 0)
+				+ Evenement.bonusDistance(evenement)
+		)
+		-- Graines géantes : taux de quelques biomes plus loin (affichés tels quels).
+		local taux = Fiche.tauxTailles(biome + Evenement.bonusTailles(evenement))
 		local morceaux = {}
 		for _, taille in Config.Tailles.Ordre do
 			local nom = (Config.Tailles.Noms :: any)[taille]
@@ -112,6 +119,7 @@ local function creerPanneauTaux(ecran: ScreenGui)
 	end
 	majTailles()
 	joueur:GetAttributeChangedSignal("Force"):Connect(majTailles)
+	Workspace:GetAttributeChangedSignal("Evenement"):Connect(majTailles)
 
 	local ouvert = true
 	titre.Activated:Connect(function()

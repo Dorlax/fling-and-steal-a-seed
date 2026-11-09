@@ -62,6 +62,7 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("NiveauForge", donnees.NiveauForge)
 	joueur:SetAttribute("Etages", donnees.Etages)
 	joueur:SetAttribute("Agrandissement", donnees.Agrandissement)
+	joueur:SetAttribute("RecordBiome", donnees.RecordBiome)
 	joueur:SetAttribute("SurForge", false)
 	joueur:SetAttribute("Pieces", donnees.Pieces)
 	creaturesParJoueur[joueur] = table.clone(donnees.CreaturesBase)
@@ -128,6 +129,7 @@ function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
 			or (if session then session.donnees.NiveauForge else 1),
 		Etages = joueur:GetAttribute("Etages"),
 		Agrandissement = joueur:GetAttribute("Agrandissement"),
+		RecordBiome = joueur:GetAttribute("RecordBiome"),
 		Pieces = joueur:GetAttribute("Pieces"),
 		CreaturesBase = creaturesParJoueur[joueur],
 	})

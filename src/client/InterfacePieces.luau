@@ -7,9 +7,11 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local Style = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Style"))
 local Nombres = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Nombres"))
+local Evenement = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Evenement"))
 local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
@@ -84,11 +86,14 @@ function InterfacePieces.demarrer()
 	end
 
 	local function rafraichirRevenu()
-		revenu.Text = `+{formater(nombre(joueur, "RevenuParSeconde"))} / s`
+		-- Pluie dorée : le revenu affiché suit le multiplicateur du serveur.
+		local mult = Evenement.multiplicateurRevenus(Workspace:GetAttribute("Evenement"))
+		revenu.Text = `+{formater(nombre(joueur, "RevenuParSeconde") * mult)} / s`
 	end
 
 	joueur:GetAttributeChangedSignal("Pieces"):Connect(rafraichirPieces)
 	joueur:GetAttributeChangedSignal("RevenuParSeconde"):Connect(rafraichirRevenu)
+	Workspace:GetAttributeChangedSignal("Evenement"):Connect(rafraichirRevenu)
 	rafraichirPieces()
 	rafraichirRevenu()
 

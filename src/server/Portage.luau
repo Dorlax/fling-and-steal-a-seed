@@ -13,6 +13,8 @@ local Bases = require(script.Parent.Bases)
 local Entrainement = require(script.Parent.Entrainement)
 local Lancers = require(script.Parent.Lancers)
 local Sauvegarde = require(script.Parent.Sauvegarde)
+local Evenements = require(script.Parent.Evenements)
+local Evenement = require(ReplicatedStorage.Shared.Evenement)
 local TerresSauvages = require(script.Parent.TerresSauvages)
 
 type Portee = {
@@ -384,9 +386,11 @@ function Portage.verifierDepot(joueur: any)
 	envoyerMessage(joueur, "Créature déposée !")
 end
 
--- Un tick de revenus : Pieces += somme des revenus des créatures de la base.
+-- Un tick de revenus : Pieces += somme des revenus des créatures de la base
+-- (× 2 pendant la Pluie dorée).
 function Portage.tickRevenus(joueur: any)
 	local gain = Revenus.total(Sauvegarde.creaturesDe(joueur))
+		* Evenement.multiplicateurRevenus(Evenements.actuel())
 	if gain <= 0 then
 		return
 	end

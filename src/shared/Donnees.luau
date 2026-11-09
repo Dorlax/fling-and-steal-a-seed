@@ -16,6 +16,7 @@ export type DonneesJoueur = {
 	NiveauForge: number,
 	Etages: number,
 	Agrandissement: number,
+	RecordBiome: number,
 	Pieces: number,
 	CreaturesBase: { string },
 }
@@ -30,6 +31,7 @@ function Donnees.parDefaut(): DonneesJoueur
 		NiveauForge = 1,
 		Etages = 1,
 		Agrandissement = 1,
+		RecordBiome = 1,
 		Pieces = 0,
 		CreaturesBase = {},
 	}
@@ -94,6 +96,10 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 		and agrandissement >= 1
 	then
 		donnees.Agrandissement = math.min(math.floor(agrandissement), #Config.Bases.Tailles)
+	end
+	local record = brut.RecordBiome
+	if type(record) == "number" and record == record and record >= 1 and record < math.huge then
+		donnees.RecordBiome = math.floor(record)
 	end
 	donnees.Pieces = nettoyerPieces(brut.Pieces)
 	donnees.CreaturesBase = nettoyerCreatures(brut.CreaturesBase)
