@@ -242,6 +242,44 @@ local Config = {
 		HeureNuit = 0,
 	},
 
+	-- Événements de serveur : un à la fois, annoncé à tous, pour tout le monde.
+	-- Les taux de rareté ne changent jamais (règle du Plan).
+	Evenements = {
+		PremierApres = 120, -- secondes après le démarrage du serveur
+		Intervalle = 480, -- secondes entre deux débuts d'événement
+		Duree = 150, -- secondes
+		Ordre = { "PluieDoree", "VentPorteur", "GrainesGeantes" },
+		Liste = {
+			PluieDoree = {
+				Nom = "Pluie dorée",
+				Texte = "Revenus × 2",
+				Couleur = { 255, 200, 50 },
+				Revenus = 2,
+			},
+			VentPorteur = {
+				Nom = "Vent porteur",
+				Texte = "Lancers + 300 studs",
+				Couleur = { 90, 200, 255 },
+				Distance = 300,
+			},
+			GrainesGeantes = {
+				Nom = "Graines géantes",
+				Texte = "Grosses tailles comme 3 biomes plus loin",
+				Couleur = { 190, 120, 255 },
+				BonusTailles = 3,
+			},
+		},
+	},
+
+	-- Classements : liste des joueurs (leaderstats), panneau « Classement »
+	-- (ce serveur et monde entier, via OrderedDataStore).
+	Classement = {
+		IntervalleMonde = 120, -- secondes entre deux mises à jour mondiales
+		Taille = 10, -- lignes affichées
+		NomRevenus = "ClassementRevenusV1",
+		NomBiomes = "ClassementBiomesV1",
+	},
+
 	-- Sauvegarde des joueurs (DataStore).
 	Sauvegarde = {
 		NomDataStore = "JoueursV1",

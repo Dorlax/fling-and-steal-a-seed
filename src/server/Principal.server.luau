@@ -4,9 +4,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Bases = require(script.Parent.Bases)
+local Classements = require(script.Parent.Classements)
 local CycleJourNuit = require(script.Parent.CycleJourNuit)
 local Decor = require(script.Parent.Decor)
 local Entrainement = require(script.Parent.Entrainement)
+local Evenements = require(script.Parent.Evenements)
 local Lancers = require(script.Parent.Lancers)
 local Monstres = require(script.Parent.Monstres)
 local Pieges = require(script.Parent.Pieges)
@@ -122,6 +124,9 @@ Decor.suivreBases()
 CycleJourNuit.demarrer()
 Monstres.demarrer()
 Pieges.demarrer()
+-- Multijoueur : événements pour tout le serveur et classements.
+Evenements.demarrer()
+Classements.demarrer()
 
 local function placerDansSaBase(joueur: Player, personnage: Model)
 	local racine = personnage:WaitForChild("HumanoidRootPart", 5)
@@ -150,6 +155,7 @@ local function surArrivee(joueur: Player)
 	end
 	Sauvegarde.charger(joueur)
 	if Sauvegarde.estCharge(joueur) then
+		Classements.suivre(joueur)
 		Entrainement.appliquerVitesse(joueur)
 		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
 	end
