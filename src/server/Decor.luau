@@ -2271,6 +2271,336 @@ local function cepe(parent: Instance, position: Vector3, hasard: Random)
 	modele.Parent = parent
 end
 
+-- Ferme : petite grange rouge au toit en pente.
+local function grange(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Grange"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	local rouge = Color3.fromRGB(200, 60, 50)
+	bloc(modele, "Murs", Vector3.new(12, 8, 10), base * CFrame.new(0, 4, 0), rouge, true).Material =
+		Enum.Material.WoodPlanks
+	for _, cote in { -1, 1 } do
+		bloc(
+			modele,
+			"Toit",
+			Vector3.new(7.4, 0.8, 11),
+			base * CFrame.new(cote * 3.1, 9.6, 0) * CFrame.Angles(0, 0, math.rad(-cote * 35)),
+			Color3.fromRGB(90, 60, 50),
+			true
+		)
+	end
+	bloc(
+		modele,
+		"Porte",
+		Vector3.new(5, 6, 0.3),
+		base * CFrame.new(0, 3, -5.1),
+		Color3.fromRGB(245, 240, 230)
+	)
+	bloc(
+		modele,
+		"Croix",
+		Vector3.new(0.4, 7, 0.32),
+		base * CFrame.new(0, 3, -5.12) * CFrame.Angles(0, 0, math.rad(40)),
+		rouge
+	)
+	modele.Parent = parent
+end
+
+-- Ferme : barrière de pré et bottes.
+local function enclos(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Enclos"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	local bois = Color3.fromRGB(245, 240, 230)
+	for k = 0, 3 do
+		bloc(
+			modele,
+			"Piquet",
+			Vector3.new(0.6, 3, 0.6),
+			base * CFrame.new(-6 + k * 4, 1.5, 0),
+			bois,
+			true
+		)
+	end
+	for _, y in { 1, 2.2 } do
+		bloc(modele, "Planche", Vector3.new(12.6, 0.4, 0.3), base * CFrame.new(0, y, 0), bois, true)
+	end
+	modele.Parent = parent
+end
+
+-- Ferme : moulin à vent.
+local function moulin(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Moulin"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	bloc(
+		modele,
+		"Tour",
+		Vector3.new(5, 14, 5),
+		base * CFrame.new(0, 7, 0),
+		Color3.fromRGB(240, 230, 210),
+		true
+	)
+	bloc(
+		modele,
+		"Toit",
+		Vector3.new(6, 3, 6),
+		base * CFrame.new(0, 15.5, 0) * CFrame.Angles(0, math.rad(45), 0),
+		Color3.fromRGB(200, 60, 50)
+	)
+	for k = 0, 3 do
+		bloc(
+			modele,
+			"Aile",
+			Vector3.new(1.6, 9, 0.3),
+			base
+				* CFrame.new(0, 12, -2.8)
+				* CFrame.Angles(0, 0, math.rad(k * 90 + 20))
+				* CFrame.new(0, 4.5, 0),
+			Color3.fromRGB(245, 245, 245)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Ferme : potager de carottes.
+local function potager(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Potager"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	bloc(
+		modele,
+		"Terre",
+		Vector3.new(8, 0.5, 4),
+		base * CFrame.new(0, 0.25, 0),
+		Color3.fromRGB(120, 80, 55)
+	)
+	for k = 0, 4 do
+		bloc(
+			modele,
+			"Fanes",
+			Vector3.new(0.6, 1, 0.6),
+			base * CFrame.new(-3 + k * 1.5, 1, 0),
+			Color3.fromRGB(90, 180, 70)
+		)
+		bloc(
+			modele,
+			"Carotte",
+			Vector3.new(0.5, 0.4, 0.5),
+			base * CFrame.new(-3 + k * 1.5, 0.6, 0),
+			Color3.fromRGB(255, 140, 40)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Rêves : nuage-lit avec un oreiller.
+local function nuageLit(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "NuageLit"
+	local e = hasard:NextNumber(1, 1.8)
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	bloc(
+		modele,
+		"Matelas",
+		Vector3.new(8, 2, 5) * e,
+		base * CFrame.new(0, 1 * e, 0),
+		Color3.fromRGB(200, 190, 255),
+		true
+	)
+	bloc(
+		modele,
+		"Oreiller",
+		Vector3.new(3, 1, 2) * e,
+		base * CFrame.new(0, 2.4 * e, -1.4 * e),
+		Color3.fromRGB(255, 255, 255)
+	)
+	bloc(
+		modele,
+		"Couverture",
+		Vector3.new(8.2, 0.4, 3) * e,
+		base * CFrame.new(0, 2.1 * e, 1 * e),
+		Color3.fromRGB(130, 110, 220)
+	)
+	modele.Parent = parent
+end
+
+-- Rêves : lune en croissant posée au sol.
+local function luneSol(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "LuneSol"
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	local r = hasard:NextNumber(5, 9)
+	for k = 0, 6 do
+		local a = math.rad(-90 + k * 30)
+		local p = bloc(
+			modele,
+			"Croissant",
+			Vector3.new(2.4, 2.4, 2),
+			base * CFrame.new(math.cos(a) * r, r + math.sin(a) * r, 0),
+			Color3.fromRGB(255, 240, 150),
+			true
+		)
+		p.Material = Enum.Material.Neon
+	end
+	modele.Parent = parent
+end
+
+-- Rêves : étoile tombée qui brille.
+local function etoileTombee(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(1.5, 3)
+	local p = bloc(
+		parent,
+		"EtoileTombee",
+		Vector3.new(t, t, t * 0.4),
+		CFrame.new(position + Vector3.new(0, t * 0.5, 0))
+			* CFrame.Angles(0, hasard:NextNumber(0, 6), math.rad(45)),
+		Color3.fromRGB(255, 230, 120)
+	)
+	p.Material = Enum.Material.Neon
+end
+
+-- Rêves : bulle de rêve qui flotte.
+local function bulleReve(parent: Instance, position: Vector3, hasard: Random)
+	local t = hasard:NextNumber(1, 3)
+	local p = piece(
+		parent,
+		"BulleReve",
+		Enum.PartType.Ball,
+		Vector3.one * t,
+		CFrame.new(position + Vector3.new(0, hasard:NextNumber(3, 16), 0)),
+		Color3.fromRGB(220, 200, 255)
+	)
+	p.Material = Enum.Material.Glass
+	p.Transparency = 0.5
+	p.CastShadow = false
+end
+
+-- Plage : palmier à noix de coco.
+local function palmierCoco(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "PalmierCoco"
+	local e = hasard:NextNumber(1, 1.6)
+	local cadre = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	for k = 0, 4 do
+		bloc(
+			modele,
+			"Tronc",
+			Vector3.new(1.4, 2.6, 1.4) * Vector3.new(e, e, e),
+			cadre
+				* CFrame.new(k * 0.35 * e, (1.3 + k * 2.5) * e, 0)
+				* CFrame.Angles(0, 0, math.rad(-6)),
+			Color3.fromRGB(170, 130, 80),
+			true
+		)
+	end
+	local sommet = cadre * CFrame.new(1.8 * e, 13.4 * e, 0)
+	for k = 0, 5 do
+		bloc(
+			modele,
+			"Palme",
+			Vector3.new(1.8, 0.4, 7) * e,
+			sommet
+				* CFrame.Angles(0, math.rad(k * 60), 0)
+				* CFrame.new(0, 0, -3 * e)
+				* CFrame.Angles(math.rad(-25), 0, 0),
+			Color3.fromRGB(60, 170, 70)
+		)
+	end
+	for k = 0, 2 do
+		piece(
+			modele,
+			"Coco",
+			Enum.PartType.Ball,
+			Vector3.one * 1.2 * e,
+			sommet * CFrame.Angles(0, math.rad(k * 120), 0) * CFrame.new(0, -0.8 * e, -0.9 * e),
+			Color3.fromRGB(110, 75, 45)
+		)
+	end
+	modele.Parent = parent
+end
+
+-- Plage : parasol rayé et serviette.
+local function parasol(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "Parasol"
+	local couleurs =
+		{ Color3.fromRGB(255, 90, 90), Color3.fromRGB(90, 170, 255), Color3.fromRGB(255, 210, 60) }
+	local couleur = couleurs[hasard:NextInteger(1, #couleurs)]
+	bloc(
+		modele,
+		"Mat",
+		Vector3.new(0.4, 7, 0.4),
+		CFrame.new(position + Vector3.new(0, 3.5, 0)),
+		Color3.fromRGB(240, 240, 240),
+		true
+	)
+	for k = 0, 7 do
+		bloc(
+			modele,
+			"Toile",
+			Vector3.new(1.8, 0.3, 4),
+			CFrame.new(position + Vector3.new(0, 7, 0))
+				* CFrame.Angles(0, math.rad(k * 45), 0)
+				* CFrame.new(0, -0.6, -1.8)
+				* CFrame.Angles(math.rad(-18), 0, 0),
+			if k % 2 == 0 then couleur else Color3.fromRGB(255, 255, 255)
+		)
+	end
+	bloc(
+		modele,
+		"Serviette",
+		Vector3.new(3, 0.1, 6),
+		CFrame.new(position + Vector3.new(3, 0.05, 0)),
+		couleur
+	)
+	modele.Parent = parent
+end
+
+-- Plage : château de sable.
+local function chateauSable(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "ChateauSable"
+	local sable = Color3.fromRGB(240, 210, 145)
+	local base = CFrame.new(position) * CFrame.Angles(0, hasard:NextNumber(0, 6), 0)
+	bloc(modele, "Base", Vector3.new(8, 2, 8), base * CFrame.new(0, 1, 0), sable, true)
+	for _, x in { -3, 3 } do
+		for _, z in { -3, 3 } do
+			bloc(modele, "Tour", Vector3.new(2, 4, 2), base * CFrame.new(x, 3, z), sable, true)
+		end
+	end
+	bloc(modele, "Donjon", Vector3.new(3, 6, 3), base * CFrame.new(0, 4, 0), sable, true)
+	bloc(
+		modele,
+		"Drapeau",
+		Vector3.new(1.4, 0.8, 0.1),
+		base * CFrame.new(0.7, 8, 0),
+		Color3.fromRGB(255, 90, 90)
+	)
+	modele.Parent = parent
+end
+
+-- Plage : étoile de mer et coquillage géant posés sur le sable.
+local function etoileMer(parent: Instance, position: Vector3, hasard: Random)
+	local modele = Instance.new("Model")
+	modele.Name = "EtoileMer"
+	local couleur = if hasard:NextNumber() < 0.5
+		then Color3.fromRGB(255, 130, 100)
+		else Color3.fromRGB(255, 180, 70)
+	for k = 0, 4 do
+		bloc(
+			modele,
+			"Bras",
+			Vector3.new(0.8, 0.3, 2.2),
+			CFrame.new(position + Vector3.new(0, 0.15, 0))
+				* CFrame.Angles(0, math.rad(k * 72), 0)
+				* CFrame.new(0, 0, -1),
+			couleur
+		)
+	end
+	modele.Parent = parent
+end
+
 local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombre: number } } } = {
 	Foret = {
 		{ fonction = arbreBloc, nombre = 70 },
@@ -2375,6 +2705,25 @@ local THEMES: { [string]: { { fonction: (Instance, Vector3, Random) -> (), nombr
 		{ fonction = tasFeuilles, nombre = 45 },
 		{ fonction = botteFoin, nombre = 15 },
 		{ fonction = cepe, nombre = 40 },
+	},
+	Ferme = {
+		{ fonction = grange, nombre = 6 },
+		{ fonction = enclos, nombre = 25 },
+		{ fonction = moulin, nombre = 4 },
+		{ fonction = potager, nombre = 20 },
+		{ fonction = botteFoin, nombre = 20 },
+	},
+	Reves = {
+		{ fonction = nuageLit, nombre = 20 },
+		{ fonction = luneSol, nombre = 5 },
+		{ fonction = etoileTombee, nombre = 40 },
+		{ fonction = bulleReve, nombre = 70 },
+	},
+	Plage = {
+		{ fonction = palmierCoco, nombre = 40 },
+		{ fonction = parasol, nombre = 20 },
+		{ fonction = chateauSable, nombre = 8 },
+		{ fonction = etoileMer, nombre = 40 },
 	},
 }
 
@@ -2558,6 +2907,30 @@ local REMPARTS: { [string]: Rempart } = {
 		},
 		poteau = { t = { 2, 12, 2 }, ecart = 22, c = { 100, 70, 50 }, m = "Wood" },
 		cime = { t = { 7, 4, 7 }, ecart = 22, c = { 230, 110, 40 }, y = 11 },
+	},
+	Ferme = {
+		lisses = {
+			{ y = 1.5, h = 0.5, e = 0.4, c = { 210, 60, 50 }, m = "Wood" },
+			{ y = 3, h = 0.5, e = 0.4, c = { 210, 60, 50 }, m = "Wood" },
+			{ y = 4.5, h = 0.5, e = 0.4, c = { 210, 60, 50 }, m = "Wood" },
+		},
+		poteau = { t = { 0.8, 5.5, 0.8 }, ecart = 8, c = { 245, 240, 230 }, m = "Wood" },
+	},
+	Reves = {
+		lisses = { { y = 3, h = 6, e = 4, c = { 200, 190, 255 }, m = "Fabric" } },
+		poteau = {
+			t = { 1.6, 1.6, 1.6 },
+			ecart = 10,
+			c = { 255, 240, 150 },
+			alterne = { 255, 200, 230 },
+			y = 6.4,
+			neon = true,
+		},
+	},
+	Plage = {
+		lisses = { { y = 1.5, h = 3, e = 3, c = { 240, 210, 145 }, m = "Sand" } },
+		poteau = { t = { 1.4, 8, 1.4 }, ecart = 20, c = { 170, 130, 80 }, m = "Wood" },
+		cime = { t = { 5, 1, 5 }, ecart = 20, c = { 60, 170, 70 }, y = 8 },
 	},
 }
 
