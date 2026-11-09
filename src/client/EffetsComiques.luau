@@ -36,11 +36,11 @@ local function etourdir(joueur: Player)
 	if type(fin) ~= "number" or fin <= Workspace:GetServerTimeNow() then
 		return
 	end
-	local personnage = joueur.Character
-	if personnage == nil then
+	local personnageOuNil = joueur.Character
+	if personnageOuNil == nil then
 		return
 	end
-	local trouve = personnage:FindFirstChild("Head")
+	local trouve = (personnageOuNil :: Model):FindFirstChild("Head")
 	if trouve == nil or not trouve:IsA("BasePart") then
 		return
 	end
