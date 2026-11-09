@@ -9,6 +9,11 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-09 — Passes Robux et Forge double
+
+- Passes du Plan : × 2 Force, × 2 Vitesse, × 2 Pièces, Ramassage auto (vérifiés chez Roblox par le serveur, onglet « Passes » du Shop).
+- Mode Double de la Forge dès le niveau 12 : Force et Vitesse à 60 % chacune.
+
 ## 2026-11-09 — Plus de graines et de mutations
 
 - 5 nouvelles graines (11 en tout) : émeraude, rubis, solaire, nébuleuse, éternelle.

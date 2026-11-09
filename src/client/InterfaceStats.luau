@@ -18,6 +18,7 @@ local COULEUR_INACTIF = Habillage.nommee("Gris")
 local COULEURS_MODES: { [string]: Color3 } = {
 	Force = Habillage.nommee("Rouge"),
 	Vitesse = Habillage.nommee("Bleu"),
+	Double = Color3.fromRGB(170, 90, 230),
 }
 local LARGEUR = 2 * Style.TailleBoutonMin + 8
 
@@ -95,13 +96,25 @@ function InterfaceStats.demarrer()
 		boutons[mode] = b
 	end
 
+	-- Mode Double (Force et Vitesse à la fois), visible à partir du niveau requis.
+	local boutonDouble = Habillage.bouton(cadre, "ModeDouble", {
+		texte = "Double",
+		couleur = COULEURS_MODES.Double,
+	})
+	boutonDouble.LayoutOrder = 5
+	boutonDouble.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
+	boutonDouble.Activated:Connect(function()
+		remote:FireServer("Double")
+	end)
+	boutons.Double = boutonDouble
+
 	-- Achat du niveau de Forge suivant (vérifié par le serveur).
 	local ameliorer = ReplicatedStorage:WaitForChild("AmeliorerForge") :: RemoteEvent
 	local boutonNiveau = Habillage.bouton(cadre, "AmeliorerForge", {
 		texte = "Forge niv. 1",
 		couleur = Color3.fromRGB(255, 170, 40),
 	})
-	boutonNiveau.LayoutOrder = 5
+	boutonNiveau.LayoutOrder = 6
 	boutonNiveau.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
 	boutonNiveau.Activated:Connect(function()
 		ameliorer:FireServer()
@@ -113,7 +126,7 @@ function InterfaceStats.demarrer()
 		texte = "Étage 2",
 		couleur = Color3.fromRGB(120, 200, 255),
 	})
-	boutonEtage.LayoutOrder = 6
+	boutonEtage.LayoutOrder = 7
 	boutonEtage.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
 	boutonEtage.Activated:Connect(function()
 		acheterEtage:FireServer()
@@ -125,7 +138,7 @@ function InterfaceStats.demarrer()
 		texte = "Agrandir",
 		couleur = Color3.fromRGB(150, 230, 120),
 	})
-	boutonAgrandir.LayoutOrder = 7
+	boutonAgrandir.LayoutOrder = 8
 	boutonAgrandir.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
 	boutonAgrandir.Activated:Connect(function()
 		agrandirBase:FireServer()
@@ -172,6 +185,7 @@ function InterfaceStats.demarrer()
 			then Color3.fromRGB(255, 170, 40)
 			else COULEUR_INACTIF
 		labelEntrainement.Visible = joueur:GetAttribute("SurForge") == true
+		boutonDouble.Visible = Forge.modePermis("Double", joueur:GetAttribute("NiveauForge"))
 		local modeActif = joueur:GetAttribute("ModeForge")
 		for mode, b in boutons do
 			b.BackgroundColor3 = if mode == modeActif then COULEURS_MODES[mode] else COULEUR_INACTIF

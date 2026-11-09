@@ -12,6 +12,7 @@ local Entrainement = require(script.Parent.Entrainement)
 local Evenements = require(script.Parent.Evenements)
 local Lancers = require(script.Parent.Lancers)
 local Monstres = require(script.Parent.Monstres)
+local PassesRobux = require(script.Parent.PassesRobux)
 local Pieges = require(script.Parent.Pieges)
 local Plaquages = require(script.Parent.Plaquages)
 local Progression = require(script.Parent.Progression)
@@ -216,6 +217,7 @@ local function surArrivee(joueur: Player)
 	if personnageActuel then
 		task.spawn(surPersonnage, joueur, personnageActuel)
 	end
+	task.spawn(PassesRobux.verifier, joueur)
 	Sauvegarde.charger(joueur)
 	if Sauvegarde.estCharge(joueur) then
 		Classements.suivre(joueur)
@@ -254,6 +256,7 @@ Players.PlayerRemoving:Connect(function(joueur)
 end)
 
 Sauvegarde.demarrer()
+PassesRobux.demarrer()
 
 -- Boucle d'entraînement : AFK compris, aucune action du joueur nécessaire.
 task.spawn(function()

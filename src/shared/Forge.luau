@@ -84,4 +84,24 @@ function Forge.walkSpeedPour(vitesse: any): number
 	return math.clamp(resultat, cfg.WalkSpeedBase, cfg.WalkSpeedMax)
 end
 
+-- Mode accepté pour ce niveau : Force, Vitesse, ou Double à partir du niveau
+-- Config.Forge.Double.NiveauMin.
+function Forge.modePermis(mode: any, niveau: any): boolean
+	if Forge.estModeValide(mode) then
+		return true
+	end
+	return mode == "Double" and niveauValide(niveau) >= Config.Forge.Double.NiveauMin
+end
+
+-- Stats entraînées par un mode et part du gain de chacune.
+function Forge.statsDuMode(mode: any): ({ string }, number)
+	if mode == "Double" then
+		return { "Force", "Vitesse" }, Config.Forge.Double.Part
+	end
+	if Forge.estModeValide(mode) then
+		return { mode :: string }, 1
+	end
+	return {}, 0
+end
+
 return Forge

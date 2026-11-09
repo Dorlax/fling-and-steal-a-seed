@@ -120,7 +120,7 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 	end
 	donnees.Force = nettoyerStat(brut.Force)
 	donnees.Vitesse = nettoyerStat(brut.Vitesse)
-	if Forge.estModeValide(brut.ModeForge) then
+	if Forge.estModeValide(brut.ModeForge) or brut.ModeForge == "Double" then
 		donnees.ModeForge = brut.ModeForge
 	end
 	local niveau = brut.NiveauForge

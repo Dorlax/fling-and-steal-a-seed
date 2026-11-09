@@ -26,6 +26,42 @@ local Config = {
 			Largeur = 8,
 			Hauteur = 6,
 		},
+		-- Mode « Double » : Force et Vitesse à la fois, chacune à Part du gain,
+		-- débloqué à partir du niveau de Forge NiveauMin.
+		Double = { NiveauMin = 12, Part = 0.6 },
+	},
+
+	-- Passes Robux autorisés par le propriétaire (Plan/Règles du jeu.md).
+	-- Id = 0 : passe pas encore créé sur Roblox (bouton « Bientôt »).
+	Passes = {
+		Ordre = { "X2Force", "X2Vitesse", "X2Pieces", "RamassageAuto" },
+		Liste = {
+			X2Force = {
+				Nom = "× 2 Force",
+				Detail = "La Forge donne deux fois plus de Force.",
+				Id = 0,
+				Couleur = { 255, 110, 80 },
+			},
+			X2Vitesse = {
+				Nom = "× 2 Vitesse",
+				Detail = "La Forge donne deux fois plus de Vitesse.",
+				Id = 0,
+				Couleur = { 80, 170, 255 },
+			},
+			X2Pieces = {
+				Nom = "× 2 Pièces",
+				Detail = "Ta base rapporte deux fois plus de pièces.",
+				Id = 0,
+				Couleur = { 255, 200, 60 },
+			},
+			RamassageAuto = {
+				Nom = "Ramassage auto",
+				Detail = "Passe sur tes créatures : elles sont récoltées toutes seules.",
+				Id = 0,
+				Couleur = { 120, 220, 120 },
+			},
+		},
+		IntervalleRamassage = 0.3, -- secondes entre deux vérifications
 	},
 
 	-- Lancer de graine vers les Terres Sauvages.
