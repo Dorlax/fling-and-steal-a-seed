@@ -13,7 +13,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local Sons = {}
 
 local dernier: { [string]: number } = {}
-local cache: { [string]: Sound } = {}
+local cache: { [string]: Sound? } = {}
 
 -- Réglage du joueur (⚙️) : sons coupés si ReglageSon vaut false.
 local function sonsActifs(): boolean
@@ -67,6 +67,23 @@ function Sons.jingle(nom: string)
 	if j == nil or not sonsActifs() then
 		return
 	end
+	-- Jingle de la bibliothèque : un seul son (s'il a bien chargé).
+	if j.Id and j.Id ~= "" then
+		local son = cache["Jingle" .. nom]
+		if son == nil then
+			local nouveau = Instance.new("Sound")
+			nouveau.Name = "Jingle" .. nom
+			nouveau.SoundId = j.Id
+			nouveau.Volume = j.Volume or 0.5
+			nouveau.Parent = SoundService
+			cache["Jingle" .. nom] = nouveau
+			son = nouveau
+		end
+		if (son :: Sound).IsLoaded then
+			(son :: Sound):Play()
+			return
+		end
+	end
 	task.spawn(function()
 		for _, note in j.Notes do
 			local son = modele(j.Son)
@@ -86,6 +103,17 @@ end
 
 -- Musique de fond en boucle (si Config.Sons.Musique.Id est renseigné).
 function Sons.demarrerMusique()
+	-- Les jingles de la bibliothèque se chargent dès maintenant.
+	for nom, j in Config.Sons.Jingles :: any do
+		if j.Id and j.Id ~= "" and cache["Jingle" .. nom] == nil then
+			local son = Instance.new("Sound")
+			son.Name = "Jingle" .. nom
+			son.SoundId = j.Id
+			son.Volume = j.Volume or 0.5
+			son.Parent = SoundService
+			cache["Jingle" .. nom] = son
+		end
+	end
 	local m = Config.Sons.Musique
 	if m.Id == "" then
 		return

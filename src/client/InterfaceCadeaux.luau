@@ -218,7 +218,7 @@ function InterfaceCadeaux.demarrer()
 	-- Texte d'une récompense (pièces chiffrées selon le revenu actuel).
 	local function texteRecompense(r: any): (string, string)
 		if r.Type == "Pieces" then
-			return "🪙", Nombres.abreger(Cadeau.pieces(revenu(), r.Minutes))
+			return "💰", Nombres.abreger(Cadeau.pieces(revenu(), r.Minutes))
 		elseif r.Type == "Boost" then
 			return "⚡", "Revenus ×2"
 		elseif r.Type == "Roue" then
@@ -336,7 +336,7 @@ function InterfaceCadeaux.demarrer()
 			c.Size = UDim2.new(1, -170, 0, 22)
 			c.TextXAlignment = Enum.TextXAlignment.Left
 			c.TextScaled = true
-			c.Text = `{math.floor(fait)} / {d.Objectif}  ·  🪙 {Nombres.abreger(
+			c.Text = `{math.floor(fait)} / {d.Objectif}  ·  💰 {Nombres.abreger(
 				Cadeau.pieces(revenu(), d.Minutes)
 			)}`
 			local b = Habillage.bouton(cadre, "Action", {
@@ -511,6 +511,9 @@ function InterfaceCadeaux.demarrer()
 		t.TextXAlignment = Enum.TextXAlignment.Left
 		t.TextScaled = true
 		t.Text = libelle
+		local plafond = Instance.new("UITextSizeConstraint")
+		plafond.MaxTextSize = 30
+		plafond.Parent = t
 		local b = Habillage.bouton(
 			reglages,
 			"Bouton" .. nom,

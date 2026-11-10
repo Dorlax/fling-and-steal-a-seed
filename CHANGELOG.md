@@ -9,6 +9,13 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-10 — Sons de la bibliothèque Roblox
+
+- Musique de fond « Bouncing » (APM Music, licence Roblox), coupable dans ⚙️ Options.
+- Jingles d'événement, de palier de Forge, de rare et de mythique remplacés par de vrais jingles APM (avec la mélodie maison en secours).
+- Souffle au lancer de la graine (Pro Sound Effects).
+- L'icône de pièce 🪙 ne s'affichait pas (carré vide) : remplacée par 💰 partout.
+
 ## 2026-11-10 — Cadeaux et options
 
 - Bouton 🎁 Cadeaux (avec pastille rouge quand une récompense attend) :

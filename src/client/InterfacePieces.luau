@@ -67,7 +67,7 @@ function InterfacePieces.demarrer()
 	piece.Position = UDim2.new(0, 26, 0.5, 0)
 	piece.Size = UDim2.fromOffset(52, 52)
 	piece.TextScaled = true
-	piece.Text = "🪙"
+	piece.Text = "💰"
 	piece.Parent = pilule
 	local compteur = Habillage.texte(
 		pilule,
