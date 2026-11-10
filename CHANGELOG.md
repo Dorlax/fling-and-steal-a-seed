@@ -9,6 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-10 — Événements spectaculaires et sons
+
+- 3 nouveaux événements : Nuit des étoiles filantes (mutations × 4), Arc-en-ciel de chance (raretés hautes plus fréquentes), Frénésie de la Forge (gains × 2). « Pluie dorée » renommée « Heure dorée ».
+- Ambiance client (`AmbianceEvenements`) : bandeau animé avec icône, teinte de la lumière, effets dans le ciel (paillettes dorées, vent et feuilles, graines géantes qui dérivent, étoiles filantes, immense arc-en-ciel et confettis, braises).
+- Sons (`Sons`, `Config.Sons`) : clic des boutons, gains de la Forge, atterrissage, choc des monstres, jingles (événement, nouvel agrès, rare, mythique) ; sons intégrés de Roblox en attendant ceux de la bibliothèque ; musique prévue (Id à renseigner).
+
 ## 2026-11-10 — Univers peaufiné, skins de graine
 
 - Bases : pelouse en damier, clôture en bois (ouverte à la porte), lanternes aux coins, buissons fleuris, chemin de pierres jusqu'à la Forge, cercle lumineux d'apparition (`DecorBase`, sans collision).

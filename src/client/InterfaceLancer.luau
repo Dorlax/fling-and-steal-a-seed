@@ -19,6 +19,7 @@ local Evenement = require(Shared:WaitForChild("Evenement"))
 local Bonus = require(Shared:WaitForChild("Bonus"))
 local Style = require(Shared:WaitForChild("Style"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
+local Sons = require(script.Parent:WaitForChild("Sons"))
 
 local InterfaceLancer = {}
 
@@ -311,6 +312,12 @@ function InterfaceLancer.demarrer()
 			return
 		end
 		local nom = Fiche.texte(rarete, taille)
+		Sons.jouer("Plouf")
+		if rangRarete >= 5 then
+			Sons.jingle("Mythique")
+		elseif rangRarete >= 3 then
+			Sons.jingle("Rare")
+		end
 		afficher(
 			`+{math.floor(distance)} m · {nom}`,
 			couleurRarete(rarete),

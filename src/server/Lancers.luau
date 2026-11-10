@@ -351,10 +351,11 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 		joueur:SetAttribute("LancerGraine", nil)
 	end
 	local graine = Bonus.graine(idGraine)
-	local rarete = Lancer.tirerRareteChance(zone, tirage, graine.Chance)
+	-- Arc-en-ciel de chance : chance ajoutée à celle de la graine.
+	local rarete =
+		Lancer.tirerRareteChance(zone, tirage, graine.Chance + Evenement.bonusChance(evenement))
 	local biome = Biomes.index(distance)
-	local bonusMutation = graine.Mutation
-		* (if evenement ~= nil then Config.Mutations.BonusEvenement else 1)
+	local bonusMutation = graine.Mutation * Evenement.multiplicateurMutation(evenement)
 	local resultat: Resultat = {
 		Distance = distance,
 		Couleur = palier.Couleur,
