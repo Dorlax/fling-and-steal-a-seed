@@ -21,6 +21,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Forge = require(Shared:WaitForChild("Forge"))
 local Nombres = require(Shared:WaitForChild("Nombres"))
 local PosesForge = require(Shared:WaitForChild("PosesForge"))
+local Sons = require(script.Parent:WaitForChild("Sons"))
 
 local AnimationsForge = {}
 
@@ -723,6 +724,7 @@ local function suivreGains()
 				and joueur:GetAttribute("SurForge") == true
 			then
 				surgir(joueur, `{ICONES[nom]} +{Nombres.abreger(valeur - avant)}`, COULEURS[nom])
+				Sons.jouer("Gain", if nom == "Force" then 1.2 else 1.6)
 			end
 			avant = valeur
 		end)
@@ -757,6 +759,7 @@ local function suivrePaliers()
 			echelle.Scale = 0.2
 			echelle.Parent = etiquette
 			ecran.Parent = joueur:WaitForChild("PlayerGui")
+			Sons.jingle("Palier")
 			TweenService:Create(echelle, TweenInfo.new(0.5, Enum.EasingStyle.Back), { Scale = 1 })
 				:Play()
 			task.delay(2.5, function()

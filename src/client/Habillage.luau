@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Style = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Style"))
+local Sons = require(script.Parent:WaitForChild("Sons"))
 
 local Habillage = {}
 
@@ -242,6 +243,7 @@ function Habillage.bouton(
 	end)
 	bouton.Activated:Connect(function()
 		Habillage.rebondir(bouton)
+		Sons.jouer("Clic")
 	end)
 	bouton.Parent = parent
 	Habillage.apparaitre(bouton)

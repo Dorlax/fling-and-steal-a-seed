@@ -3,6 +3,7 @@
 -- Les stats vivent dans les attributs du Player (Force, Vitesse, ModeForge,
 -- SurForge), écrits uniquement ici et par la Sauvegarde.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Forge = require(ReplicatedStorage.Shared.Forge)
@@ -10,6 +11,7 @@ local Bonus = require(ReplicatedStorage.Shared.Bonus)
 local Piege = require(ReplicatedStorage.Shared.Piege)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 local Passes = require(ReplicatedStorage.Shared.Passes)
+local Evenement = require(ReplicatedStorage.Shared.Evenement)
 
 local Entrainement = {}
 
@@ -59,6 +61,8 @@ function Entrainement.tick(joueur: any)
 	-- Renaissances : le gain de la Forge grandit (+50 % par renaissance).
 	local bonus = Bonus.forgeRenaissance(joueur:GetAttribute("Renaissances"))
 	local plafond = Config.Forge.PlafondStat
+	-- Frénésie de la Forge (événement) : gains multipliés.
+	local frenesie = Evenement.multiplicateurForge(Workspace:GetAttribute("Evenement"))
 	for _, nom in noms do
 		local avant = joueur:GetAttribute(nom)
 		if type(avant) ~= "number" or avant ~= avant or avant < 0 then
@@ -72,6 +76,7 @@ function Entrainement.tick(joueur: any)
 						* part
 						* bonus
 						* Passes.multiplicateurStat(nom, passe)
+						* frenesie
 					+ 0.5
 			)
 		)

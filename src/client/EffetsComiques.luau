@@ -6,6 +6,8 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
+local Sons = require(script.Parent:WaitForChild("Sons"))
+
 local EffetsComiques = {}
 
 local NOMBRE = 3
@@ -71,6 +73,9 @@ end
 local function suivre(joueur: Player)
 	joueur:GetAttributeChangedSignal("EtourdiJusqua"):Connect(function()
 		etourdir(joueur)
+		if joueur == Players.LocalPlayer and joueur:GetAttribute("EtourdiJusqua") ~= nil then
+			Sons.jouer("Choc")
+		end
 	end)
 end
 

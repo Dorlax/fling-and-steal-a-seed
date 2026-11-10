@@ -1,6 +1,7 @@
 --!strict
--- Logique pure des événements de serveur (Pluie dorée, Vent porteur,
--- Graines géantes) : tirage et effets. Testable avec Lune.
+-- Logique pure des événements de serveur (Heure dorée, Vent porteur,
+-- Graines géantes, Nuit des étoiles filantes, Arc-en-ciel de chance,
+-- Frénésie de la Forge) : tirage et effets. Testable avec Lune.
 -- Sans événement (nil ou nom inconnu), tous les effets sont neutres.
 -- selene: allow(incorrect_standard_library_use)
 local Config = if script then require(script.Parent.Config) else (require :: any)("./Config")
@@ -12,6 +13,10 @@ export type Infos = {
 	Revenus: number?,
 	Distance: number?,
 	BonusTailles: number?,
+	Mutations: number?,
+	Chance: number?,
+	Forge: number?,
+	Icone: string?,
 }
 
 local Evenement = {}
@@ -59,6 +64,29 @@ end
 function Evenement.bonusTailles(id: any): number
 	local infos = Evenement.infos(id)
 	return if infos and infos.BonusTailles then infos.BonusTailles else 0
+end
+
+-- Multiplicateur des chances de mutation : celui de l'événement s'il en
+-- donne un, sinon Config.Mutations.BonusEvenement pendant tout événement.
+function Evenement.multiplicateurMutation(id: any): number
+	local trouve = Evenement.infos(id)
+	if trouve == nil then
+		return 1
+	end
+	local infos = trouve :: Infos
+	return infos.Mutations or Config.Mutations.BonusEvenement
+end
+
+-- Chance ajoutée aux raretés hautes (0 sans événement).
+function Evenement.bonusChance(id: any): number
+	local infos = Evenement.infos(id)
+	return if infos and infos.Chance then infos.Chance else 0
+end
+
+-- Multiplicateur des gains de la Forge (1 sans événement).
+function Evenement.multiplicateurForge(id: any): number
+	local infos = Evenement.infos(id)
+	return if infos and infos.Forge then infos.Forge else 1
 end
 
 -- Secondes restantes (entier, jamais négatif).

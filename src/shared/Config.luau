@@ -332,27 +332,90 @@ local Config = {
 		PremierApres = 120, -- secondes après le démarrage du serveur
 		Intervalle = 480, -- secondes entre deux débuts d'événement
 		Duree = 150, -- secondes
-		Ordre = { "PluieDoree", "VentPorteur", "GrainesGeantes" },
+		Ordre = {
+			"PluieDoree",
+			"VentPorteur",
+			"GrainesGeantes",
+			"NuitEtoilee",
+			"ArcEnCiel",
+			"Frenesie",
+		},
+		-- Icone : emoji du bandeau ; Ambiance : effets du ciel côté client
+		-- (AmbianceEvenements).
 		Liste = {
 			PluieDoree = {
-				Nom = "Pluie dorée",
+				Nom = "Heure dorée",
 				Texte = "Revenus × 2",
+				Icone = "✨",
 				Couleur = { 255, 200, 50 },
 				Revenus = 2,
 			},
 			VentPorteur = {
 				Nom = "Vent porteur",
 				Texte = "Lancers + 300 studs",
+				Icone = "🌬️",
 				Couleur = { 90, 200, 255 },
 				Distance = 300,
 			},
 			GrainesGeantes = {
 				Nom = "Graines géantes",
 				Texte = "Grosses tailles comme 3 biomes plus loin",
+				Icone = "🌱",
 				Couleur = { 190, 120, 255 },
 				BonusTailles = 3,
 			},
+			NuitEtoilee = {
+				Nom = "Nuit des étoiles filantes",
+				Texte = "Mutations × 4",
+				Icone = "🌠",
+				Couleur = { 120, 140, 255 },
+				Mutations = 4,
+			},
+			ArcEnCiel = {
+				Nom = "Arc-en-ciel de chance",
+				Texte = "Raretés hautes plus fréquentes",
+				Icone = "🌈",
+				Couleur = { 255, 130, 200 },
+				Chance = 1, -- comme une graine qui ajoute 1 à la chance
+			},
+			Frenesie = {
+				Nom = "Frénésie de la Forge",
+				Texte = "Gains de la Forge × 2",
+				Icone = "🔥",
+				Couleur = { 255, 110, 60 },
+				Forge = 2,
+			},
 		},
+	},
+
+	-- Sons (client). Id "" = muet. Par défaut, sons intégrés à Roblox ; à
+	-- remplacer par des sons de la bibliothèque Roblox (Creator Store).
+	Sons = {
+		Effets = {
+			Clic = { Id = "rbxasset://sounds/button.mp3", Volume = 0.35, Intervalle = 0.05 },
+			Ping = {
+				Id = "rbxasset://sounds/electronicpingshort.mp3",
+				Volume = 0.3,
+				Intervalle = 0.05,
+			},
+			Gain = {
+				Id = "rbxasset://sounds/electronicpingshort.mp3",
+				Volume = 0.12,
+				Intervalle = 0.12,
+				Variation = 0.2,
+			},
+			Plouf = { Id = "rbxasset://sounds/Kerplunk.mp3", Volume = 0.4, Intervalle = 0.1 },
+			Choc = { Id = "rbxasset://sounds/collide.mp3", Volume = 0.35, Intervalle = 0.2 },
+			Flash = { Id = "rbxasset://sounds/flashbulb.mp3", Volume = 0.3, Intervalle = 0.2 },
+		},
+		-- Petites mélodies : le son « Son » joué aux hauteurs « Notes ».
+		Jingles = {
+			Evenement = { Son = "Ping", Notes = { 1, 1.26, 1.5, 2 }, Tempo = 0.12 },
+			Palier = { Son = "Ping", Notes = { 1, 1.26, 1.5, 1.26, 1.5, 2 }, Tempo = 0.1 },
+			Rare = { Son = "Ping", Notes = { 1.5, 2, 2.5 }, Tempo = 0.09 },
+			Mythique = { Son = "Ping", Notes = { 1, 1.33, 1.68, 2, 2.67, 3.36 }, Tempo = 0.08 },
+		},
+		Musique = { Id = "", Volume = 0.25 },
 	},
 
 	-- Classements : liste des joueurs (leaderstats), panneau « Classement »

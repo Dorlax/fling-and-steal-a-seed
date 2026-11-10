@@ -20,6 +20,8 @@ local InterfacePlaquage = require(script.Parent:WaitForChild("InterfacePlaquage"
 local InterfaceRaid = require(script.Parent:WaitForChild("InterfaceRaid"))
 local InterfaceStats = require(script.Parent:WaitForChild("InterfaceStats"))
 local Panneaux = require(script.Parent:WaitForChild("Panneaux"))
+local AmbianceEvenements = require(script.Parent:WaitForChild("AmbianceEvenements"))
+local Sons = require(script.Parent:WaitForChild("Sons"))
 
 -- Bandeau de messages et restylage local des panneaux avant les interfaces.
 Bandeaux.demarrer()
@@ -34,6 +36,9 @@ InterfaceRaid.demarrer()
 InterfacePieges.demarrer()
 -- Multijoueur : événement en cours et classements.
 InterfaceEvenement.demarrer()
+-- Événements : bandeau animé, lumière et effets dans le ciel.
+AmbianceEvenements.demarrer()
+Sons.demarrerMusique()
 InterfaceClassement.demarrer()
 InterfaceBestiaire.demarrer()
 InterfaceBase.demarrer()
