@@ -110,7 +110,7 @@ function InterfaceStats.demarrer()
 
 	-- Achat du niveau de Forge suivant (vérifié par le serveur).
 	local ameliorer = ReplicatedStorage:WaitForChild("AmeliorerForge") :: RemoteEvent
-	local boutonNiveau = Habillage.bouton(cadre, "AmeliorerForge", {
+	local boutonNiveau, texteNiveau = Habillage.bouton(cadre, "AmeliorerForge", {
 		texte = "Forge niv. 1",
 		couleur = Color3.fromRGB(255, 170, 40),
 	})
@@ -122,7 +122,7 @@ function InterfaceStats.demarrer()
 
 	-- Achat de l'étage de base suivant (10 socles de plus, vérifié par le serveur).
 	local acheterEtage = ReplicatedStorage:WaitForChild("AcheterEtage") :: RemoteEvent
-	local boutonEtage = Habillage.bouton(cadre, "AcheterEtage", {
+	local boutonEtage, texteEtage = Habillage.bouton(cadre, "AcheterEtage", {
 		texte = "Étage 2",
 		couleur = Color3.fromRGB(120, 200, 255),
 	})
@@ -134,7 +134,7 @@ function InterfaceStats.demarrer()
 
 	-- Agrandissement de la base (plus de place pour les grosses créatures).
 	local agrandirBase = ReplicatedStorage:WaitForChild("AgrandirBase") :: RemoteEvent
-	local boutonAgrandir = Habillage.bouton(cadre, "AgrandirBase", {
+	local boutonAgrandir, texteAgrandir = Habillage.bouton(cadre, "AgrandirBase", {
 		texte = "Agrandir",
 		couleur = Color3.fromRGB(150, 230, 120),
 	})
@@ -154,15 +154,16 @@ function InterfaceStats.demarrer()
 		labelVitesse.Text = `Vitesse : {Nombres.abreger(nombre("Vitesse"))}`
 		local niveau = math.max(1, math.floor(nombre("NiveauForge")))
 		local cout = Forge.coutNiveau(niveau)
-		boutonNiveau.Text =
-			`⬆ Forge niv. {niveau + 1} : {Nombres.abreger(cout)} 🪙 (×{Nombres.abreger(
+		local suivant = Forge.agres("Vitesse", niveau + 1) ~= Forge.agres("Vitesse", niveau)
+		texteNiveau.Text =
+			`⬆ Forge : +{Nombres.abreger(Forge.gainPour(niveau))} → +{Nombres.abreger(
 				Forge.gainPour(niveau + 1)
-			)}/s)`
+			)}/s{if suivant then " ✨" else ""}\n{Nombres.abreger(cout)} 🪙`
 		local etages = math.max(1, math.floor(nombre("Etages")))
 		local prixEtage = Config.Bases.PrixEtages[etages]
 		boutonEtage.Visible = etages < Config.Bases.EtagesMax and prixEtage ~= nil
 		if prixEtage then
-			boutonEtage.Text =
+			texteEtage.Text =
 				`🏠 Étage {etages + 1} (+{Config.Creatures.MaxCreaturesBase} places) : {Nombres.abreger(
 					prixEtage
 				)} 🪙`
@@ -175,7 +176,7 @@ function InterfaceStats.demarrer()
 		boutonAgrandir.Visible = prixAgrandir ~= nil and agrandissement < #Config.Bases.Tailles
 		if prixAgrandir then
 			local taille = Config.Bases.Tailles[agrandissement + 1]
-			boutonAgrandir.Text =
+			texteAgrandir.Text =
 				`📐 Agrandir la base ({taille}×{taille}) : {Nombres.abreger(prixAgrandir)} 🪙`
 			boutonAgrandir.BackgroundColor3 = if nombre("Pieces") >= prixAgrandir
 				then Color3.fromRGB(150, 230, 120)

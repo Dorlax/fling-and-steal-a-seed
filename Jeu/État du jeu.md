@@ -13,7 +13,7 @@
 - Monstres plus rapides à chaque biome (`Monstre.vitesse`) : biome 1 = vitesse de Config ; ensuite vitesse d'un joueur au seuil du biome × 0,9 / 1,05 / 1,2 (Proche / Moyenne / Lointaine).
 - Monstres seulement dans les biomes où il y a un joueur (et le biome 1), 12 au plus par biome la nuit.
 - Force et Vitesse sans limite : linéaires jusqu'à 1 000, puis chaque doublement = un biome de plus au lancer / +20 de vitesse ; aucune limite réelle (PlafondStat 1e300, WalkSpeedMax 1e9).
-- Niveaux de Forge achetés en pièces (bouton sous les stats, RemoteEvent `AmeliorerForge`) : gain × 1,6 par niveau, coût 100 × 1,9^(n-1) ; sauvegardés (`NiveauForge`).
+- Niveaux de Forge achetés en pièces (bouton sous les stats, RemoteEvent `AmeliorerForge`) : gain 1, 2, 5, 10, 20, 50…, coût 100 × 1,9^(n-1) ; sauvegardés (`NiveauForge`).
 - Grands nombres raccourcis (`Shared.Nombres` : 1,23 M, 4,5 T… jusqu'à Vg = 1e63, puis « 1,23e75 ») ; pièces plafonnées à 1e300.
 
 ## Lancer et raretés
@@ -34,7 +34,8 @@
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 
 ## Passes et Forge double
-- Forge habillée (`MachineForge`, tag `MachineForge`) : fourneau, soufflets, enclume, marteau ; animée par le client (`AnimationsForge`) selon le mode et les gains du propriétaire.
+- Forge évolutive (`MachineForge`, `Config.Forge.Paliers`) : 5 paliers d'agrès selon le niveau (roue/tapis/piste, rocher/haltères/barre/météorite, cordes) ; client `AnimationsForge` anime le personnage (`Shared.PosesForge`, Motor6D.Transform). Gain par niveau : suite 1-2-5 (`Forge.gainPour`).
+- Interface : taux de rareté derrière le bouton « % » (haut droite), plus de noms au-dessus des monstres.
 - Mode Double de la Forge (`Config.Forge.Double`) : Force et Vitesse ensemble, 60 % chacune, dès le niveau 12 (bouton « Double »).
 - Passes Robux (`Config.Passes`, `Shared.Passes`, serveur `PassesRobux`) : × 2 Force, × 2 Vitesse, × 2 Pièces, Ramassage auto ; attributs `Pass<Id>` écrits par le serveur ; onglet « Passes » du Shop (« Bientôt » tant que Id = 0).
 

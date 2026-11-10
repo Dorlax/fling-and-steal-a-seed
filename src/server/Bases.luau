@@ -118,7 +118,22 @@ local function construire(joueur: any, centre: Vector3): Model
 	forge.Material = Enum.Material.Neon
 	forge.TopSurface = Enum.SurfaceType.Smooth
 	forge.Parent = modele
-	MachineForge.construire(forge, centre.Y, joueur.UserId)
+	MachineForge.construire(forge, centre.Y, joueur.UserId, joueur:GetAttribute("NiveauForge"))
+	-- L'agrès se modernise quand le niveau de Forge change de palier.
+	if typeof(joueur) == "Instance" then
+		local connexion
+		connexion = joueur:GetAttributeChangedSignal("NiveauForge"):Connect(function()
+			if forge.Parent == nil then
+				connexion:Disconnect()
+				return
+			end
+			MachineForge.mettreAJour(
+				forge,
+				(joueur :: any).UserId,
+				joueur:GetAttribute("NiveauForge")
+			)
+		end)
+	end
 
 	local panneau = Instance.new("BillboardGui")
 	panneau.Name = "Panneau"

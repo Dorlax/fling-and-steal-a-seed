@@ -8,7 +8,7 @@ local Config = {
 	Forge = {
 		Modes = { "Force", "Vitesse" },
 		ModeParDefaut = "Force",
-		IntervalleSecondes = 1, -- un gain par seconde passée sur la Forge
+		IntervalleSecondes = 0.25, -- 4 gains par seconde passée sur la Forge
 		GainParTick = 1,
 		PlafondStat = 1e300, -- aucune limite réelle (seulement les nombres valides)
 		WalkSpeedBase = 16,
@@ -18,9 +18,48 @@ local Config = {
 		StatLineaire = 1000,
 		WalkSpeedParDoublement = 20,
 		WalkSpeedMax = 1e9, -- aucune limite réelle : le joueur va aussi vite qu'il veut
-		-- Niveaux de Forge achetés en pièces : gain × CroissanceGain par niveau,
-		-- coût du niveau n -> n + 1 = CoutBase × CroissanceCout^(n - 1).
-		Niveaux = { CoutBase = 100, CroissanceCout = 1.9, CroissanceGain = 1.6 },
+		-- Niveaux de Forge achetés en pièces. Gain par seconde : suite 1, 2, 5,
+		-- 10, 20, 50, 100… (× GainParTick) ; coût du niveau n -> n + 1 =
+		-- CoutBase × CroissanceCout^(n - 1).
+		Niveaux = { CoutBase = 100, CroissanceCout = 1.9 },
+		-- Paliers : l'agrès se modernise avec le niveau de la Forge.
+		Paliers = {
+			{
+				Niveau = 1,
+				Nom = "Rustique",
+				Vitesse = "Roue en bois",
+				Force = "Gros rocher",
+				Double = "Corde lumineuse",
+			},
+			{
+				Niveau = 4,
+				Nom = "Club",
+				Vitesse = "Tapis de course",
+				Force = "Haltères",
+				Double = "Corde lumineuse",
+			},
+			{
+				Niveau = 8,
+				Nom = "Pro",
+				Vitesse = "Tapis pro",
+				Force = "Barre olympique",
+				Double = "Corde lumineuse",
+			},
+			{
+				Niveau = 12,
+				Nom = "Futur",
+				Vitesse = "Piste néon",
+				Force = "Barre plasma",
+				Double = "Corde laser",
+			},
+			{
+				Niveau = 18,
+				Nom = "Cosmique",
+				Vitesse = "Piste cosmique",
+				Force = "Météorite",
+				Double = "Anneau cosmique",
+			},
+		},
 		-- Zone « sur la Forge » : au-dessus de la plateforme (studs).
 		DistanceForge = {
 			Largeur = 8,

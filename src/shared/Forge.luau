@@ -32,11 +32,12 @@ local function niveauValide(niveau: any): number
 	return math.floor(niveau)
 end
 
--- Gain par tick au niveau n : GainParTick × CroissanceGain^(n - 1), arrondi.
+-- Gain par tick au niveau n : suite 1, 2, 5, 10, 20, 50, 100… × GainParTick.
+local SUITE = { 1, 2, 5 }
 function Forge.gainPour(niveau: any, config: any?): number
 	local cfg = config or Config.Forge
-	local croissance = if cfg.Niveaux then cfg.Niveaux.CroissanceGain else 1
-	return math.floor(cfg.GainParTick * croissance ^ (niveauValide(niveau) - 1) + 0.5)
+	local n = niveauValide(niveau) - 1
+	return cfg.GainParTick * SUITE[n % 3 + 1] * 10 ^ (n // 3)
 end
 
 -- Coût en pièces pour passer du niveau n au niveau n + 1.
@@ -102,6 +103,24 @@ function Forge.statsDuMode(mode: any): ({ string }, number)
 		return { mode :: string }, 1
 	end
 	return {}, 0
+end
+
+-- Palier de la Forge (1 = Rustique…) pour un niveau.
+function Forge.palier(niveau: any): number
+	local n = niveauValide(niveau)
+	local trouve = 1
+	for i, palier in Config.Forge.Paliers do
+		if n >= palier.Niveau then
+			trouve = i
+		end
+	end
+	return trouve
+end
+
+-- Nom de l'agrès d'un mode à ce niveau (« Roue en bois », « Haltères »…).
+function Forge.agres(mode: any, niveau: any): string
+	local palier: any = Config.Forge.Paliers[Forge.palier(niveau)]
+	return if type(mode) == "string" and palier[mode] then palier[mode] else palier.Vitesse
 end
 
 return Forge
