@@ -656,6 +656,79 @@ local Config = {
 		},
 	},
 
+	-- Skins de la graine lancée (cosmétiques, aucun avantage). Débloqués par
+	-- renaissances ou pages du Bestiaire, comme les traînées. Forme : Ball,
+	-- Block ou Cylinder ; Matiere : Enum.Material ; Effet : particules.
+	Skins = {
+		Ordre = { "Gland", "Pomme", "Pepite", "Cristal", "Comete", "Planete", "Coeur", "Etoile" },
+		Liste = {
+			Gland = {
+				Nom = "Gland",
+				Couleur = { 170, 110, 60 },
+				Matiere = "Wood",
+				Forme = "Ball",
+				Effet = "Feuilles",
+				Pages = 1,
+			},
+			Pomme = {
+				Nom = "Pomme",
+				Couleur = { 240, 60, 60 },
+				Matiere = "SmoothPlastic",
+				Forme = "Ball",
+				Effet = "Feuilles",
+				Pages = 5,
+			},
+			Pepite = {
+				Nom = "Pépite d'or",
+				Couleur = { 255, 200, 40 },
+				Matiere = "Foil",
+				Forme = "Block",
+				Effet = "Etincelles",
+				Renaissances = 1,
+			},
+			Cristal = {
+				Nom = "Cristal",
+				Couleur = { 140, 230, 255 },
+				Matiere = "Glass",
+				Forme = "Block",
+				Effet = "Etincelles",
+				Pages = 8,
+			},
+			Comete = {
+				Nom = "Comète",
+				Couleur = { 120, 200, 255 },
+				Matiere = "Neon",
+				Forme = "Ball",
+				Effet = "Feu",
+				Renaissances = 2,
+			},
+			Planete = {
+				Nom = "Planète",
+				Couleur = { 160, 110, 255 },
+				Matiere = "SmoothPlastic",
+				Forme = "Ball",
+				Effet = "Etoiles",
+				Renaissances = 3,
+			},
+			Coeur = {
+				Nom = "Cœur",
+				Couleur = { 255, 110, 170 },
+				Matiere = "Neon",
+				Forme = "Ball",
+				Effet = "Coeurs",
+				Pages = 12,
+			},
+			Etoile = {
+				Nom = "Étoile filante",
+				Couleur = { 255, 240, 120 },
+				Matiere = "Neon",
+				Forme = "Block",
+				Effet = "Etoiles",
+				Renaissances = 5,
+			},
+		},
+	},
+
 	-- Vente d'une créature de la base : son revenu pendant Secondes.
 	Vente = {
 		Secondes = 120,

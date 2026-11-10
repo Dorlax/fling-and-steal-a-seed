@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local DecorBase = require(script.Parent.DecorBase)
 local MachineForge = require(script.Parent.MachineForge)
 local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
@@ -240,6 +241,15 @@ local function construire(joueur: any, centre: Vector3): Model
 	bouclier.Material = Enum.Material.Neon
 	bouclier.Transparency = 1
 	bouclier.Parent = modele
+
+	DecorBase.habiller(
+		modele,
+		centre,
+		TAILLE_SOL,
+		LARGEUR_PORTE,
+		forge.Position,
+		apparition.WorldPosition
+	)
 
 	modele:SetAttribute("ProprietaireId", joueur.UserId)
 	modele.PrimaryPart = sol
