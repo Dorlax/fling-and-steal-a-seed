@@ -118,40 +118,157 @@ export type OptionsBouton = {
 	couleur: Color3,
 	taille: Vector2?,
 	rond: boolean?,
+	icone: string?, -- emoji affiché au-dessus du texte (gros boutons ronds)
 }
 
--- Gros bouton coloré, arrondi, contour noir, rebond à l'appui et à l'apparition.
--- Le texte est porté par un TextLabel enfant « Texte » (son propre contour),
--- le contour du bouton entoure le bord. Renvoie le bouton et son texte.
+local RELIEF = 5 -- hauteur de la tranche sous le bouton (px)
+
+-- Couleur assombrie (0 = identique, 1 = noir).
+function Habillage.assombrir(c: Color3, t: number): Color3
+	return c:Lerp(Color3.new(0, 0, 0), t)
+end
+
+-- Gros bouton façon jeu « simulateur » : face colorée en relief sur une
+-- tranche sombre, dégradé, reflet brillant, contour de la couleur assombrie.
+-- S'enfonce à l'appui, grossit au survol. La couleur reste pilotée par
+-- bouton.BackgroundColor3 (le bouton lui-même est transparent : la face et
+-- la tranche suivent sa couleur). Renvoie le bouton et son texte.
 function Habillage.bouton(
 	parent: Instance,
 	nom: string,
 	options: OptionsBouton
 ): (TextButton, TextLabel)
 	local taille = options.taille or Vector2.new(Style.TailleBoutonMin, Style.TailleBoutonMin)
+	local arrondi = if options.rond then 0.5 else Style.ArrondiBouton
 	local bouton = Instance.new("TextButton")
 	bouton.Name = nom
 	bouton.Size = UDim2.fromOffset(taille.X, taille.Y)
 	bouton.BackgroundColor3 = options.couleur
+	bouton.BackgroundTransparency = 1
 	bouton.Font = Habillage.Police
 	bouton.Text = ""
 	bouton.Selectable = true -- manette
-	bouton.AutoButtonColor = true
-	Habillage.arrondi(bouton, if options.rond then 0.5 else Style.ArrondiBouton)
-	Habillage.contour(bouton, Style.Contour.Moyen, Enum.ApplyStrokeMode.Border)
+	bouton.AutoButtonColor = false
 
-	local libelle = Habillage.texte(bouton, "Texte", { contour = Style.Contour.Moyen })
+	local tranche = Instance.new("Frame")
+	tranche.Name = "Tranche"
+	tranche.Size = UDim2.new(1, 0, 1, 0)
+	tranche.BorderSizePixel = 0
+	Habillage.arrondi(tranche, arrondi)
+	tranche.Parent = bouton
+
+	local face = Instance.new("Frame")
+	face.Name = "Face"
+	face.Size = UDim2.new(1, 0, 1, -RELIEF)
+	face.BorderSizePixel = 0
+	Habillage.arrondi(face, arrondi)
+	local degrade = Instance.new("UIGradient")
+	degrade.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(205, 205, 215))
+	degrade.Rotation = 90
+	degrade.Parent = face
+	local trait = Instance.new("UIStroke")
+	trait.Thickness = Style.Contour.Petit
+	trait.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	trait.Parent = face
+	face.Parent = bouton
+
+	-- Reflet : bande claire en haut de la face.
+	local reflet = Instance.new("Frame")
+	reflet.Name = "Reflet"
+	reflet.AnchorPoint = Vector2.new(0.5, 0)
+	reflet.Position = UDim2.new(0.5, 0, 0, 4)
+	reflet.Size = UDim2.new(1, -14, 0.38, 0)
+	reflet.BackgroundColor3 = Color3.new(1, 1, 1)
+	reflet.BackgroundTransparency = 0.72
+	reflet.BorderSizePixel = 0
+	Habillage.arrondi(reflet, arrondi)
+	reflet.Parent = face
+
+	local libelle = Habillage.texte(face, "Texte", { contour = Style.Contour.Moyen })
 	libelle.AnchorPoint = Vector2.new(0.5, 0.5)
-	libelle.Position = UDim2.fromScale(0.5, 0.5)
-	libelle.Size = if options.rond then UDim2.new(1, -24, 0.5, 0) else UDim2.new(1, -16, 1, -12)
+	libelle.ZIndex = 2
+	if options.icone then
+		local icone = Instance.new("TextLabel")
+		icone.Name = "Icone"
+		icone.BackgroundTransparency = 1
+		icone.AnchorPoint = Vector2.new(0.5, 0.5)
+		icone.Position = UDim2.fromScale(0.5, 0.38)
+		icone.Size = UDim2.fromScale(0.55, 0.45)
+		icone.TextScaled = true
+		icone.Font = Habillage.Police
+		icone.Text = options.icone
+		icone.ZIndex = 2
+		icone.Parent = face
+		libelle.Position = UDim2.fromScale(0.5, 0.76)
+		libelle.Size = UDim2.new(0.86, 0, 0.26, 0)
+	else
+		libelle.Position = UDim2.fromScale(0.5, 0.5)
+		libelle.Size = if options.rond then UDim2.new(1, -24, 0.5, 0) else UDim2.new(1, -16, 1, -12)
+	end
 	libelle.Text = options.texte or ""
 
+	-- La couleur du bouton pilote face, tranche, contour et contour du texte.
+	local function teindre()
+		local c = bouton.BackgroundColor3
+		face.BackgroundColor3 = c
+		tranche.BackgroundColor3 = Habillage.assombrir(c, 0.45)
+		trait.Color = Habillage.assombrir(c, 0.55)
+		local contourTexte = libelle:FindFirstChildOfClass("UIStroke")
+		if contourTexte then
+			contourTexte.Color = Habillage.assombrir(c, 0.65)
+		end
+	end
+	teindre()
+	bouton:GetPropertyChangedSignal("BackgroundColor3"):Connect(teindre)
+
+	-- Appui : la face descend sur sa tranche ; survol : léger grossissement.
+	local function enfoncer(bas: boolean)
+		TweenService:Create(face, TweenInfo.new(0.08), {
+			Position = UDim2.fromOffset(0, if bas then RELIEF - 1 else 0),
+		}):Play()
+	end
+	bouton.MouseButton1Down:Connect(function()
+		enfoncer(true)
+	end)
+	bouton.MouseButton1Up:Connect(function()
+		enfoncer(false)
+	end)
+	bouton.MouseLeave:Connect(function()
+		enfoncer(false)
+		TweenService:Create(Habillage.echelle(bouton), TweenInfo.new(0.12), { Scale = 1 }):Play()
+	end)
+	bouton.MouseEnter:Connect(function()
+		TweenService:Create(Habillage.echelle(bouton), TweenInfo.new(0.12), { Scale = 1.05 }):Play()
+	end)
 	bouton.Activated:Connect(function()
 		Habillage.rebondir(bouton)
 	end)
 	bouton.Parent = parent
 	Habillage.apparaitre(bouton)
 	return bouton, libelle
+end
+
+-- Habille un panneau existant : fond nuit dégradé, bordure de la couleur
+-- d'accent, coins arrondis.
+function Habillage.panneau(panneau: GuiObject, accent: Color3?)
+	local couleur = accent or Habillage.nommee("Bleu")
+	panneau.BackgroundColor3 = Color3.fromRGB(38, 44, 78)
+	panneau.BackgroundTransparency = 0.04
+	for _, ancien in panneau:GetChildren() do
+		if ancien:IsA("UIStroke") or ancien:IsA("UICorner") or ancien:IsA("UIGradient") then
+			ancien:Destroy()
+		end
+	end
+	Habillage.arrondi(panneau, 0.06)
+	local degrade = Instance.new("UIGradient")
+	degrade.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(150, 150, 175))
+	degrade.Rotation = 90
+	degrade.Parent = panneau
+	local bord = Instance.new("UIStroke")
+	bord.Thickness = Style.Contour.Moyen
+	bord.Color = couleur
+	bord.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	bord.Parent = panneau
 end
 
 -- ColorSequence continue construite depuis Style.Degrade.

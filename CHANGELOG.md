@@ -9,6 +9,14 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-10 — Interfaces refaites
+
+- Boutons façon jeu « simulateur » : face en relief sur une tranche sombre, dégradé, reflet, contour de la couleur assombrie ; s'enfoncent à l'appui, grossissent au survol (`Habillage.bouton`, la couleur suit `BackgroundColor3`).
+- Boutons Top / Livre / Base / Shop avec icône (🏆 📖 🏠 🛒).
+- Panneaux (stats, boutique, base, bestiaire, classement) : fond nuit dégradé, bordure de couleur (`Habillage.panneau`).
+- Compteur de pièces en pilule dorée avec pièce 🪙.
+- Pastille d'événement déplacée sous les pièces (ne chevauche plus les stats).
+
 ## 2026-11-09 — Forge évolutive, écran allégé
 
 - Forge : l'agrès se modernise avec le niveau (5 paliers : Rustique, Club, Pro, Futur, Cosmique). Vitesse : roue en bois, tapis, tapis pro, piste néon, piste cosmique ; Force : rocher, haltères, barre olympique, barre plasma, météorite ; Double : corde lumineuse, laser, arc-en-ciel.

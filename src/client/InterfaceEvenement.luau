@@ -19,8 +19,9 @@ function InterfaceEvenement.demarrer()
 
 	local cadre = Instance.new("Frame")
 	cadre.Name = "Evenement"
-	cadre.AnchorPoint = Vector2.new(0, 0)
-	cadre.Position = UDim2.new(0, 12, 0, 8)
+	-- Sous le compteur de pièces, au centre (ne chevauche plus les stats).
+	cadre.AnchorPoint = Vector2.new(0.5, 0)
+	cadre.Position = UDim2.new(0.5, 0, 0, 100)
 	cadre.Size = UDim2.fromOffset(250, 64)
 	cadre.Visible = false
 	cadre.Parent = ecran
@@ -28,14 +29,14 @@ function InterfaceEvenement.demarrer()
 	Habillage.contour(cadre, Style.Contour.Moyen, Enum.ApplyStrokeMode.Border)
 
 	local nom = Habillage.texte(cadre, "Nom", { contour = Style.Contour.Moyen })
+	nom.TextXAlignment = Enum.TextXAlignment.Center
 	nom.Position = UDim2.fromOffset(10, 4)
 	nom.Size = UDim2.new(1, -20, 0, 30)
-	nom.TextXAlignment = Enum.TextXAlignment.Left
 
 	local effet = Habillage.texte(cadre, "Effet", { contour = Style.Contour.Petit })
 	effet.Position = UDim2.fromOffset(10, 34)
 	effet.Size = UDim2.new(1, -20, 0, Style.TailleTexteMin + 4)
-	effet.TextXAlignment = Enum.TextXAlignment.Left
+	effet.TextXAlignment = Enum.TextXAlignment.Center
 
 	local actuel = ""
 	local function maj()

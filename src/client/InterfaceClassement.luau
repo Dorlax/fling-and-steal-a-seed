@@ -109,6 +109,7 @@ function InterfaceClassement.demarrer()
 		texte = "Top",
 		couleur = OR,
 		rond = true,
+		icone = "🏆",
 	})
 	bouton.AnchorPoint = Vector2.new(1, 0.5)
 	bouton.Position =
@@ -124,8 +125,7 @@ function InterfaceClassement.demarrer()
 	panneau.BackgroundTransparency = 0.1
 	panneau.Visible = false
 	panneau.Parent = ecran
-	Habillage.arrondi(panneau, 0.05)
-	Habillage.contour(panneau, Style.Contour.Moyen, Enum.ApplyStrokeMode.Border)
+	Habillage.panneau(panneau, Habillage.nommee("Jaune"))
 	local limite = Instance.new("UISizeConstraint")
 	limite.MaxSize = Vector2.new(620, math.huge)
 	limite.Parent = panneau
