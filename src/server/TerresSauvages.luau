@@ -119,6 +119,30 @@ function TerresSauvages.creer(): BasePart
 	local L = Biomes.Longueur
 	local premier = Biomes.Liste[1]
 
+	-- Rayures de pelouse tondue : une bande plus claire tous les 2 x PAS_RAYURE
+	-- studs, posée sur le sol (visuel seulement, ne bloque ni ne touche rien).
+	local PAS_RAYURE = 8
+	local function rayures(nom: string, debut: number, couleur: Color3, materiau: Enum.Material)
+		local dossier = enfant(enfant(Workspace, "Rayures", "Folder"), nom, "Folder")
+		dossier:ClearAllChildren()
+		local clair = couleur:Lerp(Color3.new(1, 1, 1), 0.12)
+		for k = 0, math.floor(Biomes.Longueur / (2 * PAS_RAYURE)) - 1 do
+			local bande = Instance.new("Part")
+			bande.Name = "Rayure"
+			bande.Anchored = true
+			bande.CanCollide = false
+			bande.CanQuery = false
+			bande.CanTouch = false
+			bande.CastShadow = false
+			bande.Size = Vector3.new(LARGEUR, 0.06, PAS_RAYURE)
+			bande.Position = Vector3.new(0, 0.03, debut + (2 * k + 0.5) * PAS_RAYURE)
+			bande.Color = clair
+			bande.Material = materiau
+			bande.TopSurface = Enum.SurfaceType.Smooth
+			bande.Parent = dossier
+		end
+	end
+
 	-- Biome 1 : Workspace.TerresSauvages (nom gardé pour la compatibilité).
 	local sol = enfant(Workspace, "TerresSauvages", "Part") :: Part
 	sol.Anchored = true
@@ -130,6 +154,7 @@ function TerresSauvages.creer(): BasePart
 	for _, zone in Config.Lancer.Zones do
 		creerBorne(sol, zone.Nom, BORD_BASES + zone.Min, `Zone {zone.Nom} ({zone.Min} m)`)
 	end
+	rayures(premier.Id, BORD_BASES, sol.Color, sol.Material)
 
 	-- Biomes suivants : un sol chacun (une pièce ne dépasse pas 2048 studs).
 	local dossier = enfant(Workspace, "Biomes", "Folder")
@@ -144,6 +169,7 @@ function TerresSauvages.creer(): BasePart
 		segment.Material = (Enum.Material :: any)[biome.Materiau] or Enum.Material.Grass
 		segment.TopSurface = Enum.SurfaceType.Smooth
 		segment:SetAttribute("Biome", numero)
+		rayures(biome.Id, debut, segment.Color, segment.Material)
 		for _, zone in Config.Lancer.Zones do
 			creerBorne(
 				segment,

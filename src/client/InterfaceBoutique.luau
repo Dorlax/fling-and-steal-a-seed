@@ -1,6 +1,6 @@
 --!strict
--- Bouton « Shop » et boutique en 5 onglets : Graines (achat, équipement),
--- Renaissance, Roue gratuite, Traînées et Passes Robux. Le client n'envoie que des
+-- Bouton « Shop » et boutique en 6 onglets : Graines (achat, équipement),
+-- Renaissance, Roue gratuite, Traînées, Skins de graine et Passes Robux. Le client n'envoie que des
 -- identifiants ; le serveur (Progression) vérifie tout. Les infos viennent
 -- des attributs du joueur.
 local MarketplaceService = game:GetService("MarketplaceService")
@@ -41,6 +41,7 @@ function InterfaceBoutique.demarrer()
 		roue = ReplicatedStorage:WaitForChild("TournerRoue") :: RemoteEvent,
 		resultatRoue = ReplicatedStorage:WaitForChild("ResultatRoue") :: RemoteEvent,
 		equiperTrainee = ReplicatedStorage:WaitForChild("EquiperTrainee") :: RemoteEvent,
+		equiperSkin = ReplicatedStorage:WaitForChild("EquiperSkin") :: RemoteEvent,
 	}
 
 	local function nombre(nom: string): number
@@ -124,14 +125,14 @@ function InterfaceBoutique.demarrer()
 	local boutonsOnglets: { [string]: TextButton } = {}
 	local afficher: () -> ()
 
-	for ordre, nom in { "Graines", "Renaissance", "Roue", "Traînées", "Passes" } do
+	for ordre, nom in { "Graines", "Renaissance", "Roue", "Traînées", "Skins", "Passes" } do
 		local b = Habillage.bouton(barre, nom, {
 			texte = nom,
 			couleur = INACTIF,
 			taille = Vector2.new(140, 44),
 		})
 		b.LayoutOrder = ordre
-		b.Size = UDim2.new(0.2, -5, 1, 0)
+		b.Size = UDim2.new(1 / 6, -5, 1, 0)
 		b.Activated:Connect(function()
 			onglet = nom
 			afficher()
@@ -339,6 +340,43 @@ function InterfaceBoutique.demarrer()
 		end
 	end
 
+	-- Skins de la graine lancée (cosmétiques).
+	local function skinsOnglet()
+		local possedes = liste("Skins")
+		local equipe = joueur:GetAttribute("Skin")
+		ligne(
+			1,
+			"Graine classique",
+			"La graine lumineuse de départ",
+			Color3.fromRGB(255, 240, 150),
+			if equipe == "" then "Choisie" else "Choisir",
+			equipe ~= "",
+			function()
+				remotes.equiperSkin:FireServer("")
+			end
+		)
+		for i, id in Config.Skins.Ordre do
+			local sk = (Config.Skins.Liste :: any)[id]
+			local condition = if sk.Renaissances
+				then `Renaissance {sk.Renaissances}`
+				else `{sk.Pages} pages du Bestiaire`
+			local possede = table.find(possedes, id) ~= nil
+			ligne(
+				i + 1,
+				sk.Nom,
+				if possede then "Débloqué" else `À débloquer : {condition}`,
+				if possede then couleur(sk.Couleur) else INACTIF,
+				if not possede then "Verrouillé" elseif equipe == id then "Équipé" else "Équiper",
+				possede and equipe ~= id,
+				if possede
+					then function()
+						remotes.equiperSkin:FireServer(id)
+					end
+					else nil
+			)
+		end
+	end
+
 	local function traineesOnglet()
 		local possedees = liste("Trainees")
 		local equipee = joueur:GetAttribute("Trainee")
@@ -403,6 +441,8 @@ function InterfaceBoutique.demarrer()
 			roueOnglet()
 		elseif onglet == "Passes" then
 			passesOnglet()
+		elseif onglet == "Skins" then
+			skinsOnglet()
 		else
 			traineesOnglet()
 		end
@@ -452,6 +492,8 @@ function InterfaceBoutique.demarrer()
 			"Trainees",
 			"Trainee",
 			"PagesCompletes",
+			"Skins",
+			"Skin",
 			Passes.attribut("X2Force"),
 			Passes.attribut("X2Vitesse"),
 			Passes.attribut("X2Pieces"),

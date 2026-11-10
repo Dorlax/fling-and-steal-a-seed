@@ -211,6 +211,44 @@ local function creerCreature(
 	return modele
 end
 
+-- Textures de particules des skins de graine.
+local EFFETS_SKIN: { [string]: { any } } = {
+	-- { texture, taille, débit }
+	Feuilles = { "rbxasset://textures/particles/sparkles_main.dds", 0.35, 12 },
+	Etincelles = { "rbxasset://textures/particles/sparkles_main.dds", 0.5, 20 },
+	Feu = { "rbxasset://textures/particles/fire_main.dds", 1, 30 },
+	Etoiles = { "rbxasset://textures/particles/sparkles_main.dds", 0.7, 16 },
+	Coeurs = { "rbxasset://textures/particles/sparkles_main.dds", 0.6, 14 },
+}
+
+-- Applique le skin de graine `id` (Config.Skins) à la graine lancée.
+function Lancers.habillerGraine(graine: Part, id: any)
+	local skin = if type(id) == "string" then (Config.Skins.Liste :: any)[id] else nil
+	if skin == nil then
+		return
+	end
+	graine.Color = Color3.fromRGB(skin.Couleur[1], skin.Couleur[2], skin.Couleur[3])
+	graine.Material = (Enum.Material :: any)[skin.Matiere] or Enum.Material.Neon
+	graine.Shape = (Enum.PartType :: any)[skin.Forme] or Enum.PartType.Ball
+	if skin.Forme == "Block" then
+		graine.Size = Vector3.one * 1.1
+	end
+	local effet = EFFETS_SKIN[skin.Effet]
+	if effet then
+		local e = Instance.new("ParticleEmitter")
+		e.Name = "EffetSkin"
+		e.Texture = effet[1]
+		e.Color = ColorSequence.new(graine.Color, Color3.new(1, 1, 1))
+		e.LightEmission = 1
+		e.Size = NumberSequence.new(effet[2], 0)
+		e.Lifetime = NumberRange.new(0.4, 0.8)
+		e.Speed = NumberRange.new(0.5, 2)
+		e.SpreadAngle = Vector2.new(180, 180)
+		e.Rate = effet[3]
+		e.Parent = graine
+	end
+end
+
 -- Graine lumineuse qui vole en arc, puis créature au point d'atterrissage.
 local function envoyerGraine(
 	joueur: any,
@@ -228,6 +266,7 @@ local function envoyerGraine(
 	graine.CanQuery = false
 	graine.Material = Enum.Material.Neon
 	graine.Color = Color3.fromRGB(255, 240, 150)
+	Lancers.habillerGraine(graine, joueur:GetAttribute("Skin"))
 	graine.Position = depart
 	local lumiere = Instance.new("PointLight")
 	lumiere.Color = graine.Color

@@ -134,6 +134,40 @@ function Progression.verifierTrainees(joueur: any)
 	end
 end
 
+local function donnerSkin(joueur: any, id: string): boolean
+	local possedes = liste(joueur, "Skins")
+	if table.find(possedes, id) or (Config.Skins.Liste :: any)[id] == nil then
+		return false
+	end
+	table.insert(possedes, id)
+	joueur:SetAttribute("Skins", table.concat(possedes, ","))
+	message(joueur, `Nouveau skin de graine : {(Config.Skins.Liste :: any)[id].Nom} ! (Boutique)`)
+	return true
+end
+
+-- Débloque les skins de graine gagnés par renaissances ou pages du Bestiaire.
+function Progression.verifierSkins(joueur: any)
+	local renaissances = nombre(joueur, "Renaissances")
+	local pages = Sauvegarde.pagesCompletes(joueur)
+	for _, id in Config.Skins.Ordre do
+		local s = (Config.Skins.Liste :: any)[id]
+		if
+			(s.Renaissances and renaissances >= s.Renaissances) or (s.Pages and pages >= s.Pages)
+		then
+			donnerSkin(joueur, id)
+		end
+	end
+end
+
+-- Reçu du client : seul un skin possédé (ou "" = classique) est accepté.
+function Progression.equiperSkin(joueur: any, id: any): boolean
+	if id ~= "" and (type(id) ~= "string" or not table.find(liste(joueur, "Skins"), id)) then
+		return false
+	end
+	joueur:SetAttribute("Skin", id)
+	return true
+end
+
 function Progression.equiperTrainee(joueur: any, id: any): boolean
 	if id ~= "" and (type(id) ~= "string" or not table.find(liste(joueur, "Trainees"), id)) then
 		return false
@@ -155,6 +189,7 @@ function Progression.renaitre(joueur: any): boolean
 	joueur:SetAttribute("Renaissances", n + 1)
 	Sauvegarde.recalculer(joueur)
 	Progression.verifierTrainees(joueur)
+	Progression.verifierSkins(joueur)
 	if typeof(joueur) == "Instance" then
 		annoncer(
 			`{joueur.Name} renaît ! Renaissance {n + 1} : revenus × {Nombres.abreger(
@@ -261,6 +296,7 @@ end
 -- À l'arrivée (données chargées) : traînées gagnées et traînée affichée.
 function Progression.suivre(joueur: Player)
 	Progression.verifierTrainees(joueur)
+	Progression.verifierSkins(joueur)
 	Progression.appliquerTrainee(joueur)
 	joueur.CharacterAdded:Connect(function()
 		task.wait(0.5)
@@ -269,6 +305,7 @@ function Progression.suivre(joueur: Player)
 	-- Une nouvelle page du Bestiaire peut débloquer une traînée.
 	joueur:GetAttributeChangedSignal("PagesCompletes"):Connect(function()
 		Progression.verifierTrainees(joueur)
+		Progression.verifierSkins(joueur)
 	end)
 end
 

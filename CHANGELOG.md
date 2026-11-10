@@ -9,6 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-10 — Univers peaufiné, skins de graine
+
+- Bases : pelouse en damier, clôture en bois (ouverte à la porte), lanternes aux coins, buissons fleuris, chemin de pierres jusqu'à la Forge, cercle lumineux d'apparition (`DecorBase`, sans collision).
+- Biomes : rayures de pelouse tondue sur chaque sol (`TerresSauvages`).
+- Skins de graine (cosmétiques du Plan) : 8 skins (gland, pomme, pépite, cristal, comète, planète, cœur, étoile filante) débloqués par pages du Bestiaire ou renaissances ; onglet « Skins » du Shop, RemoteEvent `EquiperSkin`, sauvegardés.
+
 ## 2026-11-10 — Interfaces refaites
 
 - Boutons façon jeu « simulateur » : face en relief sur une tranche sombre, dégradé, reflet, contour de la couleur assombrie ; s'enfoncent à l'appui, grossissent au survol (`Habillage.bouton`, la couleur suit `BackgroundColor3`).
