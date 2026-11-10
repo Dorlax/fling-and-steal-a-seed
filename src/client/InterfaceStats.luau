@@ -157,7 +157,7 @@ function InterfaceStats.demarrer()
 		texteNiveau.Text =
 			`⬆ Forge : +{Nombres.abreger(Forge.gainPour(niveau))} → +{Nombres.abreger(
 				Forge.gainPour(niveau + 1)
-			)}/s{if suivant then " ✨" else ""}\n{Nombres.abreger(cout)} 🪙`
+			)}/s{if suivant then " ✨" else ""}\n{Nombres.abreger(cout)} 💰`
 		local etages = math.max(1, math.floor(nombre("Etages")))
 		local prixEtage = Config.Bases.PrixEtages[etages]
 		boutonEtage.Visible = etages < Config.Bases.EtagesMax and prixEtage ~= nil
@@ -165,7 +165,7 @@ function InterfaceStats.demarrer()
 			texteEtage.Text =
 				`🏠 Étage {etages + 1} (+{Config.Creatures.MaxCreaturesBase} places) : {Nombres.abreger(
 					prixEtage
-				)} 🪙`
+				)} 💰`
 			boutonEtage.BackgroundColor3 = if nombre("Pieces") >= prixEtage
 				then Color3.fromRGB(120, 200, 255)
 				else COULEUR_INACTIF
@@ -176,7 +176,7 @@ function InterfaceStats.demarrer()
 		if prixAgrandir then
 			local taille = Config.Bases.Tailles[agrandissement + 1]
 			texteAgrandir.Text =
-				`📐 Agrandir la base ({taille}×{taille}) : {Nombres.abreger(prixAgrandir)} 🪙`
+				`📐 Agrandir la base ({taille}×{taille}) : {Nombres.abreger(prixAgrandir)} 💰`
 			boutonAgrandir.BackgroundColor3 = if nombre("Pieces") >= prixAgrandir
 				then Color3.fromRGB(150, 230, 120)
 				else COULEUR_INACTIF

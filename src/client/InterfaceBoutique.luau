@@ -229,7 +229,7 @@ function InterfaceBoutique.demarrer()
 					g.Nom,
 					detail,
 					couleur(g.Couleur),
-					`{Nombres.abreger(prix)} 🪙`,
+					`{Nombres.abreger(prix)} 💰`,
 					nombre("Pieces") >= prix,
 					function()
 						remotes.acheter:FireServer(id)
@@ -262,7 +262,7 @@ function InterfaceBoutique.demarrer()
 				Bonus.revenusRenaissance(n + 1)
 			)}`,
 			Color3.fromRGB(255, 120, 200),
-			if sur then "Sûr ?" else `{Nombres.abreger(prix)} 🪙`,
+			if sur then "Sûr ?" else `{Nombres.abreger(prix)} 💰`,
 			nombre("Pieces") >= prix,
 			function()
 				if os.clock() - confirmation < 3 then

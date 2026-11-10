@@ -447,15 +447,44 @@ local Config = {
 			Plouf = { Id = "rbxasset://sounds/Kerplunk.mp3", Volume = 0.4, Intervalle = 0.1 },
 			Choc = { Id = "rbxasset://sounds/collide.mp3", Volume = 0.35, Intervalle = 0.2 },
 			Flash = { Id = "rbxasset://sounds/flashbulb.mp3", Volume = 0.3, Intervalle = 0.2 },
+			-- Bibliothèque Roblox (Pro Sound Effects) : souffle du lancer.
+			Lancer = { Id = "rbxassetid://9126047581", Volume = 0.4, Intervalle = 0.3 },
 		},
-		-- Petites mélodies : le son « Son » joué aux hauteurs « Notes ».
+		-- Petites mélodies. Avec « Id » : un jingle de la bibliothèque Roblox
+		-- (APM Music, licence Roblox) ; sinon le son « Son » joué aux hauteurs
+		-- « Notes » (secours si l'Id ne charge pas).
 		Jingles = {
-			Evenement = { Son = "Ping", Notes = { 1, 1.26, 1.5, 2 }, Tempo = 0.12 },
-			Palier = { Son = "Ping", Notes = { 1, 1.26, 1.5, 1.26, 1.5, 2 }, Tempo = 0.1 },
-			Rare = { Son = "Ping", Notes = { 1.5, 2, 2.5 }, Tempo = 0.09 },
-			Mythique = { Son = "Ping", Notes = { 1, 1.33, 1.68, 2, 2.67, 3.36 }, Tempo = 0.08 },
+			Evenement = {
+				Id = "rbxassetid://9048764286", -- Magical Meetup - Tag2
+				Volume = 0.5,
+				Son = "Ping",
+				Notes = { 1, 1.26, 1.5, 2 },
+				Tempo = 0.12,
+			},
+			Palier = {
+				Id = "rbxassetid://1841173800", -- Magical (t)
+				Volume = 0.5,
+				Son = "Ping",
+				Notes = { 1, 1.26, 1.5, 1.26, 1.5, 2 },
+				Tempo = 0.1,
+			},
+			Rare = {
+				Id = "rbxassetid://9040476898", -- Early Bird - Hit1
+				Volume = 0.45,
+				Son = "Ping",
+				Notes = { 1.5, 2, 2.5 },
+				Tempo = 0.09,
+			},
+			Mythique = {
+				Id = "rbxassetid://1840076509", -- Through the Roof (sting)
+				Volume = 0.55,
+				Son = "Ping",
+				Notes = { 1, 1.33, 1.68, 2, 2.67, 3.36 },
+				Tempo = 0.08,
+			},
 		},
-		Musique = { Id = "", Volume = 0.25 },
+		-- Musique de fond (APM Music, licence Roblox) : « Bouncing ».
+		Musique = { Id = "rbxassetid://1837050956", Volume = 0.2 },
 	},
 
 	-- Classements : liste des joueurs (leaderstats), panneau « Classement »

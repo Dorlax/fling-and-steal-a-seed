@@ -243,6 +243,7 @@ function InterfaceLancer.demarrer()
 		Habillage.rebondir(bouton)
 		if enCours then
 			lacherJauge:FireServer()
+			Sons.jouer("Lancer")
 			cacherJauge()
 			attenteJusqua = os.clock() + Config.Lancer.DelaiEntreLancers
 		else
