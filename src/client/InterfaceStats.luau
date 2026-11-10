@@ -48,8 +48,7 @@ function InterfaceStats.demarrer()
 	cadre.BackgroundColor3 = Habillage.nommee("Fond")
 	cadre.BackgroundTransparency = 0.2
 	cadre.Parent = ecran
-	Habillage.arrondi(cadre, 0.08)
-	Habillage.contour(cadre, Style.Contour.Petit, Enum.ApplyStrokeMode.Border)
+	Habillage.panneau(cadre, Habillage.nommee("Bleu"))
 
 	local marge = Instance.new("UIPadding")
 	marge.PaddingTop = UDim.new(0, 10)

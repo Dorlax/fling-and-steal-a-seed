@@ -33,8 +33,11 @@ function InterfaceBase.demarrer()
 	ecran.ResetOnSpawn = false
 	ecran.DisplayOrder = 6
 
-	local bouton =
-		Habillage.bouton(ecran, "BoutonBase", { texte = "Base", couleur = VERT, rond = true })
+	local bouton = Habillage.bouton(
+		ecran,
+		"BoutonBase",
+		{ texte = "Base", couleur = VERT, rond = true, icone = "🏠" }
+	)
 	bouton.AnchorPoint = Vector2.new(1, 0.5)
 	bouton.Position = UDim2.new(1, -Style.TailleBoutonMin - 22, 0.42, Style.TailleBoutonMin / 2 + 6)
 
@@ -47,8 +50,7 @@ function InterfaceBase.demarrer()
 	panneau.BackgroundTransparency = 0.08
 	panneau.Visible = false
 	panneau.Parent = ecran
-	Habillage.arrondi(panneau, 0.04)
-	Habillage.contour(panneau, Style.Contour.Moyen, Enum.ApplyStrokeMode.Border)
+	Habillage.panneau(panneau, Habillage.nommee("Vert"))
 	local limite = Instance.new("UISizeConstraint")
 	limite.MaxSize = Vector2.new(620, 620)
 	limite.Parent = panneau

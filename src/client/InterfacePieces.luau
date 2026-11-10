@@ -42,11 +42,46 @@ function InterfacePieces.demarrer()
 	ecran.Name = "InterfacePieces"
 	ecran.ResetOnSpawn = false
 
-	local compteur =
-		Habillage.texte(ecran, "Pieces", { couleur = COULEUR_PIECES, contour = Style.Contour.Gros })
-	compteur.AnchorPoint = Vector2.new(0.5, 0)
-	compteur.Position = UDim2.new(0.5, 0, 0, DESCENTE)
-	compteur.Size = UDim2.fromOffset(360, 56)
+	-- Pilule dorée : pièce à gauche, montant en gros chiffres.
+	local pilule = Instance.new("Frame")
+	pilule.Name = "Pilule"
+	pilule.AnchorPoint = Vector2.new(0.5, 0)
+	pilule.Position = UDim2.new(0.5, 0, 0, DESCENTE)
+	pilule.Size = UDim2.fromOffset(300, 54)
+	pilule.BackgroundColor3 = Color3.fromRGB(255, 196, 40)
+	pilule.Parent = ecran
+	Habillage.arrondi(pilule, 0.5)
+	local dore = Instance.new("UIGradient")
+	dore.Color = ColorSequence.new(Color3.fromRGB(255, 240, 150), Color3.fromRGB(240, 160, 20))
+	dore.Rotation = 90
+	dore.Parent = pilule
+	local bordure = Instance.new("UIStroke")
+	bordure.Thickness = Style.Contour.Moyen
+	bordure.Color = Color3.fromRGB(150, 85, 10)
+	bordure.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	bordure.Parent = pilule
+	local piece = Instance.new("TextLabel")
+	piece.Name = "Piece"
+	piece.BackgroundTransparency = 1
+	piece.AnchorPoint = Vector2.new(0.5, 0.5)
+	piece.Position = UDim2.new(0, 26, 0.5, 0)
+	piece.Size = UDim2.fromOffset(52, 52)
+	piece.TextScaled = true
+	piece.Text = "🪙"
+	piece.Parent = pilule
+	local compteur = Habillage.texte(
+		pilule,
+		"Pieces",
+		{ couleur = Color3.new(1, 1, 1), contour = Style.Contour.Moyen }
+	)
+	compteur.AnchorPoint = Vector2.new(0, 0.5)
+	compteur.Position = UDim2.new(0, 56, 0.5, 0)
+	compteur.Size = UDim2.new(1, -70, 0.78, 0)
+	compteur.TextXAlignment = Enum.TextXAlignment.Left
+	local traitCompteur = compteur:FindFirstChildOfClass("UIStroke")
+	if traitCompteur then
+		traitCompteur.Color = Color3.fromRGB(130, 70, 0)
+	end
 
 	local revenu = Habillage.texte(
 		ecran,
@@ -54,7 +89,7 @@ function InterfacePieces.demarrer()
 		{ couleur = COULEUR_REVENU, contour = Style.Contour.Petit }
 	)
 	revenu.AnchorPoint = Vector2.new(0.5, 0)
-	revenu.Position = UDim2.new(0.5, 0, 0, DESCENTE + 56)
+	revenu.Position = UDim2.new(0.5, 0, 0, DESCENTE + 58)
 	revenu.Size = UDim2.fromOffset(200, 28)
 
 	-- « BOUM ! » du plaquage : un seul, gros, blanc, au centre.
@@ -72,7 +107,7 @@ function InterfacePieces.demarrer()
 
 	local function rafraichirPieces()
 		local pieces = nombre(joueur, "Pieces")
-		compteur.Text = formater(pieces) .. " pièces"
+		compteur.Text = formater(pieces)
 		if pieces > precedent then
 			Habillage.flotter(
 				ecran,

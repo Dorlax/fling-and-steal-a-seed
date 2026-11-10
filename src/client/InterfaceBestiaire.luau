@@ -39,6 +39,7 @@ function InterfaceBestiaire.demarrer()
 		texte = "Livre",
 		couleur = VIOLET,
 		rond = true,
+		icone = "📖",
 	})
 	bouton.AnchorPoint = Vector2.new(1, 0.5)
 	bouton.Position = UDim2.new(1, -12, 0.42, -(Style.TailleBoutonMin / 2 + 6))
@@ -52,8 +53,7 @@ function InterfaceBestiaire.demarrer()
 	panneau.BackgroundTransparency = 0.08
 	panneau.Visible = false
 	panneau.Parent = ecran
-	Habillage.arrondi(panneau, 0.04)
-	Habillage.contour(panneau, Style.Contour.Moyen, Enum.ApplyStrokeMode.Border)
+	Habillage.panneau(panneau, Habillage.nommee("Violet"))
 	local limite = Instance.new("UISizeConstraint")
 	limite.MaxSize = Vector2.new(720, 640)
 	limite.Parent = panneau
