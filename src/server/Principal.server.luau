@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Nombres = require(ReplicatedStorage.Shared.Nombres)
 local Bases = require(script.Parent.Bases)
+local Cadeaux = require(script.Parent.Cadeaux)
 local Classements = require(script.Parent.Classements)
 local CycleJourNuit = require(script.Parent.CycleJourNuit)
 local Decor = require(script.Parent.Decor)
@@ -82,6 +83,7 @@ remote("VendreCreature").OnServerEvent:Connect(function(joueur: Player, numero: 
 				joueur,
 				`Créature vendue : +{Nombres.abreger(prix)} pièces`
 			)
+			Cadeaux.progresser(joueur, "Vente")
 		end
 	end
 end)
@@ -125,6 +127,33 @@ end)
 remote("EquiperSkin").OnServerEvent:Connect(function(joueur: Player, id: any)
 	if gestionPermise(joueur) then
 		Progression.equiperSkin(joueur, id)
+	end
+end)
+
+-- Cadeaux : connexion, défis, codes, réglages. Le client n'envoie qu'un
+-- numéro, un texte ou un booléen ; Cadeaux vérifie tout.
+remote("ReclamerQuotidien").OnServerEvent:Connect(function(joueur: Player)
+	if gestionPermise(joueur) then
+		Cadeaux.reclamerQuotidien(joueur)
+	end
+end)
+remote("ReclamerDefi").OnServerEvent:Connect(function(joueur: Player, numero: any)
+	if gestionPermise(joueur) then
+		Cadeaux.reclamerDefi(joueur, numero)
+	end
+end)
+local resultatCode = remote("ResultatCode")
+remote("UtiliserCode").OnServerEvent:Connect(function(joueur: Player, texte: any)
+	-- Un essai par seconde : pas de devinette de codes à la chaîne.
+	if gestionPermise(joueur) then
+		derniereGestion[joueur] = os.clock() + 0.75
+		local ok, texteResultat = Cadeaux.utiliserCode(joueur, texte)
+		resultatCode:FireClient(joueur, ok, texteResultat)
+	end
+end)
+remote("ChangerReglage").OnServerEvent:Connect(function(joueur: Player, nom: any, valeur: any)
+	if Sauvegarde.estCharge(joueur) then
+		Cadeaux.changerReglage(joueur, nom, valeur)
 	end
 end)
 
@@ -227,6 +256,7 @@ local function surArrivee(joueur: Player)
 	if Sauvegarde.estCharge(joueur) then
 		Classements.suivre(joueur)
 		Progression.suivre(joueur)
+		Cadeaux.defis(joueur) -- nouveau jour : nouveaux défis
 		local gain = Sauvegarde.prendreGainHorsLigne(joueur)
 		if gain > 0 then
 			task.delay(5, function()

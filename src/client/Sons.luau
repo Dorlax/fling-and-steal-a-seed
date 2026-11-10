@@ -4,6 +4,7 @@
 -- intégrés à Roblox (rbxasset://sounds/…), à remplacer par des sons de la
 -- bibliothèque Roblox. Un « jingle » est une suite de notes jouées avec le
 -- même son à des hauteurs différentes.
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 
@@ -13,6 +14,12 @@ local Sons = {}
 
 local dernier: { [string]: number } = {}
 local cache: { [string]: Sound } = {}
+
+-- Réglage du joueur (⚙️) : sons coupés si ReglageSon vaut false.
+local function sonsActifs(): boolean
+	local joueur = Players.LocalPlayer
+	return joueur == nil or joueur:GetAttribute("ReglageSon") ~= false
+end
 
 local function modele(nom: string): Sound?
 	local infos = (Config.Sons.Effets :: any)[nom]
@@ -37,7 +44,7 @@ end
 function Sons.jouer(nom: string, hauteur: number?)
 	local infos = (Config.Sons.Effets :: any)[nom]
 	local son = modele(nom)
-	if son == nil or infos == nil then
+	if son == nil or infos == nil or not sonsActifs() then
 		return
 	end
 	local maintenant = os.clock()
@@ -57,7 +64,7 @@ end
 -- Joue un jingle de Config.Sons.Jingles (notes = hauteurs successives).
 function Sons.jingle(nom: string)
 	local j = (Config.Sons.Jingles :: any)[nom]
-	if j == nil then
+	if j == nil or not sonsActifs() then
 		return
 	end
 	task.spawn(function()
@@ -89,7 +96,18 @@ function Sons.demarrerMusique()
 	musique.Volume = m.Volume
 	musique.Looped = true
 	musique.Parent = SoundService
-	musique:Play()
+	-- Réglage du joueur (⚙️) : musique coupée si ReglageMusique vaut false.
+	local joueur = Players.LocalPlayer
+	local function appliquer()
+		local active = joueur:GetAttribute("ReglageMusique") ~= false
+		if active and not musique.IsPlaying then
+			musique:Play()
+		elseif not active and musique.IsPlaying then
+			musique:Pause()
+		end
+	end
+	joueur:GetAttributeChangedSignal("ReglageMusique"):Connect(appliquer)
+	appliquer()
 end
 
 return Sons

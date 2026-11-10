@@ -9,6 +9,15 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-10 — Cadeaux et options
+
+- Bouton 🎁 Cadeaux (avec pastille rouge quand une récompense attend) :
+  - Connexion : un cadeau par jour sur 7 jours (pièces, boost ×2, tour de roue gratuit, graine cristal, gros sac au jour 7). Rater un jour fait repartir la série à 1.
+  - Défis : 3 défis du jour tirés parmi 6 (lancers, dépôts, Forge, créature Épique+, ventes, lancers lointains), récompense en pièces.
+  - Codes : codes promo utilisables une fois par joueur (liste dans Config.Codes).
+- Bouton ⚙️ Options : couper ou remettre les sons et la musique (sauvegardé).
+- Tout est vérifié et compté côté serveur (module Cadeaux) ; nouvelles données sauvegardées.
+
 ## 2026-11-10 — Événements spectaculaires et sons
 
 - 3 nouveaux événements : Nuit des étoiles filantes (mutations × 4), Arc-en-ciel de chance (raretés hautes plus fréquentes), Frénésie de la Forge (gains × 2). « Pluie dorée » renommée « Heure dorée ».

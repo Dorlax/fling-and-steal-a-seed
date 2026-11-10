@@ -388,6 +388,46 @@ local Config = {
 		},
 	},
 
+	-- Récompense de connexion : un cadeau par jour, série de 7 jours (rater
+	-- un jour fait repartir à 1). Pieces : minutes de revenu (minimum Min).
+	Quotidien = {
+		Min = 200,
+		Recompenses = {
+			{ Type = "Pieces", Minutes = 5, Texte = "Pièces" },
+			{ Type = "Boost", Secondes = 600, Texte = "Revenus × 2 (10 min)" },
+			{ Type = "Pieces", Minutes = 15, Texte = "Pièces" },
+			{ Type = "Roue", Texte = "Tour de roue gratuit" },
+			{ Type = "Pieces", Minutes = 30, Texte = "Pièces" },
+			{ Type = "Graine", Id = "Cristal", Texte = "Lancer avec graine cristal" },
+			{ Type = "Pieces", Minutes = 60, Texte = "Gros sac de pièces" },
+		} :: { any },
+	},
+
+	-- Défis du jour : 3 défis tirés chaque jour parmi la liste (les mêmes
+	-- pour un joueur toute la journée). Récompense : minutes de revenu.
+	Defis = {
+		Nombre = 3,
+		Liste = {
+			Lancer = { Texte = "Lance %d graines", Objectif = 15, Minutes = 10 },
+			Depot = { Texte = "Ramène %d créatures dans ta base", Objectif = 8, Minutes = 10 },
+			Forge = { Texte = "Entraîne-toi %d secondes à la Forge", Objectif = 90, Minutes = 8 },
+			DepotRare = {
+				Texte = "Ramène %d créature Épique ou mieux",
+				Objectif = 1,
+				Minutes = 20,
+			},
+			Vente = { Texte = "Vends %d créatures", Objectif = 3, Minutes = 6 },
+			Loin = { Texte = "Fais %d lancers au-delà de 500 m", Objectif = 5, Minutes = 12 },
+		},
+	},
+
+	-- Codes promo (à saisir dans Cadeaux > Codes), une fois par joueur.
+	-- Le propriétaire du jeu ajoute ses codes ici (en MAJUSCULES).
+	Codes = {
+		BIENVENUE = { Type = "Pieces", Minutes = 10, Texte = "Bienvenue au Pays des Graines !" },
+		GRAINE = { Type = "Graine", Id = "Doree", Texte = "Ton prochain lancer : graine dorée !" },
+	},
+
 	-- Sons (client). Id "" = muet. Par défaut, sons intégrés à Roblox ; à
 	-- remplacer par des sons de la bibliothèque Roblox (Creator Store).
 	Sons = {
