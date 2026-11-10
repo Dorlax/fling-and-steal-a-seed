@@ -28,6 +28,8 @@ export type DonneesJoueur = {
 	Graine: string, -- graine équipée
 	Trainees: { string }, -- traînées débloquées
 	Trainee: string, -- traînée équipée ("" = aucune)
+	Skins: { string }, -- skins de graine débloqués
+	Skin: string, -- skin équipé ("" = graine classique)
 	ProchaineRoue: number, -- os.time() du prochain tour de roue gratuit
 	Pieces: number,
 	CreaturesBase: { string },
@@ -51,6 +53,8 @@ function Donnees.parDefaut(): DonneesJoueur
 		Graine = "Simple",
 		Trainees = {},
 		Trainee = "",
+		Skins = {},
+		Skin = "",
 		ProchaineRoue = 0,
 		Pieces = 0,
 		CreaturesBase = {},
@@ -169,6 +173,10 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 	donnees.Trainees = nettoyerNoms(brut.Trainees, Config.Trainees.Ordre, {})
 	if type(brut.Trainee) == "string" and table.find(donnees.Trainees, brut.Trainee) then
 		donnees.Trainee = brut.Trainee
+	end
+	donnees.Skins = nettoyerNoms(brut.Skins, Config.Skins.Ordre, {})
+	if type(brut.Skin) == "string" and table.find(donnees.Skins, brut.Skin) then
+		donnees.Skin = brut.Skin
 	end
 	local roue = brut.ProchaineRoue
 	if type(roue) == "number" and roue == roue and roue >= 0 and roue < math.huge then

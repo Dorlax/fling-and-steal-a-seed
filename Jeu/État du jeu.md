@@ -33,6 +33,10 @@
 - Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (10 emplacements, « Base pleine ! »). [[03 Porter et revenus]]
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 
+## Univers et cosmétiques
+- Bases habillées (`DecorBase`) : damier, clôture, lanternes, buissons, chemin, cercle d'apparition. Biomes : rayures de pelouse.
+- Skins de graine (`Config.Skins`, attributs `Skins` / `Skin`, `Progression.verifierSkins` / `equiperSkin`, `Lancers.habillerGraine`), onglet « Skins » du Shop.
+
 ## Passes et Forge double
 - Forge évolutive (`MachineForge`, `Config.Forge.Paliers`) : 5 paliers d'agrès selon le niveau (roue/tapis/piste, rocher/haltères/barre/météorite, cordes) ; client `AnimationsForge` anime le personnage (`Shared.PosesForge`, Motor6D.Transform). Gain par niveau : suite 1-2-5 (`Forge.gainPour`).
 - Interface : taux de rareté derrière le bouton « % » (haut droite), plus de noms au-dessus des monstres.
@@ -70,5 +74,4 @@
 
 ## À faire
 - Créer les 4 passes sur Roblox et mettre leurs Id dans `Config.Passes`.
-- Skins de graines (cosmétiques du Plan).
 - Test du cycle jour/nuit à la main (vérifié seulement par les tests automatiques).

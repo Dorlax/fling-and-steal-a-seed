@@ -82,6 +82,8 @@ return {
 			Graine = "Cristal",
 			Trainees = { "Bulles", "X" },
 			Trainee = "Bulles",
+			Skins = { "Gland", "Faux", "Gland" },
+			Skin = "Comete",
 			ProchaineRoue = 123.4,
 		})
 		assert(d.Renaissances == 2, "renaissances")
@@ -89,6 +91,12 @@ return {
 		assert(d.Graine == "Simple", "graine non possédée refusée")
 		assert(#d.Trainees == 1 and d.Trainee == "Bulles", "traînées")
 		assert(d.ProchaineRoue == 123, "roue")
+		assert(#d.Skins == 1 and d.Skins[1] == "Gland", "skins nettoyés")
+		assert(d.Skin == "", "skin non possédé refusé")
+		for _, id in Config.Skins.Ordre do
+			local sk = Config.Skins.Liste[id]
+			assert(sk.Nom and sk.Couleur and (sk.Pages or sk.Renaissances), `skin {id} complet`)
+		end
 	end,
 
 	["C5 Bestiaire : une page complète compte"] = function()

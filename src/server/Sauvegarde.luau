@@ -131,6 +131,8 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("Graine", donnees.Graine)
 	joueur:SetAttribute("Trainees", table.concat(donnees.Trainees, ","))
 	joueur:SetAttribute("Trainee", donnees.Trainee)
+	joueur:SetAttribute("Skins", table.concat(donnees.Skins, ","))
+	joueur:SetAttribute("Skin", donnees.Skin)
 	joueur:SetAttribute("ProchaineRoue", donnees.ProchaineRoue)
 	-- Bestiaire : les créatures déjà dans la base comptent comme découvertes.
 	decouvertesParJoueur[joueur] = table.clone(donnees.Decouvertes)
@@ -264,6 +266,8 @@ function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
 		Graine = joueur:GetAttribute("Graine"),
 		Trainees = string.split(tostring(joueur:GetAttribute("Trainees") or ""), ","),
 		Trainee = joueur:GetAttribute("Trainee"),
+		Skins = string.split(tostring(joueur:GetAttribute("Skins") or ""), ","),
+		Skin = joueur:GetAttribute("Skin"),
 		ProchaineRoue = joueur:GetAttribute("ProchaineRoue"),
 		Pieces = joueur:GetAttribute("Pieces"),
 		CreaturesBase = creaturesParJoueur[joueur],

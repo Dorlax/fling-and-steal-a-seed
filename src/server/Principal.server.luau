@@ -122,6 +122,11 @@ remote("EquiperTrainee").OnServerEvent:Connect(function(joueur: Player, id: any)
 		Progression.equiperTrainee(joueur, id)
 	end
 end)
+remote("EquiperSkin").OnServerEvent:Connect(function(joueur: Player, id: any)
+	if gestionPermise(joueur) then
+		Progression.equiperSkin(joueur, id)
+	end
+end)
 
 -- Lancer : le client signale seulement « début » et « lâcher » ; ses arguments
 -- éventuels sont ignorés, tout est calculé par le serveur.
