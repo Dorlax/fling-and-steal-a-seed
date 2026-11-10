@@ -57,6 +57,24 @@ local function majListe(joueur: any, liste: { string })
 end
 
 -- Recalcule le revenu (après une renaissance ou une page complète).
+-- « 3,0,12 » -> { 3, 0, 12 } (attributs des défis).
+function Sauvegarde.listeNombres(texte: any): { number }
+	local liste = {}
+	for _, morceau in string.split(tostring(texte or ""), ",") do
+		table.insert(liste, tonumber(morceau) or 0)
+	end
+	return liste
+end
+
+-- « 1,0,1 » -> { true, false, true }.
+function Sauvegarde.listeBooleens(texte: any): { boolean }
+	local liste = {}
+	for _, morceau in string.split(tostring(texte or ""), ",") do
+		table.insert(liste, morceau == "1")
+	end
+	return liste
+end
+
 function Sauvegarde.recalculer(joueur: any)
 	majListe(joueur, creaturesParJoueur[joueur] or {})
 end
@@ -134,6 +152,18 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("Skins", table.concat(donnees.Skins, ","))
 	joueur:SetAttribute("Skin", donnees.Skin)
 	joueur:SetAttribute("ProchaineRoue", donnees.ProchaineRoue)
+	joueur:SetAttribute("QuotidienSerie", donnees.QuotidienSerie)
+	joueur:SetAttribute("QuotidienJour", donnees.QuotidienJour)
+	joueur:SetAttribute("DefisJour", donnees.DefisJour)
+	joueur:SetAttribute("DefisProgres", table.concat(donnees.DefisProgres, ","))
+	local reclames = {}
+	for i = 1, Config.Defis.Nombre do
+		reclames[i] = if donnees.DefisReclames[i] then "1" else "0"
+	end
+	joueur:SetAttribute("DefisReclames", table.concat(reclames, ","))
+	joueur:SetAttribute("CodesUtilises", table.concat(donnees.Codes, ","))
+	joueur:SetAttribute("ReglageSon", donnees.ReglageSon)
+	joueur:SetAttribute("ReglageMusique", donnees.ReglageMusique)
 	-- Bestiaire : les créatures déjà dans la base comptent comme découvertes.
 	decouvertesParJoueur[joueur] = table.clone(donnees.Decouvertes)
 	joueur:SetAttribute("Decouvertes", Collection.encoder(donnees.Decouvertes))
@@ -269,6 +299,14 @@ function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
 		Skins = string.split(tostring(joueur:GetAttribute("Skins") or ""), ","),
 		Skin = joueur:GetAttribute("Skin"),
 		ProchaineRoue = joueur:GetAttribute("ProchaineRoue"),
+		QuotidienSerie = joueur:GetAttribute("QuotidienSerie"),
+		QuotidienJour = joueur:GetAttribute("QuotidienJour"),
+		DefisJour = joueur:GetAttribute("DefisJour"),
+		DefisProgres = Sauvegarde.listeNombres(joueur:GetAttribute("DefisProgres")),
+		DefisReclames = Sauvegarde.listeBooleens(joueur:GetAttribute("DefisReclames")),
+		Codes = string.split(tostring(joueur:GetAttribute("CodesUtilises") or ""), ","),
+		ReglageSon = joueur:GetAttribute("ReglageSon"),
+		ReglageMusique = joueur:GetAttribute("ReglageMusique"),
 		Pieces = joueur:GetAttribute("Pieces"),
 		CreaturesBase = creaturesParJoueur[joueur],
 	})

@@ -18,6 +18,7 @@ local Evenement = require(ReplicatedStorage.Shared.Evenement)
 local Bonus = require(ReplicatedStorage.Shared.Bonus)
 local Passes = require(ReplicatedStorage.Shared.Passes)
 local TerresSauvages = require(script.Parent.TerresSauvages)
+local Cadeaux = require(script.Parent.Cadeaux)
 
 type Portee = {
 	creature: Model,
@@ -388,6 +389,11 @@ function Portage.verifierDepot(joueur: any)
 	portee.creature:Destroy()
 	Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
 	envoyerMessage(joueur, "Créature déposée !")
+	Cadeaux.progresser(joueur, "Depot")
+	local infos = Fiche.lire(portee.fiche)
+	if infos and (table.find(Config.Raretes.Ordre, infos.Rarete) or 0) >= 3 then
+		Cadeaux.progresser(joueur, "DepotRare")
+	end
 end
 
 -- Un tick de revenus : Pieces += somme des revenus des créatures de la base

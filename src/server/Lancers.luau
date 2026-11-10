@@ -21,6 +21,7 @@ local Modeleur = require(script.Parent.Modeleur)
 local Classements = require(script.Parent.Classements)
 local Evenements = require(script.Parent.Evenements)
 local Evenement = require(ReplicatedStorage.Shared.Evenement)
+local Cadeaux = require(script.Parent.Cadeaux)
 
 export type Resultat = {
 	Distance: number,
@@ -401,6 +402,10 @@ end
 function Lancers.traiterLacher(joueur: any): Resultat?
 	local resultat = Lancers.lacher(joueur)
 	if resultat and typeof(joueur) == "Instance" and joueur:IsA("Player") then
+		Cadeaux.progresser(joueur, "Lancer")
+		if resultat.Distance > 500 then
+			Cadeaux.progresser(joueur, "Loin")
+		end
 		local remote = ReplicatedStorage:FindFirstChild("ResultatLancer")
 		if remote and remote:IsA("RemoteEvent") then
 			remote:FireClient(joueur, resultat)

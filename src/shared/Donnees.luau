@@ -30,6 +30,14 @@ export type DonneesJoueur = {
 	Trainee: string, -- traînée équipée ("" = aucune)
 	Skins: { string }, -- skins de graine débloqués
 	Skin: string, -- skin équipé ("" = graine classique)
+	QuotidienSerie: number, -- série de connexion (1..7)
+	QuotidienJour: number, -- jour UTC du dernier cadeau récupéré (-1 = jamais)
+	DefisJour: number, -- jour UTC des défis en cours
+	DefisProgres: { number }, -- progrès des défis du jour
+	DefisReclames: { boolean }, -- récompense déjà réclamée
+	Codes: { string }, -- codes promo déjà utilisés
+	ReglageSon: boolean,
+	ReglageMusique: boolean,
 	ProchaineRoue: number, -- os.time() du prochain tour de roue gratuit
 	Pieces: number,
 	CreaturesBase: { string },
@@ -55,6 +63,14 @@ function Donnees.parDefaut(): DonneesJoueur
 		Trainee = "",
 		Skins = {},
 		Skin = "",
+		QuotidienSerie = 0,
+		QuotidienJour = -1,
+		DefisJour = -1,
+		DefisProgres = {},
+		DefisReclames = {},
+		Codes = {},
+		ReglageSon = true,
+		ReglageMusique = true,
 		ProchaineRoue = 0,
 		Pieces = 0,
 		CreaturesBase = {},
@@ -174,6 +190,37 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 	if type(brut.Trainee) == "string" and table.find(donnees.Trainees, brut.Trainee) then
 		donnees.Trainee = brut.Trainee
 	end
+	donnees.QuotidienSerie =
+		math.clamp(nettoyerStat(brut.QuotidienSerie), 0, #Config.Quotidien.Recompenses)
+	if type(brut.QuotidienJour) == "number" and brut.QuotidienJour == brut.QuotidienJour then
+		donnees.QuotidienJour = math.floor(brut.QuotidienJour)
+	end
+	if type(brut.DefisJour) == "number" and brut.DefisJour == brut.DefisJour then
+		donnees.DefisJour = math.floor(brut.DefisJour)
+	end
+	if type(brut.DefisProgres) == "table" then
+		for i = 1, Config.Defis.Nombre do
+			donnees.DefisProgres[i] = nettoyerStat(brut.DefisProgres[i])
+		end
+	end
+	if type(brut.DefisReclames) == "table" then
+		for i = 1, Config.Defis.Nombre do
+			donnees.DefisReclames[i] = brut.DefisReclames[i] == true
+		end
+	end
+	if type(brut.Codes) == "table" then
+		for _, c in brut.Codes do
+			if
+				type(c) == "string"
+				and (Config.Codes :: any)[c]
+				and not table.find(donnees.Codes, c)
+			then
+				table.insert(donnees.Codes, c)
+			end
+		end
+	end
+	donnees.ReglageSon = brut.ReglageSon ~= false
+	donnees.ReglageMusique = brut.ReglageMusique ~= false
 	donnees.Skins = nettoyerNoms(brut.Skins, Config.Skins.Ordre, {})
 	if type(brut.Skin) == "string" and table.find(donnees.Skins, brut.Skin) then
 		donnees.Skin = brut.Skin

@@ -72,6 +72,11 @@
 - Animations client (`Animations`, calculs dans `Shared.Anime`) : sautillement des créatures, dandinement des monstres, pattes qui marchent, ailes, queues, oreilles, coup de bras/mâchoire quand un monstre frappe (attribut `FrappeA`).
 - Interface : boutons de pièges en rangée en bas à gauche (ne recouvrent plus les stats).
 
+## Cadeaux et options
+- 🎁 Cadeaux (server/Cadeaux, shared/Cadeaux, client/InterfaceCadeaux) : connexion quotidienne sur 7 jours (Config.Quotidien), 3 défis du jour parmi Config.Defis (progrès comptés au serveur : lancers, dépôts, Forge, ventes), codes promo Config.Codes (une fois par joueur).
+- ⚙️ Options : ReglageSon / ReglageMusique, respectés par client/Sons.
+- Remotes : ReclamerQuotidien, ReclamerDefi, UtiliserCode (+ ResultatCode), ChangerReglage.
+
 ## À faire
 - Créer les 4 passes sur Roblox et mettre leurs Id dans `Config.Passes`.
 - Test du cycle jour/nuit à la main (vérifié seulement par les tests automatiques).

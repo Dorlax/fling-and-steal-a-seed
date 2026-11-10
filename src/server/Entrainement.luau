@@ -12,6 +12,7 @@ local Piege = require(ReplicatedStorage.Shared.Piege)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 local Passes = require(ReplicatedStorage.Shared.Passes)
 local Evenement = require(ReplicatedStorage.Shared.Evenement)
+local Cadeaux = require(script.Parent.Cadeaux)
 
 local Entrainement = {}
 
@@ -63,6 +64,7 @@ function Entrainement.tick(joueur: any)
 	local plafond = Config.Forge.PlafondStat
 	-- Frénésie de la Forge (événement) : gains multipliés.
 	local frenesie = Evenement.multiplicateurForge(Workspace:GetAttribute("Evenement"))
+	Cadeaux.progresser(joueur, "Forge", Config.Forge.IntervalleSecondes)
 	for _, nom in noms do
 		local avant = joueur:GetAttribute(nom)
 		if type(avant) ~= "number" or avant ~= avant or avant < 0 then
