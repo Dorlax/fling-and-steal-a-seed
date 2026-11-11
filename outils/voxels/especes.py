@@ -12,7 +12,7 @@ ROSE_JOUE = rgb("ff9fb4")
 
 
 def _pattes4(s, couleur, chaussette, x=0.12, z_av=-0.08, z_ar=0.16, haut=-0.22, r=0.055, pied=-0.47,
-             corps=None, sabot=False):
+             corps=None, sabot=False, coussinet=None, bande=0.35):
     """Quatre pattes droites. La cuisse (ou l'épaule) est fondue dans le corps
     pour éviter les bosses ; la patte est un fût effilé qui finit par un pied
     discret (ou un sabot net si sabot=True)."""
@@ -26,9 +26,12 @@ def _pattes4(s, couleur, chaussette, x=0.12, z_av=-0.08, z_ar=0.16, haut=-0.22, 
             if sabot:
                 m.cone((px, pied + r * 0.9, zz), (px, pied + r * 0.35, zz - r * 0.1), r * 0.9, r * 0.95, chaussette, fondu=0.015)
             else:
-                m.boule((px, pied + r * 0.5, zz - r * 0.2), (r * 1.0, r * 0.5, r * 1.15), chaussette, fondu=0.04)
+                if coussinet:  # pied rond plus marqué (forme d'origine du cerf)
+                    m.boule((px, pied + r * 0.6, zz - r * 0.3), (r * coussinet[0], r * coussinet[1], r * coussinet[2]), chaussette, fondu=0.025)
+                else:
+                    m.boule((px, pied + r * 0.5, zz - r * 0.2), (r * 1.0, r * 0.5, r * 1.15), chaussette, fondu=0.04)
             if chaussette != couleur:
-                bas = pied + (haut - pied) * (0.22 if sabot else 0.35)
+                bas = pied + (haut - pied) * (0.22 if sabot else bande)
                 m.cone((px, bas, zz), (px, pied, zz), r * 1.3, r * 1.3, chaussette, mode="peint")
 
 
@@ -268,7 +271,8 @@ def cerfaurore():
     c.boule((0, -0.15, 0.06), (0.1, 0.07, 0.16), VENTRE, mode="peint")
     for x, y, z in ((-0.1, -0.03, 0.02), (0.1, -0.02, 0.1), (-0.09, 0.0, 0.17), (0.08, -0.05, 0.0), (0.0, 0.02, 0.12), (-0.04, 0.03, 0.22)):
         c.boule((x, y, z), (0.025, 0.02, 0.025), VENTRE, mode="peint")
-    _pattes4(s, FAON, rgb("7a4a35"), x=0.085, z_av=-0.05, z_ar=0.2, haut=-0.15, r=0.037, corps=c, sabot=True)
+    _pattes4(s, FAON, rgb("7a4a35"), x=0.09, z_av=-0.05, z_ar=0.2, haut=-0.15, r=0.04, corps=c,
+             coussinet=(1.05, 0.62, 1.3), bande=0.4)
     q = s.membre("Queue", "Queue", (0, -0.04, 0.29))
     q.cone((0, -0.04, 0.28), (0, 0.0, 0.34), 0.04, 0.035, VENTRE)
     t = s.membre("Tete", "Tete", (0, 0.0, -0.08))
