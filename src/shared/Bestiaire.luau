@@ -2268,6 +2268,27 @@ local function chimere(recette: any): Espece?
 			table.insert(blocs, c)
 		end
 	end
+	-- Reste dans la boîte 1 × 1 × 1 : si les greffes dépassent, tout le modèle
+	-- rétrécit autour de ses pieds (Y = -0,5).
+	local mini, maxi = boite(blocs)
+	local facteur = math.min(
+		1,
+		1.02 / math.max(maxi[2] + 0.5, 1e-3),
+		1.04 / math.max(maxi[1] - mini[1], 1e-3),
+		1.04 / math.max(maxi[3] - mini[3], 1e-3)
+	)
+	if facteur < 1 then
+		local function reduire(v: { number }): { number }
+			return { v[1] * facteur, -0.5 + (v[2] + 0.5) * facteur, v[3] * facteur }
+		end
+		for _, b in blocs do
+			b.p = reduire(b.p)
+			if b.j then
+				b.j = reduire(b.j :: { number })
+			end
+			b.t = { b.t[1] * facteur, b.t[2] * facteur, b.t[3] * facteur }
+		end
+	end
 	-- Couleurs : toute la palette tourne vers la teinte du biome.
 	local couleurs: { { number } } = {}
 	for _, b in blocs do
