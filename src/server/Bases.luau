@@ -142,22 +142,6 @@ local function construire(joueur: any, centre: Vector3): Model
 		end)
 	end
 
-	local panneau = Instance.new("BillboardGui")
-	panneau.Name = "Panneau"
-	panneau.Size = UDim2.fromOffset(200, 40)
-	panneau.StudsOffset = Vector3.new(0, 5, 0)
-	panneau.AlwaysOnTop = false
-	panneau.Parent = forge
-	local texte = Instance.new("TextLabel")
-	texte.Size = UDim2.fromScale(1, 1)
-	texte.BackgroundTransparency = 1
-	texte.Font = Enum.Font.GothamBold
-	texte.TextScaled = true
-	texte.TextColor3 = Color3.new(1, 1, 1)
-	texte.TextStrokeTransparency = 0.4
-	texte.Text = "Forge de " .. tostring(joueur.Name)
-	texte.Parent = panneau
-
 	local apparition = Instance.new("Attachment")
 	apparition.Name = "Apparition"
 	apparition.Parent = sol
@@ -193,7 +177,9 @@ local function construire(joueur: any, centre: Vector3): Model
 	panneauVerrou.Name = "PanneauVerrou"
 	panneauVerrou.Size = UDim2.fromOffset(260, 50)
 	panneauVerrou.StudsOffset = Vector3.new(0, 3, 0)
-	panneauVerrou.MaxDistance = 150
+	panneauVerrou.MaxDistance = 60
+	-- Affiché seulement pendant le verrou (le bouton « Verrouiller » dit le prix).
+	panneauVerrou.Enabled = false
 	panneauVerrou.Parent = linteau
 	local texteVerrou = Instance.new("TextLabel")
 	texteVerrou.Name = "Texte"
@@ -430,6 +416,9 @@ function Bases.afficherVerrou(proprietaire: any, maintenant: number)
 		bouclier.Transparency = if verrouillee then TRANSPARENCE_BOUCLIER else 1
 	end
 	local panneau = base.modele:FindFirstChild("PanneauVerrou", true)
+	if panneau and panneau:IsA("BillboardGui") then
+		panneau.Enabled = verrouillee
+	end
 	local texte = panneau and panneau:FindFirstChild("Texte")
 	if texte and texte:IsA("TextLabel") then
 		texte.Text = Raid.texteVerrou(maintenant, verrouJusqua, pret)
@@ -483,7 +472,7 @@ local function creerCreatureExposee(
 	panneau.Name = "Panneau"
 	panneau.Size = UDim2.fromOffset(90, 30)
 	panneau.StudsOffset = Vector3.new(0, diametre, 0)
-	panneau.MaxDistance = 120
+	panneau.MaxDistance = 35
 	panneau.Parent = corps
 	local texte = Instance.new("TextLabel")
 	texte.Size = UDim2.fromScale(1, 1)

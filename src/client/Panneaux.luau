@@ -1,6 +1,7 @@
 --!strict
 -- Restylage LOCAL des affichages créés par le serveur :
---  - panneaux « Panneau » des créatures et des monstres (couleur, taille, police) ;
+--  - panneaux « Panneau » des créatures et des monstres : texte seul, sans
+--    boîte (couleur de rareté, contour) ; en base, seulement le revenu « +N/s » ;
 --  - « BOUM ! » serveur de l'effet de plaquage caché (un seul « BOUM ! » à l'écran) ;
 --  - prompts « Recolter », « Voler », « Verrouiller » en gros boutons cartoon.
 -- Ne détruit rien, ne change aucun attribut : seules des propriétés d'affichage
@@ -19,7 +20,7 @@ local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local Panneaux = {}
 
-local AGRANDISSEMENT = 1.6 -- au moins 1,5 × la taille actuelle
+local AGRANDISSEMENT = 1.2 -- un peu plus grand que le serveur, sans boîte
 local ESSAIS = 5 -- tentatives (attributs ou texte pas encore répliqués)
 
 -- Couleur du gros bouton de chaque prompt personnalisé.
@@ -46,7 +47,7 @@ local function cacherBoum(objet: Instance)
 	end
 end
 
-type Genre = { couleur: { number }, texte: string }
+type Genre = { couleur: { number }, texte: string, enBase: boolean }
 
 -- Que montre ce panneau ? Créature (Rarete), fausse graine (déguisée en
 -- créature légendaire, pour ne pas la trahir) ou monstre (Monstre = true).
@@ -61,21 +62,34 @@ local function genreDe(panneau: BillboardGui, label: TextLabel): Genre?
 				local taille = if type(attributTaille) == "string"
 					then attributTaille
 					else "Normale"
-				local nom = Fiche.texte(rarete, taille)
 				if courant:GetAttribute("Emplacement") ~= nil then
-					-- Exposée en base : rareté + revenu actuel (taille comprise).
-					nom ..= `\n+{Revenus.parSeconde(Fiche.ecrire(rarete, taille))}/s`
+					-- Exposée en base : seulement son revenu (taille comprise).
+					local revenu = Revenus.parSeconde(Fiche.ecrire(rarete, taille))
+					return {
+						couleur = Style.couleurRarete(rarete),
+						texte = `+{revenu}/s`,
+						enBase = true,
+					}
 				end
-				return { couleur = Style.couleurRarete(rarete), texte = nom }
+				return {
+					couleur = Style.couleurRarete(rarete),
+					texte = Fiche.texte(rarete, taille),
+					enBase = false,
+				}
 			end
 			if courant:GetAttribute("Type") == "FausseGraine" then
-				return { couleur = Style.couleurRarete("Legendaire"), texte = label.Text }
+				return {
+					couleur = Style.couleurRarete("Legendaire"),
+					texte = label.Text,
+					enBase = false,
+				}
 			end
 			if courant:GetAttribute("Monstre") == true then
 				local zone = courant:GetAttribute("Zone")
 				return {
 					couleur = Style.couleurZone(if type(zone) == "string" then zone else ""),
 					texte = label.Text,
+					enBase = false,
 				}
 			end
 		end
@@ -99,32 +113,23 @@ local function restyler(panneau: BillboardGui, essai: number)
 	local genre = trouve :: Genre
 	restyles[panneau] = true
 
+	local echelle = if genre.enBase then 1 else AGRANDISSEMENT
 	local taille = panneau.Size
 	panneau.Size = UDim2.new(
-		taille.X.Scale * AGRANDISSEMENT,
-		taille.X.Offset * AGRANDISSEMENT,
-		taille.Y.Scale * AGRANDISSEMENT,
-		taille.Y.Offset * AGRANDISSEMENT
+		taille.X.Scale * echelle,
+		taille.X.Offset * echelle,
+		taille.Y.Scale * echelle,
+		taille.Y.Offset * echelle
 	)
 	panneau.LightInfluence = 0
 
-	-- Fond arrondi semi-opaque derrière le texte.
-	local fond = Instance.new("Frame")
-	fond.Name = "Fond"
-	fond.Size = UDim2.fromScale(1, 1)
-	fond.BackgroundColor3 = Habillage.couleur(genre.couleur)
-	fond.BackgroundTransparency = 0.25
-	fond.ZIndex = 0
-	Habillage.arrondi(fond, 0.4)
-	Habillage.contour(fond, Style.Contour.Petit, Enum.ApplyStrokeMode.Border)
-	fond.Parent = panneau
-
+	-- Texte seul (pas de boîte) : couleur de rareté et contour sombre.
 	local l = label :: TextLabel
 	l.ZIndex = 2
 	l.Size = UDim2.new(1, -12, 1, -6)
 	l.AnchorPoint = Vector2.new(0.5, 0.5)
 	l.Position = UDim2.fromScale(0.5, 0.5)
-	l.TextColor3 = Color3.new(1, 1, 1)
+	l.TextColor3 = Habillage.couleur(genre.couleur)
 	l.Font = Habillage.Police
 	l.TextStrokeTransparency = 1
 	l.Text = genre.texte
@@ -181,14 +186,10 @@ local function montrerPrompt(
 		couleur = Habillage.nommee(PROMPTS[prompt.Name] or "Bleu"),
 		taille = Vector2.new(200, Style.TailleBoutonMin),
 	})
-	texte.Size = UDim2.new(1, -16, 0.62, 0)
-	texte.Position = UDim2.fromScale(0.5, 0.36)
+	-- Juste l'action (la créature visée se voit déjà) : pas de deuxième ligne.
+	texte.Size = UDim2.new(1, -16, 0.8, 0)
+	texte.Position = UDim2.fromScale(0.5, 0.5)
 	texte.Text = libelle
-	local objetTexte = Habillage.texte(bouton, "Objet", { contour = Style.Contour.Petit })
-	objetTexte.AnchorPoint = Vector2.new(0.5, 1)
-	objetTexte.Position = UDim2.new(0.5, 0, 1, -4)
-	objetTexte.Size = UDim2.new(1, -16, 0.3, 0)
-	objetTexte.Text = prompt.ObjectText
 
 	local jauge = Habillage.jauge(billboard, "Maintien", UDim2.new(1, -20, 0, 18))
 	jauge.cadre.AnchorPoint = Vector2.new(0.5, 1)

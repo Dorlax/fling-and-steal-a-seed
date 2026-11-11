@@ -20,6 +20,7 @@ local COULEUR_PRET = Habillage.nommee("Orange")
 local COULEUR_ATTENTE = Habillage.nommee("Gris")
 local TAILLE = 120 -- pixels : assez grand pour le tactile
 local MARGE_PORTEE = 2 -- studs : tolérance de l'aide côté client (le serveur tranche)
+local DISTANCE_AFFICHAGE = 35 -- studs : le bouton n'apparaît qu'avec un porteur aussi près
 
 -- Noms d'Enum.KeyCode venant de Config (« F », « ButtonY »).
 local function codeTouche(nom: string): Enum.KeyCode
@@ -66,8 +67,8 @@ function InterfacePlaquage.demarrer()
 		return not (type(pretA) == "number" and Workspace:GetServerTimeNow() < pretA)
 	end
 
-	-- Aide côté client seulement : y a-t-il un porteur à peu près à portée ?
-	local function porteurProche(): boolean
+	-- Aide côté client seulement : y a-t-il un porteur à moins de `portee` ?
+	local function porteurA(portee: number): boolean
 		local maRacine = racineDe(joueur)
 		if maRacine == nil then
 			return false
@@ -78,7 +79,7 @@ function InterfacePlaquage.demarrer()
 				local racine = racineDe(autre)
 				if racine ~= nil then
 					local distance = ((racine :: BasePart).Position - maPosition).Magnitude
-					if distance <= Config.Plaquage.Portee + MARGE_PORTEE then
+					if distance <= portee then
 						return true
 					end
 				end
@@ -105,7 +106,8 @@ function InterfacePlaquage.demarrer()
 			if etat ~= Enum.UserInputState.Begin then
 				return Enum.ContextActionResult.Pass
 			end
-			if entree.KeyCode == clavier and not (pret() and porteurProche()) then
+			local portee = Config.Plaquage.Portee + MARGE_PORTEE
+			if entree.KeyCode == clavier and not (pret() and porteurA(portee)) then
 				return Enum.ContextActionResult.Pass
 			end
 			plaquer()
@@ -116,10 +118,14 @@ function InterfacePlaquage.demarrer()
 		manette
 	)
 
-	-- Délai : bouton grisé et secondes restantes.
+	-- Délai : bouton grisé et secondes restantes. Le bouton (et sa jauge)
+	-- n'apparaît que si un porteur est dans les parages ou pendant la recharge.
 	task.spawn(function()
 		while true do
 			local estPret = pret()
+			local visible = not estPret or porteurA(DISTANCE_AFFICHAGE)
+			bouton.Visible = visible
+			jauge.cadre.Visible = visible
 			local maintenant = Workspace:GetServerTimeNow()
 			local pretA = joueur:GetAttribute("PlaquagePretA") :: number?
 			texte.Text = Plaquage.texteBouton(maintenant, pretA)
