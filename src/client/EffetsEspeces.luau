@@ -86,7 +86,7 @@ local function biomeDe(nom: string): string?
 	if numero == nil then
 		return nil
 	end
-	local biome = Biomes.Liste[numero]
+	local biome = Biomes.Liste[numero :: number]
 	if (Effets.ParBiome :: any)[biome.Id] then
 		return biome.Id
 	end
