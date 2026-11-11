@@ -196,6 +196,7 @@ local function membre(m, runs, cols, curseurs, res, pal): MeshPart
 	end
 	-- Le maillage ne change plus : on le fige en contenu opaque et on libère
 	-- l'EditableMesh (le budget mémoire client est très serré).
+	-- selene: allow(undefined_variable)
 	local contenu = Content.fromObject(em)
 	local okFige, resultat, fige = pcall(function()
 		return AssetService:CreateDataModelContentAsync(contenu)
