@@ -12,6 +12,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local Anime = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Anime"))
+local HabillageVoxels = require(script.Parent:WaitForChild("HabillageVoxels"))
 local Promenade = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Promenade"))
 
 local Animations = {}
@@ -34,6 +35,7 @@ type Suivi = {
 	bougeA: number, -- dernier déplacement par le serveur (os.clock)
 	-- Créature de base qui se promène (Shared.Promenade), sinon nil.
 	centre: Vector3?,
+	voxels: boolean, -- habillée en voxels (pièces locales, ancrées)
 	graine: number,
 	rayon: number,
 }
@@ -151,6 +153,23 @@ function suivre(objet: Instance)
 		return
 	end
 	local base = modele:GetPivot()
+	-- Espèce sculptée en voxels : on remplace ses blocs avant de relever les
+	-- pièces. Si son modèle n'est pas encore construit, on garde les blocs et
+	-- on recommence dès qu'il est prêt.
+	local voxels = false
+	if HabillageVoxels.concerne(modele) then
+		if HabillageVoxels.pret(modele) then
+			voxels = HabillageVoxels.habiller(modele, base)
+		else
+			HabillageVoxels.preparer(modele, function()
+				local s = suivis[modele]
+				if s and modele.Parent ~= nil and HabillageVoxels.habiller(modele, s.base) then
+					s.voxels = true
+					s.pieces = releverPieces(modele, s.base)
+				end
+			end)
+		end
+	end
 	local centre = modele:GetAttribute("PromenadeCentre")
 	local graine = modele:GetAttribute("Graine")
 	local rayon = modele:GetAttribute("PromenadeRayon")
@@ -164,6 +183,7 @@ function suivre(objet: Instance)
 		monstre = sorte == "Monstre",
 		pieces = releverPieces(modele, base),
 		bougeA = 0,
+		voxels = voxels,
 	}
 	modele.Destroying:Connect(function()
 		suivis[modele] = nil
@@ -213,8 +233,18 @@ local function pas()
 			continue
 		end
 		if not (corps :: BasePart).Anchored then
-			-- Portée : c'est la soudure du serveur qui la place.
+			-- Portée : c'est la soudure du serveur qui la place. Les membres
+			-- voxels (locaux, ancrés) suivent le Corps à la main.
 			s.pose = nil
+			if s.voxels then
+				local actuel = modele:GetPivot()
+				for _, p in s.pieces do
+					if p.part ~= corps and p.part.Anchored then
+						table.insert(parts, p.part)
+						table.insert(cadres, actuel * p.repos)
+					end
+				end
+			end
 			continue
 		end
 		local actuel = modele:GetPivot()

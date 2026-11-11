@@ -118,6 +118,9 @@ function Modeleur.construire(
 		p.Parent = modele
 	end
 	modele:SetAttribute("Espece", espece.Nom)
+	-- Échelle des blocs (studs par unité) : le client s'en sert pour poser le
+	-- modèle sculpté en voxels de l'espèce à la même taille.
+	modele:SetAttribute("EchelleBlocs", taille)
 	-- Le client reçoit le modèle en entier (pour relever toutes ses pièces).
 	modele.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	return #espece.Blocs
