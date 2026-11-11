@@ -9,6 +9,13 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-11 — Designs voxels, animations et interface épurée
+
+- Les 16 espèces de la Prairie (10 créatures, 6 monstres) passent en voxels sculptés, construits sur la machine du joueur. Si l'option « Mesh / Image APIs » de l'expérience est coupée, les anciens blocs restent.
+- L'arc-en-ciel géant et les graines géantes des événements, qui bouchaient la vue, sont retirés.
+- Animations : un monstre qui poursuit court (penché en avant, rebond, pattes plus rapides) ; une créature voxel portée gigote.
+- Interface allégée : boutons de la Forge seulement sur la Forge, « Agrandir » dans le panneau Base, pièges cachés en zone sûre, PLAQUER seulement près d'un porteur, panneaux des créatures sans boîte, moins de textes flottants.
+
 ## 2026-11-11 — Zone sûre, monstres et base sur un seul niveau
 
 - **Zone sûre** : le premier biome commence 60 studs plus loin. Entre les bases et la ligne (bande blanche, rideau scintillant, pancartes « ZONE SÛRE » / « TERRES SAUVAGES »), personne ne peut être attaqué : ni par un monstre, ni par un plaquage, ni par un piège. Le joueur garde la créature qu'il rapporte. Seul un voleur qui porte une créature volée dans une base reste plaquable (sinon les raids ne se défendent plus).
