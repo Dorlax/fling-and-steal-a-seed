@@ -12,14 +12,20 @@ ROSE_JOUE = rgb("ff9fb4")
 
 
 def _pattes4(s, couleur, chaussette, x=0.12, z_av=-0.08, z_ar=0.16, haut=-0.22, r=0.055, pied=-0.47):
+    """Quatre pattes droites : épaule/cuisse fondue sous le corps, patte
+    effilée bien verticale, coussinet posé à plat sous la patte."""
     for cote, nx in ((-1, "G"), (1, "D")):
         for zz, nz, ph in ((z_av, "Av", 0.0), (z_ar, "Ar", 0.5)):
-            m = s.membre(f"Patte{nz}{nx}", "Patte", (cote * x, haut, zz), cote, ph if cote < 0 else 0.5 - ph)
-            m.cone((cote * x, haut, zz), (cote * x, pied + r * 0.8, zz - 0.01), r, r * 0.92, couleur)
-            m.boule((cote * x, pied + r * 0.7, zz - 0.02), (r * 1.05, r * 0.75, r * 1.25), chaussette, fondu=0.02)
+            px = cote * x
+            m = s.membre(f"Patte{nz}{nx}", "Patte", (px, haut, zz), cote, ph if cote < 0 else 0.5 - ph)
+            # Cuisse (ou épaule) : un peu plus large, cachée en partie dans le corps.
+            m.boule((px * 0.9, haut + 0.01, zz), (r * 1.45, r * 1.7, r * 1.55), couleur, fondu=0.0)
+            m.cone((px, haut, zz), (px, pied + r * 0.9, zz), r * 1.05, r * 0.85, couleur, fondu=0.03)
+            # Coussinet : plat, centré sous la patte, un peu vers l'avant.
+            m.boule((px, pied + r * 0.6, zz - r * 0.3), (r * 1.05, r * 0.62, r * 1.3), chaussette, fondu=0.025)
             if chaussette != couleur:
-                bas = pied + (haut - pied) * 0.45
-                m.cone((cote * x, bas, zz), (cote * x, pied + r, zz - 0.01), r * 1.01, r * 0.95, chaussette, mode="peint")
+                bas = pied + (haut - pied) * 0.4
+                m.cone((px, bas, zz), (px, pied + r, zz), r * 1.2, r * 1.2, chaussette, mode="peint")
 
 
 def _joues(t, centre_y, z, ecart, r=0.045):
@@ -78,13 +84,13 @@ def _aile(s, nom, cote, base, couleur, bout=None, longueur=0.2, rot=(0, 0, 0), e
     return a
 
 
-def _pieds_oiseau(s, couleur, x=0.08, y=-0.42, z=-0.02):
+def _pieds_oiseau(s, couleur, x=0.08, y=-0.42, z=0.0):
+    """Pattes d'oiseau sous le centre du corps : tige + trois doigts à plat."""
     for c, nom in ((-1, "PatteG"), (1, "PatteD")):
         m = s.membre(nom, "Patte", (c * x, y + 0.05, z), c, 0.0 if c < 0 else 0.5)
-        m.cone((c * x, y + 0.06, z + 0.02), (c * x, -0.47, z), 0.022, 0.02, couleur)
-        for dz in (-0.05, 0.0):
-            for dx in (-0.025, 0.025):
-                m.cone((c * x, -0.475, z), (c * x + dx, -0.48, z + dz - 0.03), 0.018, 0.014, couleur, fondu=0.01)
+        m.cone((c * x, y + 0.07, z), (c * x, -0.465, z), 0.027, 0.024, couleur)
+        for dx, dz in ((-0.03, -0.045), (0.0, -0.06), (0.03, -0.045)):
+            m.cone((c * x, -0.472, z), (c * x + dx * 1.3, -0.478, z + dz * 1.3), 0.024, 0.019, couleur, fondu=0.015)
 
 
 # -------------------------------------------------------------- Poussigraine
@@ -109,7 +115,7 @@ def poussigraine():
     _joues(c, -0.12, -0.235, 0.17, 0.05)
     _aile(s, "AileG", -1, (-0.28, -0.12, 0.04), JAUNE, rgb("ffbf3a"), 0.14, rot=(0, 0, 30), epais=0.04)
     _aile(s, "AileD", 1, (0.28, -0.12, 0.04), JAUNE, rgb("ffbf3a"), 0.14, rot=(0, 0, 30), epais=0.04)
-    _pieds_oiseau(s, ORANGE, x=0.1, y=-0.42, z=-0.04)
+    _pieds_oiseau(s, ORANGE, x=0.1, y=-0.42, z=0.0)
     return s
 
 
@@ -120,7 +126,7 @@ def champichou():
     ROUGE, PIED = rgb("ff4f5e"), rgb("fff0dc")
     c = s.membre("Corps")
     c.cone((0, -0.36, 0), (0, 0.02, 0), 0.2, 0.17, PIED)
-    c.boule((0, -0.33, 0), (0.22, 0.1, 0.22), PIED)
+    c.boule((0, -0.36, 0), (0.2, 0.09, 0.2), PIED)
     c.oeil((-0.085, -0.12, -0.185), 0.048)
     c.oeil((0.085, -0.12, -0.185), 0.048)
     c.boule((0, -0.2, -0.205), (0.035, 0.018, 0.02), rgb("8a3a3a"), plat=True, fondu=0.0)
@@ -137,8 +143,9 @@ def champichou():
         y = 0.12 + 0.23 * max(0.0, 1 - (x * x / 0.37 ** 2 + z * z / 0.35 ** 2)) ** 0.5
         t.boule((x, y, z), (0.055, 0.04, 0.055), BLANC_POIS, mode="peint")
     for cc, nom in ((-1, "PiedG"), (1, "PiedD")):
-        m = s.membre(nom, "Patte", (cc * 0.1, -0.4, -0.02), cc, 0.0 if cc < 0 else 0.5)
-        m.boule((cc * 0.1, -0.45, -0.05), (0.07, 0.045, 0.09), rgb("e8c8a8"))
+        m = s.membre(nom, "Patte", (cc * 0.09, -0.4, -0.05), cc, 0.0 if cc < 0 else 0.5)
+        m.cone((cc * 0.1, -0.4, -0.12), (cc * 0.11, -0.455, -0.17), 0.05, 0.05, rgb("f3dcc0"))
+        m.boule((cc * 0.11, -0.46, -0.21), (0.065, 0.04, 0.075), rgb("e8c8a8"), fondu=0.03)
     return s
 
 
@@ -169,9 +176,14 @@ def lapinou():
         o.courbe([(cc * 0.085, 0.18, -0.055), (cc * 0.11, 0.3, -0.04), (cc * 0.14, 0.4, -0.01)], [0.025, 0.035, 0.018], ROSE, mode="peint")
         o.boule((cc * 0.15, 0.43, 0.04), (0.04, 0.04, 0.04), LILAS, mode="peint")
     for cc in (-1, 1):
-        for zz, nz, ph in ((-0.06, "Av", 0.0), (0.16, "Ar", 0.5)):
-            m = s.membre(f"Patte{nz}{'G' if cc < 0 else 'D'}", "Patte", (cc * 0.09, -0.36, zz), cc, ph)
-            m.boule((cc * 0.11, -0.45, zz - 0.04), (0.06, 0.045, 0.09 if nz == "Ar" else 0.06), BLANC_L)
+        n = "G" if cc < 0 else "D"
+        ar = s.membre(f"PatteAr{n}", "Patte", (cc * 0.13, -0.33, 0.1), cc, 0.5)
+        ar.boule((cc * 0.14, -0.33, 0.1), (0.08, 0.1, 0.11), BLANC_L, fondu=0.0)
+        ar.boule((cc * 0.13, -0.455, 0.0), (0.06, 0.04, 0.12), BLANC_L, fondu=0.04)
+        ar.boule((cc * 0.13, -0.47, -0.04), (0.035, 0.02, 0.05), ROSE, mode="peint")
+        av = s.membre(f"PatteAv{n}", "Patte", (cc * 0.07, -0.3, -0.1), cc, 0.0)
+        av.cone((cc * 0.07, -0.3, -0.1), (cc * 0.075, -0.45, -0.13), 0.045, 0.04, BLANC_L)
+        av.boule((cc * 0.075, -0.455, -0.145), (0.045, 0.03, 0.055), BLANC_L, fondu=0.02)
     return s
 
 
@@ -199,8 +211,13 @@ def tortipousse():
     _joues(t, -0.14, -0.455, 0.11, 0.035)
     for cc in (-1, 1):
         for zz, nz, ph in ((-0.1, "Av", 0.0), (0.26, "Ar", 0.5)):
-            m = s.membre(f"Patte{nz}{'G' if cc < 0 else 'D'}", "Patte", (cc * 0.22, -0.32, zz), cc, ph)
-            m.cone((cc * 0.22, -0.3, zz), (cc * 0.25, -0.44, zz - 0.01), 0.06, 0.065, PEAU)
+            m = s.membre(f"Patte{nz}{'G' if cc < 0 else 'D'}", "Patte", (cc * 0.18, -0.3, zz), cc, ph)
+            # Patte trapue qui sort en biais de sous la carapace.
+            m.boule((cc * 0.16, -0.31, zz), (0.08, 0.06, 0.08), PEAU, fondu=0.0)
+            m.cone((cc * 0.17, -0.31, zz), (cc * 0.27, -0.42, zz + (-0.03 if nz == "Av" else 0.03)), 0.065, 0.075, PEAU, fondu=0.03)
+            m.boule((cc * 0.28, -0.45, zz + (-0.04 if nz == "Av" else 0.03)), (0.085, 0.04, 0.085), PEAU, fondu=0.03)
+            for dx in (-0.035, 0.0, 0.035):
+                m.boule((cc * 0.28 + dx, -0.46, zz + (-0.12 if nz == "Av" else -0.05)), (0.017, 0.015, 0.015), rgb("e9ffd8"), mode="peint")
     q = s.membre("Queue", "Queue", (0, -0.3, 0.38))
     q.cone((0, -0.3, 0.36), (0, -0.33, 0.47), 0.04, 0.012, PEAU)
     return s
@@ -233,7 +250,7 @@ def hibouflor():
     c.boule((0, 0.25, 0.02), (0.035, 0.025, 0.035), rgb("ffe066"), fondu=0.0)
     _aile(s, "AileG", -1, (-0.26, -0.08, 0.04), PLUME, rgb("4a58d8"), 0.16, rot=(0, 0, 75), epais=0.05)
     _aile(s, "AileD", 1, (0.26, -0.08, 0.04), PLUME, rgb("4a58d8"), 0.16, rot=(0, 0, 75), epais=0.05)
-    _pieds_oiseau(s, rgb("ffa23a"), x=0.09, y=-0.42, z=-0.06)
+    _pieds_oiseau(s, rgb("ffa23a"), x=0.09, y=-0.42, z=0.0)
     return s
 
 
@@ -350,7 +367,7 @@ def phenigraine():
     q = s.membre("Queue", "Queue", (0, -0.2, 0.24))
     for dx, col in ((-0.07, OR), (0.0, FLAMME), (0.07, OR)):
         q.courbe([(dx * 0.5, -0.22, 0.22), (dx, -0.25, 0.35), (dx * 1.8, -0.18, 0.46)], [0.05, 0.04, 0.012], col, fondu=0.02, plat=col == FLAMME)
-    _pieds_oiseau(s, OR, x=0.09, y=-0.42, z=-0.04)
+    _pieds_oiseau(s, OR, x=0.09, y=-0.42, z=0.0)
     return s
 
 
