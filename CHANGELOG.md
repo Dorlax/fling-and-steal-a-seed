@@ -9,6 +9,10 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-12 — Interface masquée pendant le vol de la graine
+
+- Pendant le suivi caméra de la graine, le reste de l'interface (argent, boutons) est caché : la distance et la rareté ne se chevauchent plus avec la barre d'argent. L'interface revient à la fin du vol.
+
 ## 2026-11-11 — Lancer depuis la zone de départ, caméra de la graine, animations
 
 - On ne lance plus que depuis la zone de départ (zone sûre), agrandie à 120 studs : bouton LANCER caché ailleurs, vérifié par le serveur.

@@ -116,6 +116,7 @@ local function creerEcran()
 	e.Name = "LancerVisuel"
 	e.ResetOnSpawn = false
 	e.IgnoreGuiInset = true
+	e.DisplayOrder = 50
 	local c = Habillage.texte(e, "Distance", { contour = Style.Contour.Gros })
 	c.AnchorPoint = Vector2.new(0.5, 0)
 	c.Position = UDim2.fromScale(0.5, 0.1)
@@ -130,6 +131,22 @@ local function creerEcran()
 	s.Parent = r
 	e.Parent = joueurLocal:WaitForChild("PlayerGui")
 	ecran, compteur, carte, echelleCarte = e, c, r, s
+end
+
+-- Cache le reste de l'interface pendant le vol ; renvoie de quoi la remettre.
+local function cacherInterface(): () -> ()
+	local caches = {}
+	for _, gui in joueurLocal:WaitForChild("PlayerGui"):GetChildren() do
+		if gui:IsA("ScreenGui") and gui ~= ecran and gui.Enabled then
+			gui.Enabled = false
+			table.insert(caches, gui)
+		end
+	end
+	return function()
+		for _, gui in caches do
+			gui.Enabled = true
+		end
+	end
 end
 
 -- Point de l'arc à l'instant a (0 -> 1).
@@ -223,6 +240,7 @@ function LancerVisuel.suivre(resultat: any)
 			joueurLocal:RequestStreamAroundAsync(arrivee, 2)
 		end)
 		local graine = graineLocale(depart)
+		local remettreInterface = cacherInterface()
 		local c = compteur :: TextLabel
 		c.Visible = true
 		c.TextColor3 = Color3.new(1, 1, 1)
@@ -240,6 +258,7 @@ function LancerVisuel.suivre(resultat: any)
 		connexion:Disconnect()
 		graine:Destroy()
 		if numero ~= volEnCours then
+			remettreInterface()
 			camera.CameraType = Enum.CameraType.Custom
 			return
 		end
@@ -269,6 +288,7 @@ function LancerVisuel.suivre(resultat: any)
 			task.wait()
 		end
 		regard:Disconnect()
+		remettreInterface()
 		if numero == volEnCours then
 			c.Visible = false
 			if carte then
