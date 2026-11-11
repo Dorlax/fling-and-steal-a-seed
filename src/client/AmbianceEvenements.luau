@@ -202,85 +202,6 @@ local function creerCiel(hauteur: number, taille: number): Part
 	return p
 end
 
--- Graine géante lumineuse qui dérive et tourne lentement.
-local function graineGeante(parent: Instance, angle: number, rayon: number, hauteur: number)
-	local m = Instance.new("Model")
-	m.Name = "GraineGeante"
-	m.Parent = parent
-	local corps = partie(m, Vector3.new(7, 9, 7), Color3.fromRGB(190, 255, 150), Enum.PartType.Ball)
-	corps.Transparency = 0.15
-	local feuilles: { Part } = {}
-	for _ = 1, 2 do
-		table.insert(feuilles, partie(m, Vector3.new(5, 0.6, 2.5), Color3.fromRGB(110, 230, 90)))
-	end
-	local lueur = Instance.new("PointLight")
-	lueur.Color = Color3.fromRGB(190, 255, 150)
-	lueur.Range = 30
-	lueur.Parent = corps
-	local depart = os.clock()
-	table.insert(
-		connexions,
-		RunService.Heartbeat:Connect(function()
-			local camera = Workspace.CurrentCamera
-			if camera == nil then
-				return
-			end
-			local t = os.clock() - depart
-			local a = angle + t * 0.08
-			local o = camera.CFrame.Position
-			local centre = Vector3.new(
-				o.X + math.cos(a) * rayon,
-				o.Y + hauteur + math.sin(t * 0.7 + angle) * 3,
-				o.Z + math.sin(a) * rayon
-			)
-			local orientation = CFrame.Angles(0, t * 0.3, math.sin(t * 0.5) * 0.2)
-			corps.CFrame = CFrame.new(centre) * orientation
-			for i, f in feuilles do
-				local k = if i == 1 then -1 else 1
-				f.CFrame = CFrame.new(centre)
-					* orientation
-					* CFrame.new(k * 2.5, 5.5, 0)
-					* CFrame.Angles(0, 0, k * 0.5)
-			end
-		end)
-	)
-end
-
--- Immense arc-en-ciel posé loin devant le joueur au début de l'événement.
-local function arcEnCiel(parent: Instance)
-	local camera = Workspace.CurrentCamera
-	if camera == nil then
-		return
-	end
-	local avant = camera.CFrame.LookVector
-	avant = Vector3.new(avant.X, 0, avant.Z)
-	avant = if avant.Magnitude > 0.01 then avant.Unit else Vector3.new(0, 0, 1)
-	local centre = camera.CFrame.Position + avant * 420 + Vector3.new(0, -40, 0)
-	local repere = CFrame.lookAt(centre, centre - avant)
-	local couleurs = {
-		Color3.fromRGB(255, 80, 80),
-		Color3.fromRGB(255, 160, 60),
-		Color3.fromRGB(255, 230, 70),
-		Color3.fromRGB(90, 220, 110),
-		Color3.fromRGB(80, 180, 255),
-		Color3.fromRGB(120, 110, 255),
-		Color3.fromRGB(200, 110, 255),
-	}
-	for i, couleur in couleurs do
-		local rayon = 230 - i * 12
-		local n = 40
-		for k = 0, n - 1 do
-			local a0 = k / n * math.pi
-			local a1 = (k + 1) / n * math.pi
-			local p0 = repere * Vector3.new(math.cos(a0) * rayon, math.sin(a0) * rayon, 0)
-			local p1 = repere * Vector3.new(math.cos(a1) * rayon, math.sin(a1) * rayon, 0)
-			local s = partie(parent, Vector3.new(12, 12, (p1 - p0).Magnitude + 1), couleur)
-			s.CFrame = CFrame.lookAt((p0 + p1) / 2, p1)
-			s.Transparency = 0.45
-		end
-	end
-end
-
 -- Étoiles filantes : un trait lumineux traverse le ciel régulièrement.
 local function etoilesFilantes(parent: Instance)
 	table.insert(
@@ -388,9 +309,7 @@ local function demarrer(id: string, infos: Evenement.Infos)
 			}
 		)
 	elseif id == "GrainesGeantes" then
-		for k = 0, 5 do
-			graineGeante(d, k * math.pi / 3, 60 + (k % 2) * 25, 35 + (k % 3) * 8)
-		end
+		-- Graines géantes retirées : elles bouchaient la vue.
 		local p = creerCiel(20, 120)
 		emetteur(
 			p,
@@ -422,7 +341,7 @@ local function demarrer(id: string, infos: Evenement.Infos)
 		)
 		etoilesFilantes(d)
 	elseif id == "ArcEnCiel" then
-		arcEnCiel(d)
+		-- Arc-en-ciel géant retiré : ses piliers bouchaient la vue un peu partout.
 		local p = creerCiel(16, 120)
 		local confettis = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),

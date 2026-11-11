@@ -5,3 +5,4 @@ globalTypes.d.luau
 *.rbxl.lock
 .obsidian/workspace*.json
 .obsidian/plugins/obsidian-git/data.json
+__pycache__/

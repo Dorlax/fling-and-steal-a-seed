@@ -85,3 +85,8 @@
 - Importer et publier le Dragon Cristal dans Studio, puis le brancher au bestiaire ; vérifier le sens des os (`AnimationsOs.Axes`).
 - Créer les 4 passes sur Roblox et mettre leurs Id dans `Config.Passes`.
 - Test du cycle jour/nuit à la main (vérifié seulement par les tests automatiques).
+
+## Voxels et interface
+- Prairie en voxels (`Shared.Voxels`, `Shared.ConstructeurVoxels`, client `HabillageVoxels`) : remplace localement les blocs ; demande « Allow Mesh / Image APIs » activé sur l'expérience, sinon repli sur les blocs. Outils de génération dans `outils/voxels`, anciens designs dans `archives/designs-blocs`.
+- Animations : course des monstres selon leur vitesse (`Anime.court`, `Anime.Monstre.Course`), créatures voxels portées qui gigotent (`Anime.Portee`).
+- Interface : boutons de Forge seulement sur la Forge, Agrandir dans le panneau Base, pièges masqués en zone sûre, PLAQUER visible près d'un porteur, panneaux sans boîte.
