@@ -9,6 +9,13 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-11 — Créatures 3D à squelette (Dragon Cristal)
+
+- Nouveau modèle de référence du bestiaire : le Dragon Cristal (low-poly à facettes, cristaux, halo), généré avec TRELLIS.2 puis allégé à 11 500 triangles dans Blender (fichiers dans assets/creatures/dragon_cristal).
+- Squelette de 17 os et 6 animations : Idle (respire, regarde autour), Marche, Course (galop), Joie (petits bonds), Étourdi (tête qui tourne), Porté (pattes qui pédalent).
+- Le client anime toute créature 3D marquée `Squelette = "Quadrupede"` (module AnimationsOs, calculs dans Shared.AnimeOs) : clip choisi par l'attribut `EtatAnim` ou par la vitesse, pas calés sur la vitesse pour que les pieds ne glissent pas.
+- Le dragon n'apparaît pas encore en jeu : son maillage doit d'abord être importé et publié depuis Studio.
+
 ## 2026-11-10 — Sons de la bibliothèque Roblox
 
 - Musique de fond « Bouncing » (APM Music, licence Roblox), coupable dans ⚙️ Options.
