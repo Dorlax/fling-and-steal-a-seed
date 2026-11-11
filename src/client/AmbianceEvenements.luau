@@ -388,9 +388,7 @@ local function demarrer(id: string, infos: Evenement.Infos)
 			}
 		)
 	elseif id == "GrainesGeantes" then
-		for k = 0, 5 do
-			graineGeante(d, k * math.pi / 3, 60 + (k % 2) * 25, 35 + (k % 3) * 8)
-		end
+		-- Graines géantes retirées : elles bouchaient la vue.
 		local p = creerCiel(20, 120)
 		emetteur(
 			p,
@@ -422,7 +420,7 @@ local function demarrer(id: string, infos: Evenement.Infos)
 		)
 		etoilesFilantes(d)
 	elseif id == "ArcEnCiel" then
-		arcEnCiel(d)
+		-- Arc-en-ciel géant retiré : ses piliers bouchaient la vue un peu partout.
 		local p = creerCiel(16, 120)
 		local confettis = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),
