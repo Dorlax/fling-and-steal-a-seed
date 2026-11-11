@@ -221,6 +221,8 @@ function Constructeur.construire(tete: string, runs64: string, couleurs64: strin
 		part.Parent = modele
 		task.wait()
 	end
+	-- Pivot = centre du cube de sculpture (pieds à -taille/2), pour l'animateur.
+	modele.WorldPivot = CFrame.identity
 	return modele
 end
 
