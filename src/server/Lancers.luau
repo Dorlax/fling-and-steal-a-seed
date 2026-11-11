@@ -422,7 +422,7 @@ end
 -- Gestionnaire de LacherJauge : tout argument du client est ignoré.
 -- Sorti de la zone de départ pendant la jauge : lancer annulé.
 function Lancers.traiterLacher(joueur: any): Resultat?
-	if not dansZoneDeDepart(joueur) then
+	if racineDe(joueur) ~= nil and not dansZoneDeDepart(joueur) then
 		local etat = etats[joueur]
 		if etat then
 			etat.debut = nil
