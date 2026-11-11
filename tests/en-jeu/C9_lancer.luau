@@ -190,7 +190,7 @@ return {
 			assert(Lancers.lacher(j, t + 0.8, 0) ~= nil, "lancer attendu")
 			t += 0.8 + Config.Lancer.DelaiEntreLancers + 0.1
 		end
-		task.wait(1.5)
+		task.wait(Config.Lancer.DureeVolGraine + 0.6)
 		local n = #creaturesDe(j)
 		for _, creature in creaturesDe(j) do
 			creature:Destroy()

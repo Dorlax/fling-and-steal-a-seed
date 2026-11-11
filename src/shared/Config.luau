@@ -109,6 +109,7 @@ local Config = {
 		DistanceParForce = 0.4, -- studs par point de Force (Force 1000 -> +400)
 		DistanceMax = 1e6, -- plafond de sécurité (la vraie limite : la fin du dernier biome)
 		DelaiEntreLancers = 3, -- secondes, contrôlé par le serveur
+		DureeVolGraine = 1.6, -- secondes de vol (la caméra du lanceur suit la graine)
 		MaxCreaturesAuSol = 10, -- par joueur ; au-delà, la plus ancienne disparaît
 		CompensationPingMax = 0.25, -- secondes de latence retirées au maximum
 		DureeMaxJauge = 10, -- au-delà, la jauge est annulée côté serveur
@@ -184,7 +185,9 @@ local Config = {
 	-- Seul un voleur qui porte une créature volée reste plaquable.
 	ZoneSure = {
 		BordBases = 20, -- Z du bord avant des bases
-		Profondeur = 60, -- studs : la ligne est à Z = BordBases + Profondeur
+		-- studs : la ligne est à Z = BordBases + Profondeur. Les graines ne se
+		-- lancent que d'ici (zone de départ).
+		Profondeur = 120,
 	},
 
 	-- Tailles des créatures (tirées par le serveur à la pousse, indépendantes
@@ -224,7 +227,7 @@ local Config = {
 	Monstres = {
 		-- Z de la ligne de la zone sûre (= début des Terres Sauvages et du
 		-- biome 1) : ZoneSure.BordBases + ZoneSure.Profondeur.
-		BordBases = 80,
+		BordBases = 140,
 		MargeBases = 6, -- un monstre reste toujours à Z >= BordBases + MargeBases
 		IntervalleIA = 0.1, -- secondes entre deux pas de la boucle serveur
 		DureeProtection = 3, -- secondes sans pouvoir être refrappé par un monstre

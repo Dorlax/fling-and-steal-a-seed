@@ -11,7 +11,6 @@ local Workspace = game:GetService("Workspace")
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Biomes = require(ReplicatedStorage.Shared.Biomes)
 local Config = require(ReplicatedStorage.Shared.Config)
-local Modeleur = require(script.Parent.Modeleur)
 
 local Decor = {}
 
@@ -3630,61 +3629,8 @@ local function creerLimites(racine: Instance)
 end
 
 ---------------------------------------------------------------------------
--- Accueil du Pays des Graines : Pépin, la mascotte géante, et le panneau de
--- bienvenue, de part et d'autre du chemin de la base centrale.
-
-local TAILLE_PEPIN = 16 -- studs (hauteur d'une unité du Bestiaire)
-
-local function creerPepin(parent: Instance, position: Vector3)
-	local espece = Bestiaire.Especes.Pepin
-	if espece == nil then
-		return
-	end
-	local modele = Instance.new("Model")
-	modele.Name = "Pepin"
-	local corps = Instance.new("Part")
-	corps.Name = "Corps"
-	corps.Size = Vector3.one * 2
-	corps.Anchored = true
-	corps.CanCollide = false
-	corps.CanQuery = false
-	corps.CanTouch = false
-	-- Face avant (-Z) tournée vers les bases.
-	corps.CFrame = CFrame.new(position + Vector3.new(0, TAILLE_PEPIN * 0.5, 0))
-	corps.Parent = modele
-	modele.PrimaryPart = corps
-	Modeleur.construire(modele, corps, espece, TAILLE_PEPIN, Color3.fromRGB(255, 200, 80))
-	modele:SetAttribute("Mascotte", true)
-	-- Un socle de fleurs sous ses pieds.
-	piece(
-		modele,
-		"Socle",
-		Enum.PartType.Cylinder,
-		Vector3.new(1, TAILLE_PEPIN * 0.75, TAILLE_PEPIN * 0.75),
-		CFrame.new(position + Vector3.new(0, 0.5, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-		Color3.fromRGB(120, 210, 90),
-		true
-	)
-	for i = 0, 7 do
-		local a = math.rad(i * 45)
-		piece(
-			modele,
-			"Fleur",
-			Enum.PartType.Ball,
-			Vector3.one * 1.4,
-			CFrame.new(
-				position
-					+ Vector3.new(
-						math.cos(a) * TAILLE_PEPIN * 0.33,
-						1.2,
-						math.sin(a) * TAILLE_PEPIN * 0.33
-					)
-			),
-			FLEURS[(i % #FLEURS) + 1]
-		)
-	end
-	modele.Parent = parent
-end
+-- Accueil du Pays des Graines : le panneau de bienvenue, à côté du chemin
+-- de la base centrale (plus de mascotte).
 
 local function creerPanneauAccueil(parent: Instance, position: Vector3)
 	local modele = Instance.new("Model")
@@ -3785,8 +3731,8 @@ function Decor.creer(): Folder
 			racine,
 			"Chemin",
 			Enum.PartType.Block,
-			Vector3.new(LARGEUR_PORTE, 0.1, 60),
-			CFrame.new(cx, 0.05, BORD_BASES + 30),
+			Vector3.new(LARGEUR_PORTE, 0.1, DEBUT_SAUVAGE - BORD_BASES),
+			CFrame.new(cx, 0.05, (BORD_BASES + DEBUT_SAUVAGE) / 2),
 			COULEURS.Chemin
 		)
 	end
@@ -3864,9 +3810,8 @@ function Decor.creer(): Folder
 	-- Remparts décorés et murs invisibles autour de toute la carte.
 	creerLimites(racine)
 
-	-- Accueil : Pépin et le panneau, entre la base centrale et ses voisines.
+	-- Accueil : le panneau, entre la base centrale et sa voisine.
 	local accueil = dossier(racine, "Accueil")
-	creerPepin(accueil, Vector3.new(ECART_BASES / 2, 0, BORD_BASES + 40))
 	creerPanneauAccueil(accueil, Vector3.new(-ECART_BASES / 2, 0, BORD_BASES + 34))
 
 	-- Décor propre à chaque biome suivant (Forêt, Désert...).

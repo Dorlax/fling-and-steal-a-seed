@@ -22,6 +22,7 @@ local Classements = require(script.Parent.Classements)
 local Evenements = require(script.Parent.Evenements)
 local Evenement = require(ReplicatedStorage.Shared.Evenement)
 local Cadeaux = require(script.Parent.Cadeaux)
+local ZoneSure = require(ReplicatedStorage.Shared.ZoneSure)
 
 export type Resultat = {
 	Distance: number,
@@ -33,6 +34,8 @@ export type Resultat = {
 	Espece: string?,
 	Mutation: string?, -- voir Config.Mutations (rare)
 	Graine: string?, -- graine lancée
+	Depart: Vector3?, -- point de départ du vol (pour la caméra du lanceur)
+	Arrivee: Vector3?, -- point d'atterrissage
 }
 
 type Etat = {
@@ -54,8 +57,8 @@ end
 
 local reglages = Config.Lancer
 local raretes: any = Config.Raretes -- indexé par des noms dynamiques
-local DUREE_VOL = 1 -- secondes de vol de la graine (effet visuel)
-local HAUTEUR_VOL = 25
+local DUREE_VOL = Config.Lancer.DureeVolGraine -- secondes de vol (suivie par la caméra du lanceur)
+local HAUTEUR_VOL = 45
 local TAILLE_CREATURE = 3
 
 local etats: { [any]: Etat } = {}
@@ -261,6 +264,11 @@ local function envoyerGraine(
 )
 	local graine = Instance.new("Part")
 	graine.Name = "Graine"
+	-- Le client du lanceur suit la graine avec la caméra.
+	if typeof(joueur) == "Instance" and joueur:IsA("Player") then
+		graine:SetAttribute("Lanceur", joueur.UserId)
+	end
+	graine:SetAttribute("DureeVol", DUREE_VOL)
 	graine.Shape = Enum.PartType.Ball
 	graine.Size = Vector3.one * 1.2
 	graine.Anchored = true
@@ -381,8 +389,17 @@ function Lancers.lacher(joueur: any, maintenant: number?, aleatoire: number?): R
 	local point = bord + Vector3.new(0, 0, distance)
 	local racine = racineDe(joueur)
 	local depart = if racine then racine.Position else bord + Vector3.new(0, 5, 0)
+	resultat.Depart = depart
+	resultat.Arrivee = point
 	envoyerGraine(joueur, etat, resultat, depart, point)
 	return resultat
+end
+
+-- Vrai si le joueur est dans la zone de départ (zone sûre) : on ne lance
+-- les graines que de là.
+local function dansZoneDeDepart(joueur: any): boolean
+	local racine = racineDe(joueur)
+	return racine ~= nil and ZoneSure.contient(racine.Position)
 end
 
 -- Gestionnaire de DemarrerJauge : tout argument du client est ignoré.
@@ -396,12 +413,27 @@ function Lancers.traiterDemarrer(joueur: any): boolean
 	if humanoide == nil or humanoide.Health <= 0 then
 		return false
 	end
+	if not dansZoneDeDepart(joueur) then
+		return false
+	end
 	return Lancers.demarrer(joueur)
 end
 
 -- Gestionnaire de LacherJauge : tout argument du client est ignoré.
+-- Sorti de la zone de départ pendant la jauge : lancer annulé.
 function Lancers.traiterLacher(joueur: any): Resultat?
+	if not dansZoneDeDepart(joueur) then
+		local etat = etats[joueur]
+		if etat then
+			etat.debut = nil
+		end
+		return nil
+	end
 	local resultat = Lancers.lacher(joueur)
+	if resultat and typeof(joueur) == "Instance" and joueur:IsA("Player") then
+		-- Tous les clients jouent l'animation du lancer de ce joueur.
+		joueur:SetAttribute("Lancers", (tonumber(joueur:GetAttribute("Lancers")) or 0) + 1)
+	end
 	if resultat and typeof(joueur) == "Instance" and joueur:IsA("Player") then
 		Cadeaux.progresser(joueur, "Lancer")
 		if resultat.Distance > 500 then

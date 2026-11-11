@@ -341,7 +341,8 @@ local function retirerAccessoires(sportif: Sportif)
 end
 
 -- Objet soulevé selon l'agrès : X = décalage le long de l'axe des mains,
--- Y = au-dessus des mains, Main = "G"/"D" pour un objet par main.
+-- Y = au-dessus des mains (petit : l'objet reste dans les mains pendant tout
+-- l'épaulé-jeté), Main = "G"/"D" pour un objet par main.
 local function creerObjet(genre: string, force: number): Folder
 	local f = Instance.new("Folder")
 	f.Name = "Objet"
@@ -349,10 +350,10 @@ local function creerObjet(genre: string, force: number): Folder
 	if genre == "Rocher" then
 		for _, b in
 			{
-				{ 0, 0.9, 0, 1.6 },
-				{ 0.5, 1.1, 0.2, 1.1 },
-				{ -0.5, 1.0, -0.2, 1.1 },
-				{ 0, 1.6, 0, 0.9 },
+				{ 0, 0.1, 0, 1.6 },
+				{ 0.55, 0.25, 0.2, 1.1 },
+				{ -0.55, 0.2, -0.2, 1.1 },
+				{ 0, 0.75, 0, 0.9 },
 			}
 		do
 			local roc = partie(
@@ -385,7 +386,7 @@ local function creerObjet(genre: string, force: number): Folder
 		local roc =
 			partie(f, Vector3.new(2.6, 2.6, 2.6), Color3.fromRGB(90, 50, 40), Enum.PartType.Ball)
 		roc.Material = Enum.Material.CrackedLava
-		roc:SetAttribute("Y", 1.3)
+		roc:SetAttribute("Y", 0.5) -- tenue entre les mains
 		local feu = Instance.new("ParticleEmitter")
 		feu.Texture = "rbxasset://textures/particles/fire_main.dds"
 		feu.Color = ColorSequence.new(Color3.fromRGB(255, 120, 40), Color3.fromRGB(255, 120, 210))

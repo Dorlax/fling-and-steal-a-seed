@@ -16,6 +16,7 @@ local InterfaceBestiaire = require(script.Parent:WaitForChild("InterfaceBestiair
 local InterfaceClassement = require(script.Parent:WaitForChild("InterfaceClassement"))
 local InterfaceEvenement = require(script.Parent:WaitForChild("InterfaceEvenement"))
 local InterfaceLancer = require(script.Parent:WaitForChild("InterfaceLancer"))
+local LancerVisuel = require(script.Parent:WaitForChild("LancerVisuel"))
 local InterfacePieges = require(script.Parent:WaitForChild("InterfacePieges"))
 local InterfacePieces = require(script.Parent:WaitForChild("InterfacePieces"))
 local InterfacePlaquage = require(script.Parent:WaitForChild("InterfacePlaquage"))
@@ -30,6 +31,7 @@ Bandeaux.demarrer()
 Panneaux.demarrer()
 InterfaceStats.demarrer()
 InterfaceLancer.demarrer()
+LancerVisuel.demarrer()
 InterfacePieces.demarrer()
 -- Après InterfaceLancer : l'action « Plaquer » passe en priorité sur la touche
 -- partagée et laisse l'appui au lancer quand personne n'est à plaquer.

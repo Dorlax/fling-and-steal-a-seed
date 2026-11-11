@@ -315,7 +315,7 @@ return {
 			Lancers.lacher(j, t + 0.8, 0)
 			t += 0.8 + Config.Lancer.DelaiEntreLancers + 0.1
 		end
-		task.wait(1.5)
+		task.wait(Config.Lancer.DureeVolGraine + 0.6)
 		local vivante = c:IsDescendantOf(Workspace)
 		local porte = j:GetAttribute("Porte")
 		nettoyer(j)

@@ -9,6 +9,14 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-11 — Lancer depuis la zone de départ, caméra de la graine, animations
+
+- On ne lance plus que depuis la zone de départ (zone sûre), agrandie à 120 studs : bouton LANCER caché ailleurs, vérifié par le serveur.
+- Le personnage fait un vrai geste de lancer (élan, bras qui fouette, buste qui tourne), visible par tous.
+- La caméra suit la graine en vol (arc plus haut, 1,6 s), la distance défile en gros ; à l'atterrissage : distance finale, rareté et taille, puis retour au joueur.
+- Mascotte Pépin retirée de l'accueil.
+- Forge : vraie foulée de sprint (genoux hauts, talons, bras pliés) et épaulé-jeté complet pour la Force (accroupi, barre aux épaules, au-dessus de la tête) ; les objets restent dans les mains.
+
 ## 2026-11-11 — 55 biomes, ciels, murs décorés et enclos
 
 - 34 nouveaux biomes (55 en tout), chacun avec son sol, son ciel, ses murs et son décor. Leurs créatures sont des chimères : le corps d'une espèce existante, des parties greffées d'une autre (ailes, queue, oreilles…) et les couleurs du biome. Les noms mélangent les deux espèces.
