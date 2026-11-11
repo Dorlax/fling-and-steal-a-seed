@@ -1,10 +1,8 @@
 --!strict
--- Raids de bases (serveur) : vol d'une créature exposée et verrou de la base.
--- Le client n'envoie rien : le vol et le verrou passent par les
--- ProximityPrompts « Voler » / « Verrouiller » (Triggered côté serveur) et
--- toutes les vérifications sont faites ici.
--- `maintenant` (optionnel) sert uniquement aux tests en jeu.
-local Players = game:GetService("Players")
+-- Raids de bases (serveur) : vol d'une créature exposée (les bases ne se
+-- verrouillent plus). Le client n'envoie rien : le vol passe par le
+-- ProximityPrompt « Voler » (Triggered côté serveur) et toutes les
+-- vérifications sont faites ici.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -16,31 +14,15 @@ local Bases = require(script.Parent.Bases)
 local Portage = require(script.Parent.Portage)
 local Sauvegarde = require(script.Parent.Sauvegarde)
 
-type Etat = {
-	verrouJusqua: number?,
-	pretA: number?,
-	dernierTexte: string?,
-	derniereVerrouillee: boolean?,
-}
-
 local Raids = {}
 
 local reglages = Config.Raid
-
-local etats: { [any]: Etat } = {}
 
 local function estNombreFini(valeur: any): boolean
 	return type(valeur) == "number"
 		and valeur == valeur
 		and valeur > -math.huge
 		and valeur < math.huge
-end
-
-local function instant(maintenant: number?): number
-	if estNombreFini(maintenant) then
-		return maintenant :: number
-	end
-	return Workspace:GetServerTimeNow()
 end
 
 local function estJoueur(joueur: any): boolean
@@ -83,11 +65,6 @@ local function envoyerAlerte(joueur: any, role: string, rarete: string, autre: s
 	if remote and remote:IsA("RemoteEvent") then
 		remote:FireClient(joueur, role, rarete, autre)
 	end
-end
-
-local function estVerrouillee(proprietaire: any, maintenant: number): boolean
-	local etat = etats[proprietaire]
-	return etat ~= nil and Raid.estVerrouillee(maintenant, etat.verrouJusqua)
 end
 
 -- Créature exposée n° `numero` de la base de `proprietaire`.
@@ -166,66 +143,11 @@ local function afficherEffet(voleur: any)
 	end)
 end
 
--- Candidats à l'expulsion : joueurs connectés et joueurs ayant une base.
-local function candidats(): { any }
-	local vus: { [any]: boolean } = {}
-	local liste = {}
-	for _, joueur in Players:GetPlayers() do
-		vus[joueur] = true
-		table.insert(liste, joueur)
-	end
-	for _, joueur in Bases.joueurs() do
-		if not vus[joueur] then
-			vus[joueur] = true
-			table.insert(liste, joueur)
-		end
-	end
-	return liste
-end
-
--- Replace hors de la base tout intrus de la base verrouillée de `proprietaire`.
-local function expulserIntrus(proprietaire: any, maintenant: number)
-	local verrouillee = estVerrouillee(proprietaire, maintenant)
-	if not verrouillee then
-		return
-	end
-	local point = Bases.pointExpulsion(proprietaire)
-	if point == nil then
-		return
-	end
-	for _, joueur in candidats() do
-		local estProprietaire = joueur == proprietaire
-		if
-			not estProprietaire
-			and Raid.doitExpulser(
-				estProprietaire,
-				Bases.estDansBaseDe(joueur, proprietaire),
-				verrouillee
-			)
-		then
-			local personnage = joueur.Character
-			if typeof(personnage) == "Instance" and personnage:IsA("Model") then
-				personnage:PivotTo(point :: CFrame)
-				envoyerMessage(joueur, "Base verrouillée !")
-			end
-		end
-	end
-end
-
-local function publier(proprietaire: any, etat: Etat, maintenant: number)
-	proprietaire:SetAttribute("VerrouJusqua", etat.verrouJusqua)
-	proprietaire:SetAttribute("VerrouPretA", etat.pretA)
-	etat.dernierTexte = Raid.texteVerrou(maintenant, etat.verrouJusqua, etat.pretA)
-	etat.derniereVerrouillee = Raid.estVerrouillee(maintenant, etat.verrouJusqua)
-	Bases.afficherVerrou(proprietaire, maintenant)
-end
-
 -- Vol de la créature n° `numero` de la base de `proprietaire` par `voleur`.
-function Raids.voler(voleur: any, proprietaire: any, numero: any, maintenant: number?): boolean
+function Raids.voler(voleur: any, proprietaire: any, numero: any, _maintenant: number?): boolean
 	if voleur == nil or proprietaire == nil then
 		return false
 	end
-	local t = instant(maintenant)
 	local liste = Sauvegarde.creaturesDe(proprietaire)
 	local emplacementValide = estNombreFini(numero)
 		and numero % 1 == 0
@@ -247,7 +169,6 @@ function Raids.voler(voleur: any, proprietaire: any, numero: any, maintenant: nu
 		voleurVivant = estVivant(voleur),
 		voleurPorte = Portage.porte(voleur) or voleur:GetAttribute("Porte") ~= nil,
 		voleurDansBaseCible = Bases.estDansBaseDe(voleur, proprietaire),
-		baseVerrouillee = estVerrouillee(proprietaire, t),
 		emplacementValide = emplacementValide,
 		distance = distance,
 	})
@@ -276,73 +197,7 @@ function Raids.voler(voleur: any, proprietaire: any, numero: any, maintenant: nu
 	return true
 end
 
--- Achat du verrou de la base de `proprietaire` par `declencheur`.
-function Raids.verrouiller(proprietaire: any, declencheur: any, maintenant: number?): boolean
-	if proprietaire == nil or declencheur == nil then
-		return false
-	end
-	local t = instant(maintenant)
-	local etat: Etat = etats[proprietaire] or {}
-
-	local distance = math.huge
-	local racine = racineEtHumanoide(declencheur)
-	local base = Bases.modeleDe(proprietaire)
-	local bouton = base and base:FindFirstChild("BoutonVerrou")
-	if racine ~= nil and bouton ~= nil and bouton:IsA("BasePart") then
-		distance = (racine.Position - bouton.Position).Magnitude
-	end
-
-	local pieces = proprietaire:GetAttribute("Pieces")
-	local ok, raison = Raid.verifierVerrou({
-		estProprietaire = declencheur == proprietaire,
-		vivant = estVivant(declencheur),
-		distance = distance,
-		pieces = if type(pieces) == "number" then pieces else nil,
-		maintenant = t,
-		verrouJusqua = etat.verrouJusqua,
-		pretA = etat.pretA,
-	})
-	if not ok then
-		if declencheur == proprietaire then
-			if raison == "pieces" then
-				envoyerMessage(declencheur, "Pas assez de pièces !")
-			elseif raison == "recharge" then
-				envoyerMessage(declencheur, "Verrou en recharge !")
-			end
-		end
-		return false
-	end
-
-	proprietaire:SetAttribute("Pieces", (pieces :: number) - reglages.PrixVerrou)
-	local jusqua, pretA = Raid.acheterVerrou(t)
-	etat.verrouJusqua = jusqua
-	etat.pretA = pretA
-	etats[proprietaire] = etat
-	publier(proprietaire, etat, t)
-	envoyerMessage(proprietaire, "Base verrouillée !")
-	expulserIntrus(proprietaire, t)
-	return true
-end
-
--- Un pas de la boucle serveur : expulse les intrus des bases verrouillées et
--- met à jour panneaux et boucliers quand le texte change (une fois par seconde).
-function Raids.pas(maintenant: number?)
-	local t = instant(maintenant)
-	for proprietaire, etat in etats do
-		expulserIntrus(proprietaire, t)
-		local texte = Raid.texteVerrou(t, etat.verrouJusqua, etat.pretA)
-		local verrouillee = Raid.estVerrouillee(t, etat.verrouJusqua)
-		if texte ~= etat.dernierTexte or verrouillee ~= etat.derniereVerrouillee then
-			etat.dernierTexte = texte
-			etat.derniereVerrouillee = verrouillee
-			Bases.afficherVerrou(proprietaire, t)
-		end
-	end
-end
-
--- Départ du joueur : oublie son verrou.
-function Raids.nettoyer(joueur: any)
-	etats[joueur] = nil
-end
+-- Départ du joueur : rien à oublier (gardé pour l'appel de Principal).
+function Raids.nettoyer(_joueur: any) end
 
 return Raids

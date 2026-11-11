@@ -7,12 +7,11 @@ local Forge = require(ReplicatedStorage.Shared.Forge)
 
 -- API serveur selon la maquette issue-11 :
 --   Raids.voler(voleur, proprietaire, numero, maintenant?) -> boolean
---   Raids.verrouiller(proprietaire, declencheur, maintenant?) -> boolean
---   Raids.pas(maintenant?) ; Raids.nettoyer(joueur)
+--   Raids.nettoyer(joueur) (plus de verrou de base)
 --   Bases.estDansBaseDe(joueur, proprietaire) -> boolean ; Bases.modeleDe/solDe
 --   Sauvegarde.ajouterCreature / creaturesDe ; Portage.recolter / porte
---   Attributs joueur : Porte, Pieces, RevenuParSeconde, VerrouJusqua, VerrouPretA
---   Créature exposée : attribut Emplacement + ProximityPrompt « Voler » ; base : Porte, BoutonVerrou, Bouclier
+--   Attributs joueur : Porte, Pieces, RevenuParSeconde
+--   Créature exposée : attribut Emplacement + ProximityPrompt « Voler » ; base : Porte, sans verrou
 local RAID = (Config :: any).Raid
 
 local function module(nom: string): any
@@ -139,7 +138,7 @@ local function creaturePortee(joueur: any): Instance?
 end
 
 return {
-	["C9 créatures exposées : Emplacement et ProximityPrompt Voler ; base : Porte, BoutonVerrou, Bouclier"] = function()
+	["C9 créatures exposées : Emplacement et ProximityPrompt Voler ; base : Porte, sans verrou"] = function()
 		local Bases = module("Bases")
 		local a = fauxJoueur()
 		Bases.creer(a)
@@ -167,18 +166,11 @@ return {
 		end
 		local porte = base:FindFirstChild("Porte")
 		local bouton = base:FindFirstChild("BoutonVerrou")
-		local verrou = bouton and bouton:FindFirstChild("Verrouiller", true)
 		local bouclier = base:FindFirstChild("Bouclier")
 		nettoyer(a)
 		assert(#resultats == 0, table.concat(resultats, " ; "))
 		assert(porte ~= nil, "Porte attendue")
-		assert(bouton ~= nil, "BoutonVerrou attendu")
-		assert(
-			verrou and verrou:IsA("ProximityPrompt"),
-			"prompt Verrouiller attendu sur BoutonVerrou"
-		)
-		assert(bouclier and bouclier:IsA("BasePart"), "Bouclier attendu")
-		assert((bouclier :: BasePart).CanCollide == false, "Bouclier.CanCollide doit être false")
+		assert(bouton == nil and bouclier == nil, "plus de bouton de verrou ni de bouclier")
 	end,
 
 	["C10 vol réussi : la victime perd la créature, le voleur la porte"] = function()
@@ -372,157 +364,4 @@ return {
 		assert(trouve, "billboard « VOLÉ ! » attendu au-dessus du voleur")
 	end,
 
-	["C16 verrou acheté : pièces retirées, attributs fixés, bouclier visible"] = function()
-		local Raids, Bases = module("Raids"), module("Bases")
-		local a = fauxJoueur()
-		Bases.creer(a)
-		a:SetAttribute("Pieces", RAID.PrixVerrou + 50)
-		local bouton = (Bases.modeleDe(a) :: Model):FindFirstChild("BoutonVerrou") :: BasePart
-		assert(bouton, "BoutonVerrou attendu")
-		placer(a, bouton.Position + Vector3.new(0, 3, 0))
-		local t = Workspace:GetServerTimeNow()
-		local ok = Raids.verrouiller(a, a, t)
-		local pieces = a:GetAttribute("Pieces")
-		local jusqua = a:GetAttribute("VerrouJusqua")
-		local pret = a:GetAttribute("VerrouPretA")
-		local bouclier = (Bases.modeleDe(a) :: Model):FindFirstChild("Bouclier") :: BasePart
-		local transparence = bouclier.Transparency
-		nettoyer(a)
-		assert(ok == true, "verrouillage attendu")
-		assert(pieces == 50, "exactement PrixVerrou pièces retirées, reste " .. tostring(pieces))
-		assert(
-			type(jusqua) == "number" and math.abs(jusqua - (t + 60)) < 0.01,
-			"VerrouJusqua = t + 60"
-		)
-		assert(
-			type(pret) == "number" and math.abs(pret - (t + 120)) < 0.01,
-			"VerrouPretA = t + 120"
-		)
-		assert(transparence < 1, "Bouclier doit être visible")
-	end,
-
-	["C17 verrou refusé sans changement : déclencheur ≠ propriétaire"] = function()
-		local Raids, Bases = module("Raids"), module("Bases")
-		local a, b = fauxJoueur(), fauxJoueur()
-		Bases.creer(a)
-		Bases.creer(b)
-		a:SetAttribute("Pieces", 500)
-		b:SetAttribute("Pieces", 500)
-		local bouton = (Bases.modeleDe(a) :: Model):FindFirstChild("BoutonVerrou") :: BasePart
-		placer(b, bouton.Position + Vector3.new(0, 3, 0))
-		local ok = Raids.verrouiller(a, b, Workspace:GetServerTimeNow())
-		local pa, pb, jusqua =
-			a:GetAttribute("Pieces"), b:GetAttribute("Pieces"), a:GetAttribute("VerrouJusqua")
-		nettoyer(a, b)
-		assert(ok == false, "refus attendu")
-		assert(pa == 500 and pb == 500 and jusqua == nil, "rien ne doit changer")
-	end,
-
-	["C17 verrou refusé sans changement : pas assez de pièces"] = function()
-		local Raids, Bases = module("Raids"), module("Bases")
-		local a = fauxJoueur()
-		Bases.creer(a)
-		a:SetAttribute("Pieces", RAID.PrixVerrou - 1)
-		local bouton = (Bases.modeleDe(a) :: Model):FindFirstChild("BoutonVerrou") :: BasePart
-		placer(a, bouton.Position + Vector3.new(0, 3, 0))
-		local ok = Raids.verrouiller(a, a, Workspace:GetServerTimeNow())
-		local pieces, jusqua = a:GetAttribute("Pieces"), a:GetAttribute("VerrouJusqua")
-		nettoyer(a)
-		assert(ok == false, "refus attendu")
-		assert(pieces == RAID.PrixVerrou - 1 and jusqua == nil, "rien ne doit changer")
-	end,
-
-	["C17 verrou refusé sans changement : verrou déjà actif, puis en recharge"] = function()
-		local Raids, Bases = module("Raids"), module("Bases")
-		local a = fauxJoueur()
-		Bases.creer(a)
-		a:SetAttribute("Pieces", 1000)
-		local bouton = (Bases.modeleDe(a) :: Model):FindFirstChild("BoutonVerrou") :: BasePart
-		placer(a, bouton.Position + Vector3.new(0, 3, 0))
-		local t = Workspace:GetServerTimeNow()
-		assert(Raids.verrouiller(a, a, t) == true, "premier achat attendu")
-		local piecesApres = a:GetAttribute("Pieces")
-		local actif = Raids.verrouiller(a, a, t + 10)
-		local piecesActif = a:GetAttribute("Pieces")
-		local recharge = Raids.verrouiller(a, a, t + RAID.DureeVerrou + 10)
-		local piecesRecharge = a:GetAttribute("Pieces")
-		local jusqua = a:GetAttribute("VerrouJusqua")
-		nettoyer(a)
-		assert(
-			actif == false and piecesActif == piecesApres,
-			"verrou actif : refus sans changement"
-		)
-		assert(
-			recharge == false and piecesRecharge == piecesApres,
-			"recharge : refus sans changement"
-		)
-		assert(math.abs(jusqua - (t + RAID.DureeVerrou)) < 0.01, "VerrouJusqua inchangé")
-	end,
-
-	["C18 pendant le verrou, l'intrus est expulsé, le propriétaire reste ; après DureeVerrou, plus d'expulsion"] = function()
-		local Raids, Bases = module("Raids"), module("Bases")
-		local a, b = fauxJoueur(), fauxJoueur()
-		Bases.creer(a)
-		Bases.creer(b)
-		a:SetAttribute("Pieces", 500)
-		local bouton = (Bases.modeleDe(a) :: Model):FindFirstChild("BoutonVerrou") :: BasePart
-		local sol = Bases.solDe(a) :: BasePart
-		placer(a, bouton.Position + Vector3.new(0, 3, 0))
-		placer(b, sol.Position + Vector3.new(0, 4, 0))
-		assert(Bases.estDansBaseDe(b, a), "B doit être dans la base de A au départ")
-		local t = Workspace:GetServerTimeNow()
-		assert(Raids.verrouiller(a, a, t) == true, "verrouillage attendu")
-		-- L'achat expulse déjà les intrus ; on les remet de force pour tester Raids.pas.
-		placer(b, sol.Position + Vector3.new(0, 4, 0))
-		Raids.pas(t + 1)
-		local intrusDedans = Bases.estDansBaseDe(b, a)
-		-- Après la fin du verrou.
-		placer(b, sol.Position + Vector3.new(0, 4, 0))
-		Raids.pas(t + RAID.DureeVerrou + 1)
-		local intrusApres = Bases.estDansBaseDe(b, a)
-		local bouclier = (Bases.modeleDe(a) :: Model):FindFirstChild("Bouclier") :: BasePart
-		local transparence = bouclier.Transparency
-		nettoyer(a, b)
-		assert(intrusDedans == false, "l'intrus doit être expulsé pendant le verrou")
-		assert(intrusApres == true, "l'intrus ne doit plus être expulsé après le verrou")
-		assert(transparence == 1, "Bouclier doit être invisible après le verrou")
-	end,
-
-	["C18 le propriétaire reste en place pendant le verrou"] = function()
-		local Raids, Bases = module("Raids"), module("Bases")
-		local a = fauxJoueur()
-		Bases.creer(a)
-		a:SetAttribute("Pieces", 500)
-		local bouton = (Bases.modeleDe(a) :: Model):FindFirstChild("BoutonVerrou") :: BasePart
-		local sol = Bases.solDe(a) :: BasePart
-		placer(a, bouton.Position + Vector3.new(0, 3, 0))
-		local t = Workspace:GetServerTimeNow()
-		assert(Raids.verrouiller(a, a, t) == true, "verrouillage attendu")
-		local avant = a.Character.HumanoidRootPart.Position
-		Raids.pas(t + 1)
-		local apres = a.Character.HumanoidRootPart.Position
-		local dedans = Bases.estDansBaseDe(a, a)
-		nettoyer(a)
-		assert(sol ~= nil)
-		assert((apres - avant).Magnitude < 0.01, "le propriétaire ne doit pas bouger")
-		assert(dedans, "le propriétaire doit rester dans sa base")
-	end,
-
-	["C19 pendant le verrou, voler est refusé même si le voleur est placé de force"] = function()
-		local Raids, Sauvegarde, Bases = module("Raids"), module("Sauvegarde"), module("Bases")
-		local a, b = scenario()
-		a:SetAttribute("Pieces", 500)
-		local bouton = (Bases.modeleDe(a) :: Model):FindFirstChild("BoutonVerrou") :: BasePart
-		placer(a, bouton.Position + Vector3.new(0, 3, 0))
-		local t = Workspace:GetServerTimeNow()
-		assert(Raids.verrouiller(a, a, t) == true, "verrouillage attendu")
-		local c = creatureExposee(a, 2) :: Model
-		placer(b, c:GetPivot().Position + Vector3.new(0, 0, 3))
-		local ok = Raids.voler(b, a, 2, t + 1)
-		local n = #Sauvegarde.creaturesDe(a)
-		local porte = b:GetAttribute("Porte")
-		nettoyer(a, b)
-		assert(ok == false, "vol refusé pendant le verrou")
-		assert(n == 3 and porte == nil, "rien ne doit changer")
-	end,
 }
