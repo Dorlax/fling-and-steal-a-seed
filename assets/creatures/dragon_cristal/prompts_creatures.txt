@@ -1,0 +1,27 @@
+Fling & Steal a Seed - prompts TRELLIS.2 Text-to-3D (style du Dragon Cristal)
+Base commune ajoutee a chaque prompt :
+", cute chibi stylized game creature, low poly faceted gemstone crystal body, cosmic galaxy sparkles inside the crystals, glowing eyes, full body, standing, plain white background"
+
+PRAIRIE
+1. Renard Cristal : "fox with crystal tail tufts and crystal ears, teal and violet crystals"
+2. Lapin Germe : "rabbit with a glowing seed sprout on its head, mint green and pink crystals"
+
+FORET
+3. Tortue Geode : "turtle whose shell is a cracked open amethyst geode, moss green and purple crystals"
+4. Hibou Prisme : "owl with prism crystal feathers and big round eyes, emerald and gold crystals"
+
+DESERT
+5. Scarabee Rubis : "rhino beetle with a ruby horn and crystal shell, red and amber crystals"
+6. Fennec Ambre : "fennec fox with huge crystal ears, amber orange and sand gold crystals"
+
+BANQUISE
+7. Pingouin Givre : "penguin with ice crystal belly and frosty spikes, ice blue and white crystals"
+8. Ourson Polaire : "polar bear cub with ice crystal armor plates, pale cyan and silver crystals"
+
+VOLCAN
+9. Salamandre de Lave : "salamander with lava cracks and obsidian crystal spikes, black and glowing orange crystals"
+10. Belier Obsidienne : "ram with spiral glowing crystal horns, obsidian black and magenta crystals"
+
+GALAXIE
+11. Meduse Astrale : "floating jellyfish with crystal bell and starry tentacles, deep blue and cyan crystals"
+12. Chat Nebuleuse : "cat with a nebula crystal coat and star tail tip, purple and pink crystals"

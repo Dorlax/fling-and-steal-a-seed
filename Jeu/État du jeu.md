@@ -71,6 +71,7 @@
 - Textures pixel-art 16×16 (Pelage, Écailles, Gelée) teintées par la couleur de chaque gros bloc (`Bestiaire.Textures`, images du compte du propriétaire).
 - Animations client (`Animations`, calculs dans `Shared.Anime`) : sautillement des créatures, dandinement des monstres, pattes qui marchent, ailes, queues, oreilles, coup de bras/mâchoire quand un monstre frappe (attribut `FrappeA`).
 - Interface : boutons de pièges en rangée en bas à gauche (ne recouvrent plus les stats).
+- Créatures 3D à squelette (nouveau style, low-poly à facettes) : client `AnimationsOs` + `Shared.AnimeOs` animent les modèles `Squelette = "Quadrupede"` (17 os nommés, clips Idle/Marche/Course/Joie/Etourdi/Porte, `EtatAnim`). Référence : Dragon Cristal (assets/creatures/dragon_cristal), pas encore importé dans Studio.
 
 ## Cadeaux et options
 - 🎁 Cadeaux (server/Cadeaux, shared/Cadeaux, client/InterfaceCadeaux) : connexion quotidienne sur 7 jours (Config.Quotidien), 3 défis du jour parmi Config.Defis (progrès comptés au serveur : lancers, dépôts, Forge, ventes), codes promo Config.Codes (une fois par joueur).
@@ -78,5 +79,6 @@
 - Remotes : ReclamerQuotidien, ReclamerDefi, UtiliserCode (+ ResultatCode), ChangerReglage.
 
 ## À faire
+- Importer et publier le Dragon Cristal dans Studio, puis le brancher au bestiaire ; vérifier le sens des os (`AnimationsOs.Axes`).
 - Créer les 4 passes sur Roblox et mettre leurs Id dans `Config.Passes`.
 - Test du cycle jour/nuit à la main (vérifié seulement par les tests automatiques).

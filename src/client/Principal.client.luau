@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Animations = require(script.Parent:WaitForChild("Animations"))
+local AnimationsOs = require(script.Parent:WaitForChild("AnimationsOs"))
 local AnimationsForge = require(script.Parent:WaitForChild("AnimationsForge"))
 local Ambiances = require(script.Parent:WaitForChild("Ambiances"))
 local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
@@ -49,6 +50,8 @@ InterfaceCadeaux.demarrer()
 EffetsComiques.demarrer()
 -- Sautillement des créatures et dandinement des monstres (affichage seulement).
 Animations.demarrer()
+-- Créatures 3D à squelette (Blender) : idle, marche, course, joie, étourdi, porté.
+AnimationsOs.demarrer()
 -- Machines de Forge : couleur du mode, soufflets, marteau et étincelles.
 AnimationsForge.demarrer()
 -- Effets en blocs des espèces (ambiance du biome, signatures, grosses tailles).
