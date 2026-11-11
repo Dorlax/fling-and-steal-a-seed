@@ -139,7 +139,6 @@ local function ecrireAttributs(joueur: Player, donnees: Donnees.DonneesJoueur)
 	joueur:SetAttribute("Vitesse", donnees.Vitesse)
 	joueur:SetAttribute("ModeForge", donnees.ModeForge)
 	joueur:SetAttribute("NiveauForge", donnees.NiveauForge)
-	joueur:SetAttribute("Etages", donnees.Etages)
 	joueur:SetAttribute("Agrandissement", donnees.Agrandissement)
 	joueur:SetAttribute("RecordBiome", donnees.RecordBiome)
 	joueur:SetAttribute("SurForge", false)
@@ -184,13 +183,9 @@ function Sauvegarde.creaturesDe(joueur: any): { string }
 	return table.clone(creaturesParJoueur[joueur] or {})
 end
 
--- Nombre de places de la base : MaxCreaturesBase par étage acheté.
+-- Nombre de places de la base : selon l'agrandissement (Config.Bases.Capacites).
 function Sauvegarde.capacite(joueur: any): number
-	local etages = joueur:GetAttribute("Etages")
-	if type(etages) ~= "number" or etages ~= etages or etages < 1 then
-		etages = 1
-	end
-	return Config.Creatures.MaxCreaturesBase * math.min(math.floor(etages), Config.Bases.EtagesMax)
+	return Donnees.capacite(joueur:GetAttribute("Agrandissement"))
 end
 
 -- Ajoute une créature (fiche valide : « Rarete[:Taille[:Espece]] ») à la
@@ -286,7 +281,6 @@ function Sauvegarde.collecter(joueur: any): Donnees.DonneesJoueur
 		ModeForge = joueur:GetAttribute("ModeForge"),
 		NiveauForge = joueur:GetAttribute("NiveauForge")
 			or (if session then session.donnees.NiveauForge else 1),
-		Etages = joueur:GetAttribute("Etages"),
 		Agrandissement = joueur:GetAttribute("Agrandissement"),
 		RecordBiome = joueur:GetAttribute("RecordBiome"),
 		Decouvertes = decouvertesParJoueur[joueur],

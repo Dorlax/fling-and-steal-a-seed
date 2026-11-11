@@ -166,8 +166,9 @@ return {
 		assert(c:GetAttribute("Zone") == r.Zone, "Zone incohérente")
 		assert(c:GetAttribute("Distance") == r.Distance, "Distance incohérente")
 		assert(c:GetAttribute("Proprietaire") == j.UserId, "Proprietaire incohérent")
-		local centre = (base :: any):GetPivot().Position
-		local attenduZ = centre.Z + 20 + r.Distance
+		assert(base ~= nil, "base attendue")
+		-- Les distances partent de la ligne de la zone sûre.
+		local attenduZ = Config.Monstres.BordBases + r.Distance
 		local pos = (c :: Model):GetPivot().Position
 		assert(math.abs(pos.Z - attenduZ) <= 2, "Z attendu " .. attenduZ .. ", obtenu " .. pos.Z)
 		assert(pos.Y >= 0, "la créature doit être au-dessus du sol (Y >= 0), Y = " .. pos.Y)

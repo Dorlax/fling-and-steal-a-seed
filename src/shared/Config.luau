@@ -158,25 +158,33 @@ local Config = {
 		DistanceRecolte = 10, -- studs, vérifiée par le serveur
 		DureeRecolte = 0.5, -- secondes de maintien du ProximityPrompt
 		MultiplicateurPortage = 0.8, -- WalkSpeed × 0,8 pendant le portage
-		MaxCreaturesBase = 10, -- emplacements par base
+		MaxCreaturesBase = 10, -- places d'une base au niveau 1 (voir Bases.Capacites)
 		IntervalleRevenus = 1, -- secondes entre deux versements
 		RevenuParSeconde = { Commune = 1, Rare = 3, Epique = 10, Legendaire = 30, Mythique = 100 },
 		PiecesMax = 1e300, -- plafond de sécurité (progression quasi infinie)
 	},
 
-	-- Étages de base (façon vitrine) : chaque étage ajoute MaxCreaturesBase
-	-- socles. Le premier est gratuit ; les suivants s'achètent en pièces.
+	-- Base des joueurs : un seul niveau (pas d'étages). Chaque agrandissement
+	-- élargit le sol et ajoute des places. Tailles : côté du sol (studs) ;
+	-- Capacites : places par niveau ; PrixAgrandissement : prix des niveaux
+	-- 2, 3, 4… ; EchelleMax : taille max des créatures exposées (× leur
+	-- taille de base). Les anciens étages achetés comptent comme des
+	-- agrandissements (migration dans Shared.Donnees).
 	Bases = {
-		EtagesMax = 3,
-		HauteurEtage = 14, -- studs entre deux étages
-		PrixEtages = { 2500, 150000 }, -- prix des étages 2 et 3
-		-- Agrandissements : côté du sol de la base (studs), prix des niveaux 2
-		-- et 3, et taille max des créatures exposées (× leur taille de base),
-		-- pour que les plus grosses tiennent sur leur socle.
-		Tailles = { 40, 56, 72 },
-		PrixAgrandissement = { 6000, 250000 },
-		EchelleMax = { 1.3, 2.1, 2.8 },
+		Tailles = { 40, 56, 72, 84 },
+		Capacites = { 10, 20, 30, 40 },
+		PrixAgrandissement = { 5000, 150000, 5000000 },
+		EchelleMax = { 1.3, 2.1, 2.8, 2.8 },
 		Ecart = 90, -- distance entre deux bases (assez pour la plus grande)
+	},
+
+	-- Zone sûre : bande entre le bord avant des bases et la ligne de départ
+	-- des Terres Sauvages. Derrière la ligne, personne ne peut être attaqué
+	-- (ni monstre, ni plaquage, ni piège) : le joueur garde sa créature.
+	-- Seul un voleur qui porte une créature volée reste plaquable.
+	ZoneSure = {
+		BordBases = 20, -- Z du bord avant des bases
+		Profondeur = 60, -- studs : la ligne est à Z = BordBases + Profondeur
 	},
 
 	-- Tailles des créatures (tirées par le serveur à la pousse, indépendantes
@@ -214,7 +222,9 @@ local Config = {
 
 	-- Monstres des Terres Sauvages (tout est décidé par le serveur).
 	Monstres = {
-		BordBases = 20, -- Z du bord des bases (= début des Terres Sauvages)
+		-- Z de la ligne de la zone sûre (= début des Terres Sauvages et du
+		-- biome 1) : ZoneSure.BordBases + ZoneSure.Profondeur.
+		BordBases = 80,
 		MargeBases = 6, -- un monstre reste toujours à Z >= BordBases + MargeBases
 		IntervalleIA = 0.1, -- secondes entre deux pas de la boucle serveur
 		DureeProtection = 3, -- secondes sans pouvoir être refrappé par un monstre
@@ -233,8 +243,8 @@ local Config = {
 				PorteeDetection = 30,
 				PorteeCoup = 5,
 				Recharge = 2.0,
-				NombreJour = 2,
-				NombreNuit = 3, -- au plus 12 monstres par biome la nuit (anti-lag)
+				NombreJour = 1,
+				NombreNuit = 2, -- au plus 9 monstres par biome la nuit (anti-lag)
 			},
 			Moyenne = {
 				Nom = "Ronchonbulle",
@@ -247,8 +257,8 @@ local Config = {
 				PorteeDetection = 40,
 				PorteeCoup = 6,
 				Recharge = 1.6,
-				NombreJour = 3,
-				NombreNuit = 4,
+				NombreJour = 2,
+				NombreNuit = 3,
 			},
 			Lointaine = {
 				Nom = "Grobidou",
@@ -261,11 +271,23 @@ local Config = {
 				PorteeDetection = 50,
 				PorteeCoup = 7,
 				Recharge = 1.2,
-				NombreJour = 4,
-				NombreNuit = 5,
+				NombreJour = 3,
+				NombreNuit = 4,
 			},
 		},
 		IntervalleVague = 30, -- la nuit, une vague complète les zones toutes les 30 s
+		-- Monstres présents d'avance : le biome d'un joueur, le suivant, et
+		-- ceux où une de ses créatures attend au sol. Contrôle fréquent.
+		IntervalleControle = 0.5, -- secondes entre deux contrôles des biomes actifs
+		ChanceProcheCreature = 0.6, -- 60 % des monstres apparaissent près d'une créature au sol
+		RayonProcheCreature = 70, -- studs autour de cette créature
+		-- Tailles des monstres (tirées à l'apparition) : un grand monstre
+		-- frappe de plus loin et projette plus fort (× racine de l'échelle).
+		Tailles = {
+			Ordre = { "Petit", "Normal", "Grand", "Geant" },
+			Echelle = { Petit = 0.75, Normal = 1, Grand = 1.5, Geant = 2.2 },
+			Poids = { Petit = 25, Normal = 45, Grand = 20, Geant = 10 },
+		},
 		ReculMax = 500, -- studs/s : plafond de la propulsion horizontale
 		DureePoussee = 0.2, -- secondes de poussée
 	},

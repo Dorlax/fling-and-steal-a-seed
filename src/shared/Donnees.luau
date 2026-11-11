@@ -18,8 +18,7 @@ export type DonneesJoueur = {
 	Vitesse: number,
 	ModeForge: string,
 	NiveauForge: number,
-	Etages: number,
-	Agrandissement: number,
+	Agrandissement: number, -- 1 à #Config.Bases.Tailles (sol et nombre de places)
 	RecordBiome: number,
 	Decouvertes: { string }, -- espèces de créatures déjà récoltées (Bestiaire)
 	DerniereConnexion: number, -- os.time() de la dernière sauvegarde (0 = jamais)
@@ -51,7 +50,6 @@ function Donnees.parDefaut(): DonneesJoueur
 		Vitesse = 0,
 		ModeForge = Config.Forge.ModeParDefaut,
 		NiveauForge = 1,
-		Etages = 1,
 		Agrandissement = 1,
 		RecordBiome = 1,
 		Decouvertes = {},
@@ -93,14 +91,24 @@ local function nettoyerPieces(valeur: any): number
 	return math.min(math.floor(valeur), Config.Creatures.PiecesMax)
 end
 
--- Liste de fiches valides, tronquée à la capacité maximale (tous étages).
+-- Nombre de places d'une base au niveau d'agrandissement donné (borné).
+function Donnees.capacite(agrandissement: any): number
+	local capacites = Config.Bases.Capacites
+	local niveau = 1
+	if type(agrandissement) == "number" and agrandissement == agrandissement then
+		niveau = math.clamp(math.floor(agrandissement), 1, #capacites)
+	end
+	return capacites[niveau]
+end
+
+-- Liste de fiches valides, tronquée à la capacité maximale (base la plus grande).
 local function nettoyerCreatures(valeur: any): { string }
 	local liste = {}
 	if type(valeur) ~= "table" then
 		return liste
 	end
 	for _, rarete in ipairs(valeur) do
-		if #liste >= Config.Creatures.MaxCreaturesBase * Config.Bases.EtagesMax then
+		if #liste >= Donnees.capacite(math.huge) then
 			break
 		end
 		if Fiche.valide(rarete) then
@@ -147,10 +155,6 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 	if type(niveau) == "number" and niveau == niveau and niveau >= 1 and niveau < math.huge then
 		donnees.NiveauForge = math.floor(niveau)
 	end
-	local etages = brut.Etages
-	if type(etages) == "number" and etages == etages and etages >= 1 then
-		donnees.Etages = math.min(math.floor(etages), Config.Bases.EtagesMax)
-	end
 	local agrandissement = brut.Agrandissement
 	if
 		type(agrandissement) == "number"
@@ -158,6 +162,13 @@ function Donnees.nettoyer(brut: any): DonneesJoueur
 		and agrandissement >= 1
 	then
 		donnees.Agrandissement = math.min(math.floor(agrandissement), #Config.Bases.Tailles)
+	end
+	-- Anciennes sauvegardes : les étages n'existent plus. Chaque étage acheté
+	-- devient un agrandissement (10 places chacun), pour ne rien perdre.
+	local etages = brut.Etages
+	if type(etages) == "number" and etages == etages and etages >= 1 then
+		local niveauEtages = math.min(math.floor(etages), #Config.Bases.Tailles)
+		donnees.Agrandissement = math.max(donnees.Agrandissement, niveauEtages)
 	end
 	local record = brut.RecordBiome
 	if type(record) == "number" and record == record and record >= 1 and record < math.huge then

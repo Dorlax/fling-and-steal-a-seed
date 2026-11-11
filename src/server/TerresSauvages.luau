@@ -12,7 +12,10 @@ local TerresSauvages = {}
 -- Les 12 emplacements de Bases vont de X = -360 à +360 (sols de 40 studs) :
 -- 800 studs de large les couvrent tous.
 local LARGEUR = 1200 -- couvre les 12 bases (90 studs d'écart, jusqu'à 72 de large)
-local BORD_BASES = 20 -- bord des bases côté +Z
+-- Début des Terres Sauvages = ligne de la zone sûre (les bases sont à
+-- Z = ZoneSure.BordBases, la bande entre les deux est la zone sûre).
+local BORD_BASES = Config.Monstres.BordBases
+local BORD_AVANT_BASES = Config.ZoneSure.BordBases
 local EPAISSEUR = 1
 
 local COULEURS_ZONES: { [string]: Color3 } = {
@@ -113,6 +116,97 @@ local function creerArche(parent: Instance, biome: Biomes.Biome, numero: number,
 	dos.Parent = linteau
 end
 
+-- Zone sûre : sol entre les bases et la ligne, et la ligne elle-même
+-- (bande blanche et verte, rideau scintillant qui ne bloque rien, pancartes).
+local function creerZoneSure()
+	local modele = enfant(Workspace, "ZoneSure", "Model") :: Model
+	modele:ClearAllChildren()
+	local profondeur = BORD_BASES - BORD_AVANT_BASES
+	local function bloc(nom: string, taille: Vector3, position: Vector3, couleur: Color3): Part
+		local p = Instance.new("Part")
+		p.Name = nom
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.CastShadow = false
+		p.Size = taille
+		p.Position = position
+		p.Color = couleur
+		p.Material = Enum.Material.SmoothPlastic
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.Parent = modele
+		return p
+	end
+	local sol = bloc(
+		"Sol",
+		Vector3.new(LARGEUR, EPAISSEUR, profondeur),
+		Vector3.new(0, -EPAISSEUR / 2, BORD_AVANT_BASES + profondeur / 2),
+		Color3.fromRGB(150, 215, 120)
+	)
+	sol.CanCollide = true
+	sol.CanQuery = true
+	sol.Material = Enum.Material.Grass
+	-- Ligne : bande blanche bordée de vert, en tirets.
+	bloc(
+		"Ligne",
+		Vector3.new(LARGEUR, 0.12, 3),
+		Vector3.new(0, 0.06, BORD_BASES - 1.5),
+		Color3.fromRGB(245, 250, 240)
+	)
+	local TIRET = 10
+	for x = -LARGEUR / 2 + TIRET / 2, LARGEUR / 2 - TIRET / 2, 2 * TIRET do
+		bloc(
+			"Tiret",
+			Vector3.new(TIRET, 0.14, 1),
+			Vector3.new(x, 0.07, BORD_BASES - 3.4),
+			Color3.fromRGB(90, 200, 110)
+		)
+	end
+	-- Rideau translucide (visuel seulement) : on voit qu'on change de côté.
+	local rideau = bloc(
+		"Rideau",
+		Vector3.new(LARGEUR, 7, 0.2),
+		Vector3.new(0, 3.5, BORD_BASES),
+		Color3.fromRGB(120, 230, 160)
+	)
+	rideau.Material = Enum.Material.ForceField
+	rideau.Transparency = 0.35
+	-- Pancartes « ZONE SÛRE » réparties sur la ligne, lisibles des deux côtés.
+	for x = -LARGEUR / 2 + 75, LARGEUR / 2 - 75, 150 do
+		local pied = bloc(
+			"Pied",
+			Vector3.new(0.8, 8, 0.8),
+			Vector3.new(x, 4, BORD_BASES - 1.5),
+			Color3.fromRGB(240, 240, 240)
+		)
+		pied.CastShadow = true
+		local planche = bloc(
+			"Pancarte",
+			Vector3.new(14, 4, 0.6),
+			Vector3.new(x, 9, BORD_BASES - 1.5),
+			Color3.fromRGB(90, 200, 110)
+		)
+		for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+			local gui = Instance.new("SurfaceGui")
+			gui.Face = face
+			gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+			gui.PixelsPerStud = 20
+			gui.Parent = planche
+			local texte = Instance.new("TextLabel")
+			texte.Size = UDim2.fromScale(1, 1)
+			texte.BackgroundTransparency = 1
+			texte.Font = Enum.Font.FredokaOne
+			texte.TextScaled = true
+			texte.TextColor3 = Color3.new(1, 1, 1)
+			texte.TextStrokeTransparency = 0
+			-- Face avant (-Z) vue depuis les bases, arrière depuis les Terres Sauvages.
+			texte.Text = if face == Enum.NormalId.Front then "TERRES SAUVAGES" else "ZONE SÛRE"
+			texte.Parent = gui
+		end
+	end
+end
+
 -- Crée (ou remet en état) le sol de chaque biome, les bornes des sous-zones,
 -- les arches d'entrée et Workspace.Creatures. Renvoie le sol du biome 1.
 function TerresSauvages.creer(): BasePart
@@ -181,6 +275,7 @@ function TerresSauvages.creer(): BasePart
 		creerArche(segment, biome, numero, debut + 2)
 	end
 
+	creerZoneSure()
 	enfant(Workspace, "Creatures", "Folder")
 	return sol
 end

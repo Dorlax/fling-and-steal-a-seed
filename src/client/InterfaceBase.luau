@@ -8,7 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Bestiaire = require(Shared:WaitForChild("Bestiaire"))
-local Config = require(Shared:WaitForChild("Config"))
+local Donnees = require(Shared:WaitForChild("Donnees"))
 local Fiche = require(Shared:WaitForChild("Fiche"))
 local GestionBase = require(Shared:WaitForChild("GestionBase"))
 local Nombres = require(Shared:WaitForChild("Nombres"))
@@ -121,7 +121,6 @@ function InterfaceBase.demarrer()
 		local espece = Bestiaire.especeCreature(infos.Rarete, infos.Espece)
 		Apercu.montrer(vue, Apercu.modele(espece, false, couleur))
 
-		local etage = math.floor((numero - 1) / Config.Creatures.MaxCreaturesBase) + 1
 		local nom = Habillage.texte(cadre, "Nom", { contour = Style.Contour.Petit })
 		nom.Position = UDim2.fromOffset(HAUTEUR_LIGNE + 4, 4)
 		nom.Size = UDim2.new(1, -HAUTEUR_LIGNE - 140, 0, 28)
@@ -134,7 +133,7 @@ function InterfaceBase.demarrer()
 		detail.Size = UDim2.new(1, -HAUTEUR_LIGNE - 140, 0, 24)
 		detail.TextXAlignment = Enum.TextXAlignment.Left
 		detail.TextScaled = true
-		detail.Text = `+{Nombres.abreger(Revenus.parSeconde(fiche))}/s · étage {etage}`
+		detail.Text = `+{Nombres.abreger(Revenus.parSeconde(fiche))}/s`
 
 		local prix = GestionBase.prixVente(fiche)
 		local enAttente = confirmation == numero and os.clock() - confirmationA < DELAI_CONFIRMATION
@@ -166,9 +165,7 @@ function InterfaceBase.demarrer()
 			end
 		end
 		local creatures = GestionBase.decoder(joueur:GetAttribute("CreaturesBase"))
-		local etages = joueur:GetAttribute("Etages")
-		local capacite = Config.Creatures.MaxCreaturesBase
-			* (if type(etages) == "number" then etages else 1)
+		local capacite = Donnees.capacite(joueur:GetAttribute("Agrandissement"))
 		titre.Text = `Ma base · {#creatures}/{capacite}`
 		for numero, fiche in creatures do
 			ligne(numero, fiche)
@@ -198,11 +195,13 @@ function InterfaceBase.demarrer()
 	boutonTrier.Activated:Connect(function()
 		trier:FireServer()
 	end)
-	joueur:GetAttributeChangedSignal("CreaturesBase"):Connect(function()
-		if panneau.Visible then
-			afficher()
-		end
-	end)
+	for _, nom in { "CreaturesBase", "Agrandissement" } do
+		joueur:GetAttributeChangedSignal(nom):Connect(function()
+			if panneau.Visible then
+				afficher()
+			end
+		end)
+	end
 
 	ecran.Parent = joueur:WaitForChild("PlayerGui")
 end

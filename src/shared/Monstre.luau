@@ -21,6 +21,9 @@ export type Contexte = {
 	maintenant: number,
 	pretA: number?, -- fin de la recharge du monstre
 	protegeeJusqua: number?, -- fin de protection de la cible
+	cibleEnZoneSure: boolean?, -- derrière la ligne de la zone sûre
+	ciblePorte: boolean?, -- false : la cible ne porte aucune créature
+	echelle: number?, -- taille du monstre (1 = normale), allonge sa portée
 }
 
 export type Candidat = { distance: number, valide: boolean }
@@ -105,7 +108,38 @@ function Monstre.limiter(position: Position, zone: string?, biome: number?): Pos
 	}
 end
 
+-- Échelle valide d'un monstre (1 par défaut, bornée entre 0,25 et 5).
+local function echelleValide(echelle: any): number
+	return borner(echelle, 0.25, 5, 1)
+end
+
+-- Portée du coup d'un monstre de cette zone et de cette taille.
+function Monstre.porteeCoup(zone: string, echelle: number?): number
+	return Monstre.reglagesZone(zone).PorteeCoup * echelleValide(echelle)
+end
+
+-- Taille d'un monstre tirée avec `u` dans [0, 1[ selon Config.Monstres.Tailles.
+-- Renvoie le nom de la taille et son échelle.
+function Monstre.tirerTaille(u: number): (string, number)
+	local tailles: any = reglages.Tailles
+	local total = 0
+	for _, nom in tailles.Ordre do
+		total += tailles.Poids[nom]
+	end
+	local tirage = (if estNombreFini(u) then math.clamp(u, 0, 0.999999) else 0) * total
+	for _, nom in tailles.Ordre do
+		tirage -= tailles.Poids[nom]
+		if tirage < 0 then
+			return nom, tailles.Echelle[nom]
+		end
+	end
+	local dernier = tailles.Ordre[#tailles.Ordre]
+	return dernier, tailles.Echelle[dernier]
+end
+
 -- Renvoie true, ou false et la première raison de refus trouvée.
+-- Personne n'est frappé derrière la ligne de la zone sûre, ni sans créature
+-- portée (les monstres n'attaquent qu'après le ramassage d'une graine).
 -- (La protection passe avant la recharge : un joueur protégé l'apprend.)
 function Monstre.peutFrapper(contexte: Contexte): (boolean, string?)
 	if not contexte.cibleVivante then
@@ -114,13 +148,19 @@ function Monstre.peutFrapper(contexte: Contexte): (boolean, string?)
 	if contexte.cibleDansSaBase then
 		return false, "base"
 	end
+	if contexte.cibleEnZoneSure == true then
+		return false, "zonesure"
+	end
+	if contexte.ciblePorte == false then
+		return false, "sansgraine"
+	end
 	if avant(contexte.maintenant, contexte.protegeeJusqua) then
 		return false, "protegee"
 	end
 	if avant(contexte.maintenant, contexte.pretA) then
 		return false, "recharge"
 	end
-	local portee = Monstre.reglagesZone(contexte.zone).PorteeCoup
+	local portee = Monstre.porteeCoup(contexte.zone, contexte.echelle)
 	if not estNombreFini(contexte.distance) or contexte.distance > portee then
 		return false, "portee"
 	end
@@ -171,11 +211,13 @@ end
 
 -- Coup d'un monstre : vitesse horizontale et verticale de la propulsion
 -- (studs/s) et durée d'étourdissement. Plus le monstre est rapide (biomes
--- lointains), plus le joueur vole loin ; plafond Config.Monstres.ReculMax.
-function Monstre.recul(zone: string, biome: number?): (number, number, number)
+-- lointains) et grand, plus le joueur vole loin ; plafond Config.Monstres.ReculMax.
+function Monstre.recul(zone: string, biome: number?, echelle: number?): (number, number, number)
 	local r = Monstre.reglagesZone(zone)
-	local horizontal = math.min(Monstre.vitesse(zone, biome) * r.Recul, Config.Monstres.ReculMax)
-	return horizontal, r.Hauteur, r.Etourdi
+	local force = math.sqrt(echelleValide(echelle))
+	local horizontal =
+		math.min(Monstre.vitesse(zone, biome) * r.Recul * force, Config.Monstres.ReculMax)
+	return horizontal, r.Hauteur * force, r.Etourdi
 end
 
 -- Phase du cycle à l'instant `t` et secondes restantes dans cette phase.

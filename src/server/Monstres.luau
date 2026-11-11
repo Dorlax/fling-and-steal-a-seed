@@ -13,6 +13,7 @@ local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Biomes = require(ReplicatedStorage.Shared.Biomes)
 local Monstre = require(ReplicatedStorage.Shared.Monstre)
 local Projection = require(ReplicatedStorage.Shared.Projection)
+local ZoneSure = require(ReplicatedStorage.Shared.ZoneSure)
 local Bases = require(script.Parent.Bases)
 local Modeleur = require(script.Parent.Modeleur)
 local Portage = require(script.Parent.Portage)
@@ -20,6 +21,8 @@ local Portage = require(script.Parent.Portage)
 type Etat = {
 	zone: string,
 	biome: number,
+	echelle: number, -- taille tirée à l'apparition (1 = normale)
+	taille: number, -- diamètre du Corps (studs)
 	apparition: Vector3,
 	pretA: number?, -- fin de la recharge
 	cible: any?, -- joueur poursuivi
@@ -91,18 +94,41 @@ function Monstres.dossier(): Folder
 	return dossier
 end
 
-local function hauteurSol(zone: string): number
-	return Monstre.reglagesZone(zone).Taille / 2
+-- Créatures qui attendent au sol (Workspace.Creatures) dans la bande d'une
+-- zone d'un biome : les monstres aiment rôder autour.
+local function creaturesAuSol(zone: string, biome: number): { Vector3 }
+	local liste = {}
+	local dossierCreatures = Workspace:FindFirstChild("Creatures")
+	if dossierCreatures == nil then
+		return liste
+	end
+	local zMin, zMax = Monstre.bandeZone(zone, biome)
+	for _, creature in dossierCreatures:GetChildren() do
+		if creature:IsA("Model") then
+			local p = creature:GetPivot().Position
+			if p.Z >= zMin and p.Z <= zMax then
+				table.insert(liste, p)
+			end
+		end
+	end
+	return liste
 end
 
--- Point aléatoire de la bande d'une zone du biome n, au niveau du sol.
-local function pointAleatoire(zone: string, biome: number): Vector3
+-- Point aléatoire de la bande d'une zone du biome n, au niveau du sol (Y
+-- donné par l'appelant). Souvent près d'une créature au sol, pour que les
+-- monstres soient déjà là quand le joueur arrive, même s'il court vite.
+local function pointAleatoire(zone: string, biome: number, hauteur: number): Vector3
 	local zMin, zMax = Monstre.bandeZone(zone, biome)
-	local p = Monstre.limiter({
-		X = aleatoire:NextNumber(-580, 580),
-		Y = hauteurSol(zone),
-		Z = aleatoire:NextNumber(zMin, zMax),
-	}, zone, biome)
+	local x = aleatoire:NextNumber(-580, 580)
+	local z = aleatoire:NextNumber(zMin, zMax)
+	local proches = creaturesAuSol(zone, biome)
+	if #proches > 0 and aleatoire:NextNumber() < reglages.ChanceProcheCreature then
+		local cible = proches[aleatoire:NextInteger(1, #proches)]
+		local rayon = reglages.RayonProcheCreature
+		x = cible.X + aleatoire:NextNumber(-rayon, rayon)
+		z = cible.Z + aleatoire:NextNumber(-rayon, rayon)
+	end
+	local p = Monstre.limiter({ X = x, Y = hauteur, Z = z }, zone, biome)
 	return Vector3.new(p.X, p.Y, p.Z)
 end
 
@@ -119,9 +145,14 @@ local function appliquerYeux(modele: Model, nuit: boolean)
 	end
 end
 
-local function creerModele(zone: string, position: Vector3, biome: number): Model
+local function creerModele(
+	zone: string,
+	position: Vector3,
+	biome: number,
+	t: number,
+	nomTaille: string
+): Model
 	local r = Monstre.reglagesZone(zone)
-	local t = r.Taille
 	local modele = Instance.new("Model")
 	modele.Name = "Monstre"
 
@@ -142,6 +173,7 @@ local function creerModele(zone: string, position: Vector3, biome: number): Mode
 	modele:SetAttribute("Monstre", true)
 	modele:SetAttribute("Zone", zone)
 	modele:SetAttribute("Biome", biome)
+	modele:SetAttribute("TailleMonstre", nomTaille)
 	appliquerYeux(modele, Workspace:GetAttribute("Nuit") == true)
 	local angle = aleatoire:NextNumber(0, 2 * math.pi)
 	modele:PivotTo(CFrame.new(position) * CFrame.Angles(0, angle, 0))
@@ -304,10 +336,11 @@ local function propulser(
 	humanoide: Humanoid,
 	depuis: Vector3,
 	zone: string,
-	biome: number
+	biome: number,
+	echelle: number
 ): Projection.Style
 	local style = Projection.tirer(aleatoire:NextNumber())
-	local baseH, baseV, baseDuree = Monstre.recul(zone, biome)
+	local baseH, baseV, baseDuree = Monstre.recul(zone, biome, echelle)
 	local horizontal, vertical = Projection.poussee(style, baseH, baseV)
 	local duree = Projection.duree(style, baseDuree)
 	local ecart = racine.Position - depuis
@@ -381,11 +414,15 @@ end
 -- Apparition et disparition
 
 local function apparaitre(zone: string, biome: number): Model
-	local position = pointAleatoire(zone, biome)
-	local modele = creerModele(zone, position, biome)
+	local nomTaille, echelle = Monstre.tirerTaille(aleatoire:NextNumber())
+	local taille = Monstre.reglagesZone(zone).Taille * echelle
+	local position = pointAleatoire(zone, biome, taille / 2)
+	local modele = creerModele(zone, position, biome, taille, nomTaille)
 	etats[modele] = {
 		zone = zone,
 		biome = biome,
+		echelle = echelle,
+		taille = taille,
 		apparition = position,
 		pretA = nil,
 		cible = nil,
@@ -419,15 +456,30 @@ local function monstresDe(zone: string, biome: number): { Model }
 	return liste
 end
 
--- Biomes « actifs » : le premier (toujours) et ceux où se trouve au moins un
--- joueur. Les autres n'ont aucun monstre (anti-lag).
+-- Biomes « actifs » : le premier (toujours), celui de chaque joueur et le
+-- suivant (prêt d'avance pour un joueur rapide), et ceux où une créature
+-- attend au sol. Les autres n'ont aucun monstre (anti-lag).
 local function biomesActifs(): { [number]: boolean }
 	local actifs = { [1] = true }
+	local dernier = Biomes.nombre()
 	for _, joueur in Players:GetPlayers() do
 		local racine = racineEtHumanoide(joueur)
 		if racine then
 			local p = racine.Position
-			actifs[Monstre.biomeDe({ X = p.X, Y = p.Y, Z = p.Z })] = true
+			local biome = Monstre.biomeDe({ X = p.X, Y = p.Y, Z = p.Z })
+			actifs[biome] = true
+			if not ZoneSure.contient(p) then
+				actifs[math.min(biome + 1, dernier)] = true
+			end
+		end
+	end
+	local dossierCreatures = Workspace:FindFirstChild("Creatures")
+	if dossierCreatures then
+		for _, creature in dossierCreatures:GetChildren() do
+			if creature:IsA("Model") then
+				local p = creature:GetPivot().Position
+				actifs[Monstre.biomeDe({ X = p.X, Y = p.Y, Z = p.Z })] = true
+			end
 		end
 	end
 	return actifs
@@ -480,6 +532,9 @@ function Monstres.frapper(monstre: any, joueur: any, maintenant: number?): (bool
 		maintenant = instant,
 		pretA = etat.pretA,
 		protegeeJusqua = protection[joueur],
+		cibleEnZoneSure = racine ~= nil and ZoneSure.contient(racine.Position),
+		ciblePorte = Portage.porte(joueur),
+		echelle = etat.echelle,
 	})
 	if not ok then
 		return false, raison
@@ -496,7 +551,8 @@ function Monstres.frapper(monstre: any, joueur: any, maintenant: number?): (bool
 		humanoide :: Humanoid,
 		position,
 		etat.zone,
-		etat.biome
+		etat.biome,
+		etat.echelle
 	)
 
 	protection[joueur] = instant + reglages.DureeProtection
@@ -518,6 +574,8 @@ end
 
 -- ----------------------------------------------------------------------------
 -- Déplacement
+-- Seuls les joueurs qui portent une créature, hors de la zone sûre, sont
+-- poursuivis : avant le ramassage, les monstres les laissent passer.
 
 type InfoJoueur = { joueur: any, position: Vector3, valide: boolean }
 
@@ -529,7 +587,8 @@ local function infosJoueurs(instant: number): { InfoJoueur }
 			local p = racine.Position
 			local protege = protection[joueur]
 			local valide = humanoide.Health > 0
-				and p.Z >= reglages.BordBases
+				and not ZoneSure.contient(p)
+				and Portage.porte(joueur)
 				and not (protege ~= nil and instant < protege)
 				and not Bases.estDansSaBase(joueur)
 			table.insert(infos, { joueur = joueur, position = p, valide = valide })
@@ -573,7 +632,7 @@ local function avancer(modele: Model, etat: Etat, infos: { InfoJoueur }, instant
 		etat.cible = nil
 		local destination = etat.destination
 		if destination == nil or horizontal(position - destination).Magnitude <= ARRIVE then
-			destination = pointAleatoire(etat.zone, etat.biome)
+			destination = pointAleatoire(etat.zone, etat.biome, etat.taille / 2)
 			etat.destination = destination
 		end
 		but = destination :: Vector3
@@ -588,7 +647,7 @@ local function avancer(modele: Model, etat: Etat, infos: { InfoJoueur }, instant
 		etat.rebond += reglages.IntervalleIA * 12
 	end
 	-- Rebond vertical (visuel seulement).
-	local hauteur = hauteurSol(etat.zone) + math.abs(math.sin(etat.rebond)) * r.Taille * 0.15
+	local hauteur = etat.taille / 2 + math.abs(math.sin(etat.rebond)) * etat.taille * 0.15
 	-- Chaque pas passe par la limite : jamais dans une base, jamais hors de sa zone.
 	local p = Monstre.limiter({ X = suivant.X, Y = hauteur, Z = suivant.Z }, etat.zone, etat.biome)
 	local nouvelle = Vector3.new(p.X, p.Y, p.Z)
@@ -653,7 +712,7 @@ function Monstres.demarrer()
 			-- Un joueur change de biome : on peuple le nouveau, on vide l'ancien.
 			local phase = Monstre.phase(instant)
 			local cle = ""
-			if instant - dernierControle >= 2 then
+			if instant - dernierControle >= reglages.IntervalleControle then
 				dernierControle = instant
 				local liste = {}
 				for biome in biomesActifs() do

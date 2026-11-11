@@ -9,6 +9,16 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-11 — Zone sûre, monstres et base sur un seul niveau
+
+- **Zone sûre** : le premier biome commence 60 studs plus loin. Entre les bases et la ligne (bande blanche, rideau scintillant, pancartes « ZONE SÛRE » / « TERRES SAUVAGES »), personne ne peut être attaqué : ni par un monstre, ni par un plaquage, ni par un piège. Le joueur garde la créature qu'il rapporte. Seul un voleur qui porte une créature volée dans une base reste plaquable (sinon les raids ne se défendent plus).
+- Les distances de lancer partent maintenant de la ligne (aussi pour les bases agrandies, qui décalaient la graine de quelques studs).
+- **Monstres** : ils n'attaquent et ne poursuivent un joueur qu'une fois qu'il a ramassé une créature. Ils sont présents d'avance : dans le biome du joueur, le suivant, et partout où une créature attend au sol (contrôle toutes les 0,5 s au lieu de 2 s), et 60 % apparaissent près d'une créature au sol. Moins nombreux : 6 par biome le jour, 9 la nuit (au lieu de 9 et 12).
+- **Tailles des monstres** : Petit, Normal, Grand, Géant (× 0,75 à × 2,2). Plus grand = frappe de plus loin et projette plus fort.
+- **Base** : plus d'étages ni d'ascenseurs. Un seul niveau qui s'agrandit : 40 → 56 → 72 → 84 studs, 10 → 20 → 30 → 40 places (5 000, 150 000 puis 5 M pièces). Les étages déjà achetés deviennent des agrandissements, rien n'est perdu.
+- **Lumière** : moins éblouissante (luminosité, halo et contraste revus). Chaque biome a son ciel (horizon, voile, teinte) et son exposition, plus basse dans les biomes clairs (glacier, dunes, nuages, plage).
+- **Bords de la carte** : de vrais murs de 110 studs, à la couleur et à la matière de chaque biome, avec une corniche ; un portique (piliers et poutre haute) marque l'entrée de chaque biome ; murs pleins au fond des deux côtés. Chaque biome devient sa propre « boîte ».
+
 ## 2026-11-11 — Créatures 3D à squelette (Dragon Cristal)
 
 - Nouveau modèle de référence du bestiaire : le Dragon Cristal (low-poly à facettes, cristaux, halo), généré avec TRELLIS.2 puis allégé à 11 500 triangles dans Blender (fichiers dans assets/creatures/dragon_cristal).
