@@ -225,7 +225,7 @@ Chimeres.Themes = {
 			-0.45,
 			{ 245, 250, 255 },
 			"Montgolfieres",
-			{ 255, 200, 120 },
+			{ 255, 200, 120 }
 		)
 	),
 	theme(
@@ -269,7 +269,7 @@ Chimeres.Themes = {
 			-0.15,
 			{ 255, 245, 230 },
 			"Montgolfieres",
-			{ 210, 160, 90 },
+			{ 210, 160, 90 }
 		)
 	),
 	theme(
@@ -313,7 +313,7 @@ Chimeres.Themes = {
 			-0.3,
 			{ 250, 250, 255 },
 			"Montgolfieres",
-			{ 255, 90, 90 },
+			{ 255, 90, 90 }
 		)
 	),
 	theme(

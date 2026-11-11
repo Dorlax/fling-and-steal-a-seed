@@ -315,7 +315,6 @@ function Bases.joueurs(): { any }
 	return liste
 end
 
-
 -- Petite créature exposée dans la base (couleur de rareté, yeux, « +N/s »)
 -- avec le bouton « Voler » (pour les visiteurs, revérifié par le serveur).
 local function creerCreatureExposee(

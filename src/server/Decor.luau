@@ -3064,7 +3064,7 @@ local function strates(
 	z: number,
 	h: Random,
 	p: Palette,
-	matiere: Enum.Material,
+	matiere: Enum.Material
 )
 	local y = 0
 	local k = 0
@@ -3093,7 +3093,7 @@ local function strates(
 		Vector3.new(7, 2.5, PAS_MOTIF + 6),
 		y + 1,
 		p.dessus,
-		Enum.Material.Grass,
+		Enum.Material.Grass
 	)
 end
 
@@ -3107,7 +3107,7 @@ local function arbreSommet(parent: Instance, cote: number, z: number, h: Random,
 		Vector3.new(2, 10, 2),
 		y + 5,
 		fonce(p.roche, 0.4),
-		Enum.Material.Wood,
+		Enum.Material.Wood
 	)
 	for k = 1, 3 do
 		local d = h:NextNumber(9, 14)
@@ -3212,7 +3212,7 @@ function MOTIFS.Cosmos(parent, cote, z, h, p)
 		Vector3.new(6, HAUTEUR_PAROI, PAS_MOTIF),
 		HAUTEUR_PAROI / 2,
 		p.roche,
-		Enum.Material.Slate,
+		Enum.Material.Slate
 	)
 	for _ = 1, 3 do
 		local d = h:NextNumber(3, 7)
@@ -3252,7 +3252,7 @@ function MOTIFS.Pierre(parent, cote, z, h, p)
 		Vector3.new(6, HAUTEUR_PAROI - 10, PAS_MOTIF),
 		(HAUTEUR_PAROI - 10) / 2,
 		p.roche,
-		Enum.Material.Brick,
+		Enum.Material.Brick
 	)
 	-- Créneaux.
 	for i = -1, 1 do
@@ -3291,7 +3291,7 @@ function MOTIFS.Corail(parent, cote, z, h, p)
 		Vector3.new(4, HAUTEUR_PAROI, PAS_MOTIF),
 		HAUTEUR_PAROI / 2,
 		p.roche,
-		Enum.Material.Sand,
+		Enum.Material.Sand
 	)
 	for _ = 1, 6 do
 		local d = h:NextNumber(6, 14)
@@ -3347,7 +3347,7 @@ function MOTIFS.Bonbon(parent, cote, z, h, p)
 			Vector3.new(1.2, 14, 1.2),
 			HAUTEUR_PAROI + 7,
 			Color3.new(1, 1, 1),
-			Enum.Material.SmoothPlastic,
+			Enum.Material.SmoothPlastic
 		)
 		contre(
 			parent,
@@ -3358,7 +3358,7 @@ function MOTIFS.Bonbon(parent, cote, z, h, p)
 			HAUTEUR_PAROI + 16,
 			p.dessus,
 			Enum.Material.SmoothPlastic,
-			Enum.PartType.Cylinder,
+			Enum.PartType.Cylinder
 		)
 	end
 end
@@ -3389,7 +3389,7 @@ function MOTIFS.Usine(parent, cote, z, h, p)
 		Vector3.new(6, HAUTEUR_PAROI, PAS_MOTIF),
 		HAUTEUR_PAROI / 2,
 		p.roche,
-		Enum.Material.DiamondPlate,
+		Enum.Material.DiamondPlate
 	)
 	for _, y in { HAUTEUR_PAROI * 0.3, HAUTEUR_PAROI * 0.65 } do
 		local tuyau = contre(
@@ -3445,7 +3445,7 @@ function MOTIFS.Bambou(parent, cote, z, h, p)
 		Vector3.new(2, HAUTEUR_PAROI, PAS_MOTIF),
 		HAUTEUR_PAROI / 2,
 		fonce(p.roche, 0.3),
-		Enum.Material.Wood,
+		Enum.Material.Wood
 	)
 end
 
@@ -3535,7 +3535,7 @@ local function paroisBiome(
 	biome: Biomes.Biome,
 	numero: number,
 	z1: number,
-	z2: number,
+	z2: number
 )
 	local palette = paletteBiome(biome)
 	local motif = MOTIFS[STYLES_MURS[biome.Decor] or "Falaise"] or MOTIFS.Falaise
