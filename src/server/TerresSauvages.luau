@@ -63,7 +63,7 @@ local function creerBorne(parent: Instance, nom: string, z: number, texteBorne: 
 	local panneau = enfant(borne, "Panneau", "BillboardGui") :: BillboardGui
 	panneau.Size = UDim2.fromOffset(220, 50)
 	panneau.StudsOffset = Vector3.new(0, 6, 0)
-	panneau.MaxDistance = 400
+	panneau.MaxDistance = 90
 	local texte = enfant(panneau, "Texte", "TextLabel") :: TextLabel
 	texte.Size = UDim2.fromScale(1, 1)
 	texte.BackgroundTransparency = 1

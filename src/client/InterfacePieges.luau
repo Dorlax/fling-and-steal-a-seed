@@ -12,6 +12,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Piege = require(Shared:WaitForChild("Piege"))
 local Style = require(Shared:WaitForChild("Style"))
+local ZoneSure = require(Shared:WaitForChild("ZoneSure"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local InterfacePieges = {}
@@ -129,6 +130,16 @@ function InterfacePieges.demarrer()
 	piege.Visible = false
 	local echellePiege = Habillage.echelle(piege)
 
+	-- Pièges cachés dans la zone sûre (on ne peut pas les y poser).
+	local function dansZoneSure(): boolean
+		local personnage = joueur.Character
+		local racine = personnage and personnage:FindFirstChild("HumanoidRootPart")
+		if racine and racine:IsA("BasePart") then
+			return ZoneSure.contient(racine.Position)
+		end
+		return true
+	end
+
 	-- Mise à jour : prix, délai restant, « MAX », grisé, « PIÉGÉ ! ».
 	task.spawn(function()
 		local debut = os.clock()
@@ -145,6 +156,7 @@ function InterfacePieges.demarrer()
 				b.bouton.BackgroundColor3 = if disponible then b.couleur else COULEUR_ATTENTE
 				b.jauge.maj(recharge)
 			end
+			colonne.Visible = not dansZoneSure()
 			local immobile = joueur:GetAttribute("ImmobileJusqua")
 			piege.Visible = type(immobile) == "number"
 			if piege.Visible then

@@ -116,13 +116,13 @@ local function scenario(): (any, any, Model)
 	return a, b, c
 end
 
-return {
-	["C11 RemoteEvent Plaquer et module Plaquages exposés"] = function()
-
 local SURE = Vector3.new(300, 4, Config.Monstres.BordBases - 20) -- zone sûre, hors des bases
 
 local function premierMonstre(): Model
-	for _, m in Workspace:WaitForChild("Monstres", 5):GetChildren() do
+	-- Le serveur de test peut ne pas encore avoir peuplé les biomes.
+	local Monstres = module("Monstres")
+	Monstres.completer(0)
+	for _, m in Monstres.dossier():GetChildren() do
 		if m:GetAttribute("Zone") == "Proche" then
 			return m :: Model
 		end
@@ -135,10 +135,13 @@ return {
 		local Monstres = module("Monstres")
 		local a, b = scenario()
 		placer(b, SURE)
-		local monstre = premierMonstre()
-		monstre:PivotTo(CFrame.new(SURE + Vector3.new(0, 0, 2)))
-		local ok, raison = Monstres.frapper(monstre, b, Workspace:GetServerTimeNow() + 2000)
-		local porte = b:GetAttribute("Porte")
+		local trouve, monstre = pcall(premierMonstre)
+		local ok, raison, porte = false, "monstre introuvable", nil
+		if trouve then
+			monstre:PivotTo(CFrame.new(SURE + Vector3.new(0, 0, 2)))
+			ok, raison = Monstres.frapper(monstre, b, Workspace:GetServerTimeNow() + 2000)
+			porte = b:GetAttribute("Porte")
+		end
 		Monstres.nettoyer(b)
 		nettoyer(a, b)
 		assert(ok == false and raison == "zonesure", "refus zonesure attendu : " .. tostring(raison))
@@ -150,9 +153,12 @@ return {
 		local a = fauxJoueur()
 		module("Bases").creer(a)
 		placer(a, POSITION)
-		local monstre = premierMonstre()
-		monstre:PivotTo(CFrame.new(POSITION + Vector3.new(0, 0, 2)))
-		local ok, raison = Monstres.frapper(monstre, a, Workspace:GetServerTimeNow() + 3000)
+		local trouve, monstre = pcall(premierMonstre)
+		local ok, raison = false, "monstre introuvable"
+		if trouve then
+			monstre:PivotTo(CFrame.new(POSITION + Vector3.new(0, 0, 2)))
+			ok, raison = Monstres.frapper(monstre, a, Workspace:GetServerTimeNow() + 3000)
+		end
 		Monstres.nettoyer(a)
 		nettoyer(a)
 		assert(ok == false and raison == "sansgraine", "refus sansgraine : " .. tostring(raison))
@@ -171,6 +177,7 @@ return {
 	end,
 
 	["C22 la ligne de la zone sûre et son sol existent"] = function()
+		module("TerresSauvages").creer()
 		local zone = Workspace:FindFirstChild("ZoneSure")
 		assert(zone, "modèle ZoneSure attendu")
 		local sol = zone:FindFirstChild("Sol")

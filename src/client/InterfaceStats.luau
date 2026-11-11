@@ -1,18 +1,17 @@
 --!strict
--- Interface des stats : Force, Vitesse, mode actif et indicateur d'entraînement.
+-- Interface des stats : Force et Vitesse en permanence (petit encart) ; les
+-- boutons de la Forge (modes, amélioration) n'apparaissent que sur sa Forge.
 -- Les valeurs viennent des attributs du Player, écrits par le serveur.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Style = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Style"))
 local Forge = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forge"))
-local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Nombres = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Nombres"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 
 local InterfaceStats = {}
 
-local COULEUR_ACTIF = Habillage.nommee("Orange")
 local COULEUR_INACTIF = Habillage.nommee("Gris")
 -- Couleurs franches des boutons de la Forge.
 local COULEURS_MODES: { [string]: Color3 } = {
@@ -25,7 +24,7 @@ local LARGEUR = 2 * Style.TailleBoutonMin + 8
 local function etiquette(parent: Instance, nom: string, ordre: number): TextLabel
 	local label = Habillage.texte(parent, nom)
 	label.LayoutOrder = ordre
-	label.Size = UDim2.new(1, 0, 0, 30)
+	label.Size = UDim2.new(1, 0, 0, 24)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	return label
 end
@@ -66,9 +65,6 @@ function InterfaceStats.demarrer()
 	labelForce.TextColor3 = COULEURS_MODES.Force
 	local labelVitesse = etiquette(cadre, "Vitesse", 2)
 	labelVitesse.TextColor3 = COULEURS_MODES.Vitesse
-	local labelEntrainement = etiquette(cadre, "Entrainement", 3)
-	labelEntrainement.Text = "Entraînement en cours…"
-	labelEntrainement.TextColor3 = COULEUR_ACTIF
 
 	local rangee = Instance.new("Frame")
 	rangee.Name = "Modes"
@@ -119,49 +115,29 @@ function InterfaceStats.demarrer()
 		ameliorer:FireServer()
 	end)
 
-	-- Agrandissement de la base : sol plus grand et plus de places (un seul niveau).
-	local agrandirBase = ReplicatedStorage:WaitForChild("AgrandirBase") :: RemoteEvent
-	local boutonAgrandir, texteAgrandir = Habillage.bouton(cadre, "AgrandirBase", {
-		texte = "Agrandir",
-		couleur = Color3.fromRGB(150, 230, 120),
-	})
-	boutonAgrandir.LayoutOrder = 8
-	boutonAgrandir.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
-	boutonAgrandir.Activated:Connect(function()
-		agrandirBase:FireServer()
-	end)
-
 	local function nombre(nom: string): number
 		local valeur = joueur:GetAttribute(nom)
 		return if type(valeur) == "number" then valeur else 0
 	end
 
 	local function rafraichir()
-		labelForce.Text = `Force : {Nombres.abreger(nombre("Force"))}`
-		labelVitesse.Text = `Vitesse : {Nombres.abreger(nombre("Vitesse"))}`
+		labelForce.Text = `💪 {Nombres.abreger(nombre("Force"))}`
+		labelVitesse.Text = `⚡ {Nombres.abreger(nombre("Vitesse"))}`
 		local niveau = math.max(1, math.floor(nombre("NiveauForge")))
 		local cout = Forge.coutNiveau(niveau)
 		local suivant = Forge.agres("Vitesse", niveau + 1) ~= Forge.agres("Vitesse", niveau)
-		texteNiveau.Text =
-			`⬆ Forge : +{Nombres.abreger(Forge.gainPour(niveau))} → +{Nombres.abreger(
-				Forge.gainPour(niveau + 1)
-			)}/s{if suivant then " ✨" else ""}\n{Nombres.abreger(cout)} 💰`
-		local agrandissement = math.max(1, math.floor(nombre("Agrandissement")))
-		local prixAgrandir = Config.Bases.PrixAgrandissement[agrandissement]
-		boutonAgrandir.Visible = prixAgrandir ~= nil and agrandissement < #Config.Bases.Tailles
-		if prixAgrandir then
-			local places = Config.Bases.Capacites[agrandissement + 1]
-			texteAgrandir.Text =
-				`📐 Agrandir la base ({places} places) : {Nombres.abreger(prixAgrandir)} 💰`
-			boutonAgrandir.BackgroundColor3 = if nombre("Pieces") >= prixAgrandir
-				then Color3.fromRGB(150, 230, 120)
-				else COULEUR_INACTIF
-		end
+		local gain = Nombres.abreger(Forge.gainPour(niveau + 1))
+		local etoile = if suivant then " ✨" else ""
+		texteNiveau.Text = `⬆ Forge +{gain}/s{etoile}\n{Nombres.abreger(cout)} 💰`
 		boutonNiveau.BackgroundColor3 = if nombre("Pieces") >= cout
 			then Color3.fromRGB(255, 170, 40)
 			else COULEUR_INACTIF
-		labelEntrainement.Visible = joueur:GetAttribute("SurForge") == true
-		boutonDouble.Visible = Forge.modePermis("Double", joueur:GetAttribute("NiveauForge"))
+		-- Boutons de la Forge : seulement quand on est dessus.
+		local surForge = joueur:GetAttribute("SurForge") == true
+		rangee.Visible = surForge
+		boutonNiveau.Visible = surForge
+		boutonDouble.Visible = surForge
+			and Forge.modePermis("Double", joueur:GetAttribute("NiveauForge"))
 		local modeActif = joueur:GetAttribute("ModeForge")
 		for mode, b in boutons do
 			b.BackgroundColor3 = if mode == modeActif then COULEURS_MODES[mode] else COULEUR_INACTIF
@@ -176,7 +152,6 @@ function InterfaceStats.demarrer()
 			"SurForge",
 			"NiveauForge",
 			"Pieces",
-			"Agrandissement",
 		}
 	do
 		joueur:GetAttributeChangedSignal(nom):Connect(rafraichir)

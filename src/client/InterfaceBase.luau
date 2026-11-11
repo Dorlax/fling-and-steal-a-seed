@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Bestiaire = require(Shared:WaitForChild("Bestiaire"))
+local Config = require(Shared:WaitForChild("Config"))
 local Donnees = require(Shared:WaitForChild("Donnees"))
 local Fiche = require(Shared:WaitForChild("Fiche"))
 local GestionBase = require(Shared:WaitForChild("GestionBase"))
@@ -74,6 +75,19 @@ function InterfaceBase.demarrer()
 		taille = Vector2.new(220, 44),
 	})
 	boutonTrier.Position = UDim2.fromOffset(12, 56)
+
+	-- Agrandir la base (plus grande, plus de places), vérifié par le serveur.
+	local agrandir = ReplicatedStorage:WaitForChild("AgrandirBase") :: RemoteEvent
+	local boutonAgrandir, texteAgrandir = Habillage.bouton(panneau, "AgrandirBase", {
+		texte = "Agrandir",
+		couleur = VERT,
+		taille = Vector2.new(250, 44),
+	})
+	boutonAgrandir.AnchorPoint = Vector2.new(1, 0)
+	boutonAgrandir.Position = UDim2.new(1, -12, 0, 56)
+	boutonAgrandir.Activated:Connect(function()
+		agrandir:FireServer()
+	end)
 
 	local liste = Instance.new("ScrollingFrame")
 	liste.Name = "Liste"
@@ -158,6 +172,21 @@ function InterfaceBase.demarrer()
 		end)
 	end
 
+	-- Bouton « Agrandir » : prix du niveau suivant, grisé sans assez de pièces.
+	local function majAgrandir()
+		local niveau = joueur:GetAttribute("Agrandissement")
+		local n = if type(niveau) == "number" then math.max(1, math.floor(niveau)) else 1
+		local prix = Config.Bases.PrixAgrandissement[n]
+		boutonAgrandir.Visible = prix ~= nil
+		if prix then
+			local pieces = joueur:GetAttribute("Pieces")
+			local assez = type(pieces) == "number" and pieces >= prix
+			local places = Config.Bases.Capacites[n + 1]
+			texteAgrandir.Text = `📐 {places} places : {Nombres.abreger(prix)} 💰`
+			boutonAgrandir.BackgroundColor3 = if assez then VERT else Habillage.nommee("Gris")
+		end
+	end
+
 	local function afficher()
 		for _, enfant in liste:GetChildren() do
 			if enfant:IsA("Frame") then
@@ -195,6 +224,9 @@ function InterfaceBase.demarrer()
 	boutonTrier.Activated:Connect(function()
 		trier:FireServer()
 	end)
+	majAgrandir()
+	joueur:GetAttributeChangedSignal("Pieces"):Connect(majAgrandir)
+	joueur:GetAttributeChangedSignal("Agrandissement"):Connect(majAgrandir)
 	for _, nom in { "CreaturesBase", "Agrandissement" } do
 		joueur:GetAttributeChangedSignal(nom):Connect(function()
 			if panneau.Visible then
