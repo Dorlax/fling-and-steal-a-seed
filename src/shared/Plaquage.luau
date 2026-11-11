@@ -17,6 +17,9 @@ export type Contexte = {
 	maintenant: number,
 	pretA: number?, -- fin du délai du plaqueur
 	protegeeJusqua: number?, -- fin de protection de la cible
+	-- Cible derrière la ligne de la zone sûre (hors voleur portant une
+	-- créature volée) : intouchable.
+	cibleEnZoneSure: boolean?,
 }
 
 export type Candidat = { distance: number, valide: boolean }
@@ -53,6 +56,9 @@ function Plaquage.verifier(contexte: Contexte): (boolean, string?)
 	end
 	if contexte.cibleDansSaBase then
 		return false, "base"
+	end
+	if contexte.cibleEnZoneSure == true then
+		return false, "zonesure"
 	end
 	if avant(contexte.maintenant, contexte.protegeeJusqua) then
 		return false, "protegee"

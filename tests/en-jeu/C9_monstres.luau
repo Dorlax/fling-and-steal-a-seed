@@ -80,7 +80,8 @@ end
 local function compter(zone: string): number
 	local n = 0
 	for _, m in dossierMonstres():GetChildren() do
-		if m:GetAttribute("Zone") == zone then
+		-- Biome 1 seulement : d'autres biomes peuvent être actifs (créature au sol).
+		if m:GetAttribute("Zone") == zone and m:GetAttribute("Biome") == 1 then
 			n += 1
 		end
 	end

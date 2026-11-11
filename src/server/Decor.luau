@@ -10,15 +10,19 @@ local Workspace = game:GetService("Workspace")
 
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Biomes = require(ReplicatedStorage.Shared.Biomes)
+local Config = require(ReplicatedStorage.Shared.Config)
 local Modeleur = require(script.Parent.Modeleur)
 
 local Decor = {}
 
--- Doit rester cohérent avec Bases (sol de 40, emplacements tous les 60 studs,
--- de -360 à +360) et TerresSauvages (800 de large, de Z = 20 à Z = 600).
+-- Doit rester cohérent avec Bases (bord avant à Z = 20, emplacements tous
+-- les 90 studs) et TerresSauvages (1 200 de large ; zone sûre de Z = 20 à la
+-- ligne, puis les biomes).
 local DEMI_LARGEUR = 600
-local BORD_BASES = 20
-local FOND_SAUVAGE = 600 -- fond du biome 1 (Prairie)
+local BORD_BASES = Config.ZoneSure.BordBases -- bord avant des bases
+local DEBUT_SAUVAGE = Config.Monstres.BordBases -- ligne de la zone sûre
+local FOND_SAUVAGE = DEBUT_SAUVAGE + Biomes.Longueur -- fond du biome 1 (Prairie)
+local HAUTEUR_PAROI = 110 -- murs du bord de la carte (chaque biome est une « boîte »)
 local ECART_BASES = 90
 local LARGEUR_PORTE = 10
 local GRAINE = 20261108 -- même décor à chaque serveur
@@ -112,7 +116,7 @@ end
 
 -- Un point est-il trop près d'un chemin de base (devant chaque porte) ?
 local function surChemin(x: number, z: number, centres: { number }): boolean
-	if z > BORD_BASES + 70 then
+	if z > DEBUT_SAUVAGE + 10 then
 		return false
 	end
 	for _, cx in centres do
@@ -141,9 +145,11 @@ local function enfantLighting(nom: string, classe: string): Instance
 end
 
 function Decor.eclairer()
-	Lighting.Brightness = 2.6
-	Lighting.Ambient = Color3.fromRGB(150, 140, 160)
-	Lighting.OutdoorAmbient = Color3.fromRGB(170, 165, 190)
+	-- Lumière adoucie : les sols clairs (neige, sable, nuages) n'éblouissent
+	-- plus ; chaque biome règle encore son exposition côté client (Ambiances).
+	Lighting.Brightness = 2
+	Lighting.Ambient = Color3.fromRGB(130, 122, 140)
+	Lighting.OutdoorAmbient = Color3.fromRGB(150, 145, 170)
 	Lighting.ColorShift_Top = Color3.fromRGB(255, 235, 200)
 	Lighting.EnvironmentDiffuseScale = 0.5
 	Lighting.EnvironmentSpecularScale = 0.3
@@ -160,17 +166,18 @@ function Decor.eclairer()
 
 	local couleurs =
 		enfantLighting("CouleursCartoon", "ColorCorrectionEffect") :: ColorCorrectionEffect
-	couleurs.Saturation = 0.25
-	couleurs.Contrast = 0.08
-	couleurs.Brightness = 0.02
+	couleurs.Saturation = 0.22
+	couleurs.Contrast = 0.1
+	couleurs.Brightness = -0.03
 
+	-- Halo réservé aux vraies sources de lumière (néons, yeux, auras).
 	local eclat = enfantLighting("EclatCartoon", "BloomEffect") :: BloomEffect
-	eclat.Intensity = 0.5
-	eclat.Size = 24
-	eclat.Threshold = 0.95
+	eclat.Intensity = 0.25
+	eclat.Size = 20
+	eclat.Threshold = 1.6
 
 	local rayons = enfantLighting("RayonsCartoon", "SunRaysEffect") :: SunRaysEffect
-	rayons.Intensity = 0.04
+	rayons.Intensity = 0.02
 	rayons.Spread = 0.6
 end
 
@@ -2740,7 +2747,7 @@ local function creerBiome(racine: Instance, numero: number)
 	end
 	local dossierBiome = dossier(racine, "Biome" .. numero)
 	local hasard = Random.new(GRAINE + numero * 97)
-	local debut = BORD_BASES + Biomes.debut(numero)
+	local debut = DEBUT_SAUVAGE + Biomes.debut(numero)
 	for _, element in theme do
 		for _ = 1, math.floor(element.nombre * 1.5) do
 			local x = hasard:NextNumber(-DEMI_LARGEUR + 12, DEMI_LARGEUR - 12)
@@ -3013,20 +3020,112 @@ local function murInvisible(parent: Instance, debut: Vector3, fin: Vector3)
 	end
 end
 
+-- Parois hautes : chaque biome est une « boîte » avec ses propres murs (couleur
+-- et matière de son rempart, corniche claire en haut). À l'entrée de chaque
+-- biome (sauf le premier), deux piliers et une poutre haute marquent le
+-- passage d'une boîte à l'autre, sans rien bloquer au sol.
+local function teinteParoi(biome: Biomes.Biome): Color3
+	return couleurRgb(biome.Bordure):Lerp(Color3.fromRGB(40, 35, 50), 0.18)
+end
+
+local function matiereParoi(spec: Rempart): Enum.Material
+	local m = materiau(spec.lisses[1].m)
+	-- Pas de mur entièrement lumineux ou transparent (éblouissant).
+	if m == Enum.Material.Neon or m == Enum.Material.ForceField or m == Enum.Material.Glass then
+		return Enum.Material.Slate
+	end
+	return m
+end
+
+local function paroisBiome(
+	parent: Instance,
+	biome: Biomes.Biome,
+	spec: Rempart,
+	z1: number,
+	z2: number,
+	cadre: boolean
+)
+	local couleur = teinteParoi(biome)
+	local matiere = matiereParoi(spec)
+	local corniche = couleurRgb(biome.Bordure):Lerp(Color3.new(1, 1, 1), 0.35)
+	local longueur = z2 - z1
+	local milieu = (z1 + z2) / 2
+	local bord = DEMI_LARGEUR + 3
+	for _, cote in { -1, 1 } do
+		local paroi = bloc(
+			parent,
+			"Paroi",
+			Vector3.new(4, HAUTEUR_PAROI, longueur),
+			CFrame.new(cote * bord, HAUTEUR_PAROI / 2, milieu),
+			couleur,
+			true
+		)
+		paroi.Material = matiere
+		paroi.CastShadow = false
+		local haut = bloc(
+			parent,
+			"Corniche",
+			Vector3.new(7, 3, longueur),
+			CFrame.new(cote * (bord - 1.5), HAUTEUR_PAROI - 1.5, milieu),
+			corniche,
+			false
+		)
+		haut.CastShadow = false
+	end
+	if cadre then
+		for _, cote in { -1, 1 } do
+			local pilier = bloc(
+				parent,
+				"PilierCadre",
+				Vector3.new(10, HAUTEUR_PAROI + 6, 10),
+				CFrame.new(cote * (bord - 3), (HAUTEUR_PAROI + 6) / 2, z1),
+				corniche,
+				true
+			)
+			pilier.Material = matiere
+			pilier.CastShadow = false
+		end
+		local poutre = bloc(
+			parent,
+			"PoutreCadre",
+			Vector3.new(DEMI_LARGEUR * 2 + 6, 5, 5),
+			CFrame.new(0, HAUTEUR_PAROI + 2, z1),
+			corniche,
+			false
+		)
+		poutre.CastShadow = false
+	end
+end
+
+-- Mur plein d'un bout à l'autre de la largeur, au fond de la carte.
+local function murFond(parent: Instance, biome: Biomes.Biome, spec: Rempart, z: number)
+	local paroi = bloc(
+		parent,
+		"ParoiFond",
+		Vector3.new(DEMI_LARGEUR * 2 + 10, HAUTEUR_PAROI, 4),
+		CFrame.new(0, HAUTEUR_PAROI / 2, z),
+		teinteParoi(biome),
+		true
+	)
+	paroi.Material = matiereParoi(spec)
+	paroi.CastShadow = false
+end
+
 -- Remparts tout autour : chaque biome sur ses deux côtés, la Prairie derrière
 -- les bases, le dernier biome au bout de la carte ; puis les murs invisibles.
 local function creerLimites(racine: Instance)
 	local dossierLimites = dossier(racine, "Limites")
 	local x = DEMI_LARGEUR - 2
 	local arriere = BORD_BASES - 140
-	local fin = BORD_BASES + Biomes.nombre() * Biomes.Longueur
+	local fin = DEBUT_SAUVAGE + Biomes.nombre() * Biomes.Longueur
 	for numero, biome in Biomes.Liste do
 		local spec = REMPARTS[biome.Id] or REMPARTS.Prairie
-		local z1 = if numero == 1 then arriere else BORD_BASES + Biomes.debut(numero)
-		local z2 = BORD_BASES + Biomes.debut(numero) + Biomes.Longueur
+		local z1 = if numero == 1 then arriere else DEBUT_SAUVAGE + Biomes.debut(numero)
+		local z2 = DEBUT_SAUVAGE + Biomes.debut(numero) + Biomes.Longueur
 		local groupe = dossier(dossierLimites, biome.Id)
 		rempart(groupe, spec, Vector3.new(-x, 0, z1), Vector3.new(-x, 0, z2))
 		rempart(groupe, spec, Vector3.new(x, 0, z1), Vector3.new(x, 0, z2))
+		paroisBiome(groupe, biome, spec, z1, z2, numero > 1)
 	end
 	rempart(
 		dossierLimites,
@@ -3041,6 +3140,9 @@ local function creerLimites(racine: Instance)
 		Vector3.new(-x, 0, fin - 2),
 		Vector3.new(x, 0, fin - 2)
 	)
+	-- Murs du fond (derrière les bases, au bout du dernier biome) : la boîte est fermée.
+	murFond(dossierLimites, Biomes.Liste[1], REMPARTS.Prairie, arriere - 3)
+	murFond(dossierLimites, dernier, REMPARTS[dernier.Id] or REMPARTS.Prairie, fin + 1)
 	local bord = DEMI_LARGEUR + 2
 	murInvisible(dossierLimites, Vector3.new(-bord, 0, arriere - 4), Vector3.new(-bord, 0, fin + 4))
 	murInvisible(dossierLimites, Vector3.new(bord, 0, arriere - 4), Vector3.new(bord, 0, fin + 4))
@@ -3219,7 +3321,7 @@ function Decor.creer(): Folder
 	local function pointLibre(): Vector3
 		for _ = 1, 20 do
 			local x = hasard:NextNumber(-DEMI_LARGEUR + 10, DEMI_LARGEUR - 10)
-			local z = hasard:NextNumber(BORD_BASES + 12, FOND_SAUVAGE - 10)
+			local z = hasard:NextNumber(DEBUT_SAUVAGE + 12, FOND_SAUVAGE - 10)
 			if not surChemin(x, z, centres) then
 				return Vector3.new(x, 0, z)
 			end
@@ -3261,7 +3363,7 @@ function Decor.creer(): Folder
 	-- Collines tout autour : derrière les bases, le long de chaque biome (à sa
 	-- couleur) et au bout du dernier biome.
 	local bord = dossier(racine, "Bordure")
-	local fin = BORD_BASES + Biomes.nombre() * Biomes.Longueur
+	local fin = DEBUT_SAUVAGE + Biomes.nombre() * Biomes.Longueur
 	local x = -DEMI_LARGEUR
 	while x <= DEMI_LARGEUR do
 		local t = hasard:NextNumber(50, 80)
@@ -3275,8 +3377,8 @@ function Decor.creer(): Folder
 	local z = -140
 	while z <= fin do
 		local t = hasard:NextNumber(50, 80)
-		local biome = Biomes.biome(Biomes.index(z - BORD_BASES))
-		local couleur = if z < BORD_BASES + Biomes.Longueur
+		local biome = Biomes.biome(Biomes.index(z - DEBUT_SAUVAGE))
+		local couleur = if z < DEBUT_SAUVAGE + Biomes.Longueur
 			then COULEURS.Colline
 			else Color3.fromRGB(biome.Bordure[1], biome.Bordure[2], biome.Bordure[3])
 		colline(bord, Vector3.new(-DEMI_LARGEUR - 15, 0, z), t, couleur)

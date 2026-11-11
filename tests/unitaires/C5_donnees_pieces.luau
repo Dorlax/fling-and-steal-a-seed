@@ -48,8 +48,9 @@ return {
 		assert(d.CreaturesBase[1] == "Commune" and d.CreaturesBase[2] == "Mythique")
 	end,
 
-	["C6 CreaturesBase tronquée à la capacité de tous les étages"] = function()
-		local maxTotal = maxBase * Config.Bases.EtagesMax
+	["C6 CreaturesBase tronquée à la capacité de la plus grande base"] = function()
+		local maxTotal = Config.Bases.Capacites[#Config.Bases.Capacites]
+		assert(maxTotal >= maxBase, "la plus grande base a au moins les places du niveau 1")
 		local liste = {}
 		for _ = 1, maxTotal + 5 do
 			table.insert(liste, "Commune")
@@ -57,10 +58,18 @@ return {
 		assert(#Donnees.nettoyer({ CreaturesBase = liste }).CreaturesBase == maxTotal)
 	end,
 
-	["C6 étages : 1 par défaut, borné à EtagesMax"] = function()
-		assert(Donnees.nettoyer({}).Etages == 1, "1 étage par défaut")
-		assert(Donnees.nettoyer({ Etages = 99 }).Etages == Config.Bases.EtagesMax, "borné")
-		assert(Donnees.nettoyer({ Etages = "x" }).Etages == 1, "invalide -> 1")
+	["C6 agrandissement : 1 par défaut, borné, anciens étages convertis"] = function()
+		local n = #Config.Bases.Tailles
+		assert(Donnees.nettoyer({}).Agrandissement == 1, "niveau 1 par défaut")
+		assert(Donnees.nettoyer({ Agrandissement = 99 }).Agrandissement == n, "borné")
+		assert(Donnees.nettoyer({ Agrandissement = "x" }).Agrandissement == 1, "invalide -> 1")
+		assert(Donnees.nettoyer({ Etages = 3 }).Agrandissement == 3, "3 étages -> niveau 3")
+		assert(
+			Donnees.nettoyer({ Etages = 2, Agrandissement = 3 }).Agrandissement == 3,
+			"on garde le plus grand"
+		)
+		assert(Donnees.nettoyer({ Etages = 0 / 0 }).Agrandissement == 1, "NaN ignoré")
+		assert((Donnees.nettoyer({ Etages = 3 }) :: any).Etages == nil, "plus de champ Etages")
 	end,
 
 	["C6 anciennes données sans ces champs restent valides"] = function()

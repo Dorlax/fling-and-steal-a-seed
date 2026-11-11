@@ -8,10 +8,13 @@
 - Pièces et créatures de la base sauvegardées ; revenus par seconde selon la rareté (1/3/10/30/100).
 
 ## Biomes et progression
+- Zone sûre (`Shared.ZoneSure`, `Config.ZoneSure`) : bande de 60 studs entre le bord des bases (Z = 20) et la ligne (Z = 80 = `Config.Monstres.BordBases`), avec sol, ligne, rideau et pancartes (`TerresSauvages`). Derrière la ligne : aucun coup de monstre (raison `zonesure`), aucun plaquage (sauf voleur portant une créature volée, `Portage.porteVolee`), aucun piège. Les lancers partent de la ligne.
 - Les Terres Sauvages sont une route de biomes de 600 studs (`Shared.Biomes`) : 1 Prairie Pétillante, 2 Bois Moussu, 3 Dunes Dorées, 4 Glacier Givré, 5 Volcan Ardent, 6 Galaxie Étoilée, 7 Marais Brumeux, 8 Récif Corail, 9 Royaume Bonbon, 10 Jungle Émeraude, 11 Îles Célestes, 12 Manoir Hanté, 13 Savane Dorée, 14 Cité Mécanique, 15 Jardin Zen, 16 Cavernes Lumineuses, 17 Coffre à Jouets, 18 Forêt d'Automne, 19 Ferme Joyeuse, 20 Royaume des Rêves, 21 Plage Soleil. Chaque biome garde Proche / Moyenne / Lointaine et les taux du Plan ; sol, arche d'entrée, décor en blocs et ambiance (client `Ambiances`) propres.
 - Valeur des créatures × 1,5 par biome (espèce -> biome) ; chaque biome a 2 créatures par rareté et 1 monstre par sous-zone (un fichier `Especes<Biome>` par biome).
 - Monstres plus rapides à chaque biome (`Monstre.vitesse`) : biome 1 = vitesse de Config ; ensuite vitesse d'un joueur au seuil du biome × 0,9 / 1,05 / 1,2 (Proche / Moyenne / Lointaine).
-- Monstres seulement dans les biomes où il y a un joueur (et le biome 1), 12 au plus par biome la nuit.
+- Monstres présents d'avance : biome 1, biome de chaque joueur et le suivant, biomes où une créature attend au sol (contrôle toutes les 0,5 s) ; 60 % apparaissent près d'une créature au sol. 6 par biome le jour, 9 la nuit.
+- Les monstres n'attaquent et ne poursuivent qu'un joueur qui porte une créature (raison `sansgraine` sinon).
+- Tailles des monstres (`Config.Monstres.Tailles`, `Monstre.tirerTaille`) : Petit / Normal / Grand / Géant (× 0,75 / 1 / 1,5 / 2,2), attribut `TailleMonstre` ; portée du coup × échelle, projection × racine de l'échelle.
 - Force et Vitesse sans limite : linéaires jusqu'à 1 000, puis chaque doublement = un biome de plus au lancer / +20 de vitesse ; aucune limite réelle (PlafondStat 1e300, WalkSpeedMax 1e9).
 - Niveaux de Forge achetés en pièces (bouton sous les stats, RemoteEvent `AmeliorerForge`) : gain 1, 2, 5, 10, 20, 50…, coût 100 × 1,9^(n-1) ; sauvegardés (`NiveauForge`).
 - Grands nombres raccourcis (`Shared.Nombres` : 1,23 M, 4,5 T… jusqu'à Vg = 1e63, puis « 1,23e75 ») ; pièces plafonnées à 1e300.
@@ -28,9 +31,8 @@
 ## Porter et revenus
 - Créatures libres dans la base : chacune se promène autour de sa place (`Shared.Promenade`, déterministe serveur/client), sauts et pirouettes ; vol vérifié sur sa position calculée. Plus de socles.
 - Gestion (bouton « Base », `InterfaceBase`) : vente (2 min de revenu, `VendreCreature`), rangement par valeur (`TrierBase`) ; gains hors ligne 50 % jusqu'à 12 h (`DerniereConnexion`).
-- Étages de base (`Config.Bases`) : jusqu'à 3 étages, 10 socles chacun ; étage 2 = 2 500 pièces, étage 3 = 150 000 (bouton sous les stats, RemoteEvent `AcheterEtage`, sauvegardé `Etages`) ; plancher, garde-corps, ascenseurs (plaques lumineuses, touche G) ; raids possibles à tous les étages.
-- Agrandissements de base (`Config.Bases.Tailles`) : sol 40, 56 puis 72 studs (6 000 puis 250 000 pièces, RemoteEvent `AgrandirBase`, sauvegardé `Agrandissement`) ; bord avant toujours à Z = 20 ; socles plus espacés ; créatures exposées à leur vraie taille jusqu'à × 1,3 / 2,1 / 2,8 selon le niveau. Bases espacées de 90 studs, monde élargi à 1 200 studs.
-- Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (10 emplacements, « Base pleine ! »). [[03 Porter et revenus]]
+- Base sur un seul niveau (plus d'étages ni d'ascenseurs) : agrandissements (`Config.Bases`) sol 40 / 56 / 72 / 84 studs, 10 / 20 / 30 / 40 places (`Capacites`, `Donnees.capacite`), prix 5 000 / 150 000 / 5 M (RemoteEvent `AgrandirBase`, sauvegardé `Agrandissement`) ; anciens `Etages` convertis en agrandissement au chargement ; bord avant toujours à Z = 20 ; créatures en colonnes de 5 le long des bords X ; tailles exposées jusqu'à × 1,3 / 2,1 / 2,8 / 2,8. Bases espacées de 90 studs, monde de 1 200 studs.
+- Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (places selon l'agrandissement, « Base pleine ! »). [[03 Porter et revenus]]
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 
 ## Univers et cosmétiques
@@ -62,6 +64,7 @@
 
 ## Décor et ambiance
 - Pays des Graines : Pépin, mascotte géante animée (espèce `Pepin`, attribut `Mascotte`), et panneau de bienvenue devant la base centrale. Streaming activé (rayon 640) ; petits décors sans ombre ; animations à cadence réduite au loin.
+- Chaque biome est une « boîte » : murs de 110 studs à sa couleur et sa matière (corniche), portique (piliers + poutre haute) à son entrée, murs pleins aux deux bouts (`Decor`) ; ciel propre côté client (`Ambiances` : horizon, voile, éclat, teinte, exposition plus basse dans les biomes clairs). Éclairage adouci (luminosité 2, halo seulement sur les vraies sources).
 - Bords de la carte : rempart décoré propre à chaque biome des deux côtés (palissade, mur moussu, muraille de grès, mur de glace, falaise de lave, champ de force, corail, sucres d'orge, végétation, nuages et colonnes, grille de manoir), Prairie derrière les bases, dernier biome au bout ; murs invisibles de 1 000 studs derrière ; un joueur sous Y = -30 revient dans sa base (`Config.Limites`).
 - Décor cartoon généré par le serveur (`Decor`) : éclairage coloré (atmosphère, saturation, éclat), place de sable sous les bases, chemins devant les portes, arbres (dont roses et dorés), rochers, champignons, fleurs, nuages, collines de bordure.
 - Bases ornées : bordure colorée (sans collision) et lampadaires-sucettes ; sol vert vif.

@@ -119,19 +119,7 @@ function InterfaceStats.demarrer()
 		ameliorer:FireServer()
 	end)
 
-	-- Achat de l'étage de base suivant (10 socles de plus, vérifié par le serveur).
-	local acheterEtage = ReplicatedStorage:WaitForChild("AcheterEtage") :: RemoteEvent
-	local boutonEtage, texteEtage = Habillage.bouton(cadre, "AcheterEtage", {
-		texte = "Étage 2",
-		couleur = Color3.fromRGB(120, 200, 255),
-	})
-	boutonEtage.LayoutOrder = 7
-	boutonEtage.Size = UDim2.new(1, 0, 0, Style.TailleBoutonMin)
-	boutonEtage.Activated:Connect(function()
-		acheterEtage:FireServer()
-	end)
-
-	-- Agrandissement de la base (plus de place pour les grosses créatures).
+	-- Agrandissement de la base : sol plus grand et plus de places (un seul niveau).
 	local agrandirBase = ReplicatedStorage:WaitForChild("AgrandirBase") :: RemoteEvent
 	local boutonAgrandir, texteAgrandir = Habillage.bouton(cadre, "AgrandirBase", {
 		texte = "Agrandir",
@@ -158,25 +146,13 @@ function InterfaceStats.demarrer()
 			`⬆ Forge : +{Nombres.abreger(Forge.gainPour(niveau))} → +{Nombres.abreger(
 				Forge.gainPour(niveau + 1)
 			)}/s{if suivant then " ✨" else ""}\n{Nombres.abreger(cout)} 💰`
-		local etages = math.max(1, math.floor(nombre("Etages")))
-		local prixEtage = Config.Bases.PrixEtages[etages]
-		boutonEtage.Visible = etages < Config.Bases.EtagesMax and prixEtage ~= nil
-		if prixEtage then
-			texteEtage.Text =
-				`🏠 Étage {etages + 1} (+{Config.Creatures.MaxCreaturesBase} places) : {Nombres.abreger(
-					prixEtage
-				)} 💰`
-			boutonEtage.BackgroundColor3 = if nombre("Pieces") >= prixEtage
-				then Color3.fromRGB(120, 200, 255)
-				else COULEUR_INACTIF
-		end
 		local agrandissement = math.max(1, math.floor(nombre("Agrandissement")))
 		local prixAgrandir = Config.Bases.PrixAgrandissement[agrandissement]
 		boutonAgrandir.Visible = prixAgrandir ~= nil and agrandissement < #Config.Bases.Tailles
 		if prixAgrandir then
-			local taille = Config.Bases.Tailles[agrandissement + 1]
+			local places = Config.Bases.Capacites[agrandissement + 1]
 			texteAgrandir.Text =
-				`📐 Agrandir la base ({taille}×{taille}) : {Nombres.abreger(prixAgrandir)} 💰`
+				`📐 Agrandir la base ({places} places) : {Nombres.abreger(prixAgrandir)} 💰`
 			boutonAgrandir.BackgroundColor3 = if nombre("Pieces") >= prixAgrandir
 				then Color3.fromRGB(150, 230, 120)
 				else COULEUR_INACTIF
@@ -200,7 +176,6 @@ function InterfaceStats.demarrer()
 			"SurForge",
 			"NiveauForge",
 			"Pieces",
-			"Etages",
 			"Agrandissement",
 		}
 	do

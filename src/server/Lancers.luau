@@ -92,10 +92,11 @@ local function pingDe(joueur: any): number
 	return 0
 end
 
--- Point de départ : bord de la base côté +Z, au niveau du sol.
+-- Point de départ des distances : face à la base, sur la ligne de la zone
+-- sûre (début des Terres Sauvages), au niveau du sol.
 local function bordDeBase(modele: Model): Vector3
 	local centre = modele:GetPivot().Position
-	return Vector3.new(centre.X, 0, centre.Z + TerresSauvages.BordBases)
+	return Vector3.new(centre.X, 0, TerresSauvages.BordBases)
 end
 
 local function racineDe(joueur: any): BasePart?

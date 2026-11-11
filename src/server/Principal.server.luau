@@ -49,16 +49,10 @@ remote("AmeliorerForge").OnServerEvent:Connect(function(joueur: Player)
 	end
 end)
 
--- Achat de l'agrandissement de base suivant : aucun argument.
+-- Achat de l'agrandissement de base suivant (plus grand, plus de places) :
+-- aucun argument ; le serveur vérifie tout.
 remote("AgrandirBase").OnServerEvent:Connect(function(joueur: Player)
 	if Sauvegarde.estCharge(joueur) and Bases.agrandir(joueur) then
-		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
-	end
-end)
-
--- Achat de l'étage de base suivant : aucun argument ; le serveur vérifie tout.
-remote("AcheterEtage").OnServerEvent:Connect(function(joueur: Player)
-	if Sauvegarde.estCharge(joueur) and Bases.acheterEtage(joueur) then
 		Bases.afficherCreatures(joueur, Sauvegarde.creaturesDe(joueur))
 	end
 end)

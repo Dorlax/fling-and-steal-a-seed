@@ -138,6 +138,12 @@ function Portage.porte(joueur: any): boolean
 	return portees[joueur] ~= nil and joueur:GetAttribute("Porte") ~= nil
 end
 
+-- Vrai si le joueur porte une créature volée dans une base (raid).
+function Portage.porteVolee(joueur: any): boolean
+	local portee = portees[joueur]
+	return portee ~= nil and Portage.porte(joueur) and portee.creature:GetAttribute("Volee") == true
+end
+
 -- Plaquage ou coup de monstre : la créature portée tombe à DistanceChute studs
 -- du joueur, du côté opposé à `depuis` (position du plaqueur ou du monstre).
 -- Elle devient « libre » : récoltable par n'importe qui, hors des créatures au

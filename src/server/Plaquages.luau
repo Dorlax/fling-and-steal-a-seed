@@ -11,6 +11,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Plaquage = require(ReplicatedStorage.Shared.Plaquage)
+local ZoneSure = require(ReplicatedStorage.Shared.ZoneSure)
 local Bases = require(script.Parent.Bases)
 local Portage = require(script.Parent.Portage)
 
@@ -203,6 +204,9 @@ function Plaquages.plaquer(plaqueur: any, candidats: { any }?, maintenant: numbe
 			maintenant = instant,
 			pretA = pretA[plaqueur],
 			protegeeJusqua = protegeJusqua[cible],
+			cibleEnZoneSure = racineCible ~= nil
+				and ZoneSure.contient(racineCible.Position)
+				and not Portage.porteVolee(cible),
 		})
 		options[indice] = { distance = distance, valide = valide }
 	end
