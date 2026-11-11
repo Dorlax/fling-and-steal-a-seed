@@ -21,6 +21,8 @@
 local Biomes = if script then require(script.Parent.Biomes) else (require :: any)("./Biomes")
 -- selene: allow(incorrect_standard_library_use)
 local Effets = if script then require(script.Parent.Effets) else (require :: any)("./Effets")
+-- selene: allow(incorrect_standard_library_use)
+local Chimeres = if script then require(script.Parent.Chimeres) else (require :: any)("./Chimeres")
 
 local Bestiaire = {}
 
@@ -2157,6 +2159,135 @@ for nom, roles in Effets.Roles do
 				break
 			end
 		end
+	end
+end
+
+---------------------------------------------------------------------------
+-- Chimères des biomes 22 et suivants (Shared.Chimeres) : le corps de la base,
+-- une ou deux parties greffées du donneur (ramenées à la taille du corps), et
+-- toutes les couleurs tournées vers la teinte du biome.
+
+local GREFFES = { "Aile", "Queue", "Oreille", "Antenne", "Flamme", "Helice", "Pendule", "Machoire" }
+
+local function copieBloc(b: Bloc): Bloc
+	local c: Bloc = table.clone(b)
+	c.t = table.clone(b.t)
+	c.p = table.clone(b.p)
+	if b.j then
+		c.j = table.clone(b.j :: { number })
+	end
+	if b.r then
+		c.r = table.clone(b.r :: { number })
+	end
+	if type(b.c) == "table" then
+		c.c = table.clone(b.c :: { number })
+	end
+	return c
+end
+
+-- Boîte englobante (centres et demi-tailles) d'une liste de blocs.
+local function boite(blocs: { Bloc }): ({ number }, { number })
+	local mini = { math.huge, math.huge, math.huge }
+	local maxi = { -math.huge, -math.huge, -math.huge }
+	for _, b in blocs do
+		for k = 1, 3 do
+			mini[k] = math.min(mini[k], b.p[k] - b.t[k] / 2)
+			maxi[k] = math.max(maxi[k], b.p[k] + b.t[k] / 2)
+		end
+	end
+	if mini[1] > maxi[1] then
+		return { -0.5, -0.5, -0.5 }, { 0.5, 0.5, 0.5 }
+	end
+	return mini, maxi
+end
+
+-- Les yeux (et leurs reflets) restent toujours ceux de la base.
+local function estOeil(nom: string): boolean
+	return string.sub(nom, 1, 4) == "Oeil"
+		or string.sub(nom, 1, 7) == "Pupille"
+		or string.sub(nom, 1, 6) == "Reflet"
+end
+
+local function chimere(recette: any): Espece?
+	local base, donneur = especes[recette.Base], especes[recette.Donneur]
+	if base == nil or donneur == nil then
+		return nil
+	end
+	-- Parties greffées : au plus deux rôles que le donneur possède.
+	local present: { [string]: boolean } = {}
+	for _, b in donneur.Blocs do
+		if b.a then
+			present[b.a :: string] = true
+		end
+	end
+	local roles: { [string]: boolean } = {}
+	local nombre = 0
+	for _, role in GREFFES do
+		if present[role] and nombre < 2 then
+			roles[role] = true
+			nombre += 1
+		end
+	end
+	local blocs: { Bloc } = {}
+	for _, b in base.Blocs do
+		if estOeil(b.n) or not (b.a and roles[b.a :: string]) then
+			table.insert(blocs, copieBloc(b))
+		end
+	end
+	local corpsDonneur: { Bloc } = {}
+	for _, b in donneur.Blocs do
+		if not (b.a and roles[b.a :: string]) then
+			table.insert(corpsDonneur, b)
+		end
+	end
+	local minA, maxA = boite(blocs)
+	local minB, maxB = boite(corpsDonneur)
+	local echelle = { 1, 1, 1 }
+	for k = 1, 3 do
+		local largeurB = maxB[k] - minB[k]
+		if largeurB > 1e-3 then
+			echelle[k] = math.clamp((maxA[k] - minA[k]) / largeurB, 0.4, 2.5)
+		end
+	end
+	local moyenne = (echelle[1] + echelle[2] + echelle[3]) / 3
+	local function placer(v: { number }): { number }
+		return {
+			minA[1] + (v[1] - minB[1]) * echelle[1],
+			minA[2] + (v[2] - minB[2]) * echelle[2],
+			minA[3] + (v[3] - minB[3]) * echelle[3],
+		}
+	end
+	for _, b in donneur.Blocs do
+		if b.a and roles[b.a :: string] and not estOeil(b.n) then
+			local c = copieBloc(b)
+			c.p = placer(b.p)
+			if b.j then
+				c.j = placer(b.j :: { number })
+			end
+			c.t = { b.t[1] * moyenne, b.t[2] * moyenne, b.t[3] * moyenne }
+			table.insert(blocs, c)
+		end
+	end
+	-- Couleurs : toute la palette tourne vers la teinte du biome.
+	local couleurs: { { number } } = {}
+	for _, b in blocs do
+		if type(b.c) == "table" then
+			table.insert(couleurs, b.c :: { number })
+		end
+	end
+	local reference = Chimeres.teintePrincipale(couleurs)
+	for _, b in blocs do
+		if type(b.c) == "table" then
+			b.c = Chimeres.teinter(b.c :: { number }, recette.Teinte, reference)
+		end
+	end
+	return { Nom = recette.Nom, Hauteur = sommet(blocs), Texture = base.Texture, Blocs = blocs }
+end
+
+for nom, recette in Biomes.Recettes do
+	local espece = chimere(recette)
+	if espece then
+		especes[nom] = espece
 	end
 end
 
