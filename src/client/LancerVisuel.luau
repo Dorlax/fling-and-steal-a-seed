@@ -182,10 +182,11 @@ local function cacherGrainesServeur()
 end
 
 local function afficherCarte(texte: string, couleur: Color3, taille: number)
-	local c, s = carte, echelleCarte
-	if c == nil or s == nil then
+	if carte == nil or echelleCarte == nil then
 		return
 	end
+	local c = carte :: TextLabel
+	local s = echelleCarte :: UIScale
 	c.Text = texte
 	c.TextColor3 = couleur
 	c.Visible = true
