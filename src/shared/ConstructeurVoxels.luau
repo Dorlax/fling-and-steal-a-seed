@@ -1,3 +1,5 @@
+--!nocheck
+-- (Content et Enum.CreateContentResult sont plus récents que les types de la CI.)
 -- Construit les créatures sculptées en voxels (outils/voxels) à partir des
 -- données de Shared.Voxels : faces visibles, arrondi léger, une couleur par
 -- voxel, via EditableMesh. Un MeshPart par membre (corps, tête, pattes…),
