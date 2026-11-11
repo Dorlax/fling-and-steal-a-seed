@@ -545,7 +545,9 @@ end
 -- Multiplicateur lisible : « 1 », « 1,5 », « 2,25 », « 38 », « 1,2 M »…
 function Biomes.texteMultiplicateur(index: number): string
 	local m = Biomes.multiplicateur(index)
-	if m >= 1e6 then
+	if m >= 1e9 then
+		return (string.gsub(string.format("%.1f Md", m / 1e9), "%.", ","))
+	elseif m >= 1e6 then
 		return (string.gsub(string.format("%.1f M", m / 1e6), "%.", ","))
 	elseif m >= 100 then
 		return string.format("%d", math.floor(m + 0.5))

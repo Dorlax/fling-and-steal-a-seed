@@ -655,7 +655,7 @@ function Chimeres.generer(originaux: { any }): ({ Biome }, { [string]: Recette }
 						end
 					end
 				end
-				local final = nom or (base .. t.Id)
+				local final = nom or (string.sub(base, 1, 6) .. string.sub(t.Id, 1, 6))
 				pris[final] = true
 				recettes[final] = { Nom = final, Base = base, Donneur = donneur, Teinte = t.Teinte }
 				table.insert(noms, final)

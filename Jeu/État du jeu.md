@@ -90,3 +90,11 @@
 - Prairie en voxels (`Shared.Voxels`, `Shared.ConstructeurVoxels`, client `HabillageVoxels`) : remplace localement les blocs ; demande « Allow Mesh / Image APIs » activé sur l'expérience, sinon repli sur les blocs. Outils de génération dans `outils/voxels`, anciens designs dans `archives/designs-blocs`.
 - Animations : course des monstres selon leur vitesse (`Anime.court`, `Anime.Monstre.Course`), créatures voxels portées qui gigotent (`Anime.Portee`).
 - Interface : boutons de Forge seulement sur la Forge, Agrandir dans le panneau Base, pièges masqués en zone sûre, PLAQUER visible près d'un porteur, panneaux sans boîte.
+
+## Biomes chimériques, ciels, murs et enclos
+- 55 biomes : 21 faits à la main + 34 de `Shared.Chimeres` (Themes, `generer`, `teinter`) ; espèces chimériques construites par `Bestiaire` (corps de la base, greffes du donneur, teinte du biome). Ne jamais réordonner `Chimeres.Themes` (noms sauvegardés).
+- Ciel par biome : client `CielBiome` (éléments qui suivent la caméra), choisi par `Ambiances` (`biome.Ciel` ou table `CIELS`).
+- Murs : `Decor` (MOTIFS par style, `STYLES_MURS` par décor, hauteur 80, sans plafond).
+- Bases : enclos de ranch (`DecorBase`) ; plus de verrou (Raid ne gère que le vol) ; plus d'ornements `Decor.ornerBase`.
+- Aucun texte au changement de zone (bandeau, arches et bornes sans texte).
+
