@@ -20,6 +20,8 @@ local Bonus = require(Shared:WaitForChild("Bonus"))
 local Style = require(Shared:WaitForChild("Style"))
 local Habillage = require(script.Parent:WaitForChild("Habillage"))
 local Sons = require(script.Parent:WaitForChild("Sons"))
+local LancerVisuel = require(script.Parent:WaitForChild("LancerVisuel"))
+local ZoneSure = require(Shared:WaitForChild("ZoneSure"))
 
 local InterfaceLancer = {}
 
@@ -32,10 +34,6 @@ local COULEURS_PALIERS: { [string]: Color3 } = {
 	Orange = Habillage.nommee("Orange"),
 	Rouge = Habillage.nommee("Rouge"),
 }
-
-local function couleurRarete(rarete: string): Color3
-	return Habillage.couleur(Style.couleurRarete(rarete))
-end
 
 local function creerPanneauTaux(ecran: ScreenGui)
 	local cadre = Instance.new("Frame")
@@ -293,52 +291,33 @@ function InterfaceLancer.demarrer()
 		if type(resultat) ~= "table" then
 			return
 		end
-		local distance = resultat.Distance
-		local rarete = resultat.Rarete
-		if type(distance) ~= "number" or type(rarete) ~= "string" then
+		if type(resultat.Distance) ~= "number" or type(resultat.Rarete) ~= "string" then
 			return
 		end
 		numeroMessage += 1
 		local numero = numeroMessage
+		-- Message du timing tout de suite ; distance et rareté à l'atterrissage
+		-- (LancerVisuel suit la graine avec la caméra).
 		local couleurPalier = COULEURS_PALIERS[resultat.Couleur] or Color3.new(1, 1, 1)
-		local rangRarete = table.find(Config.Raretes.Ordre, rarete) or 1
-		local taille = if type(resultat.Taille) == "string" then resultat.Taille else "Normale"
-		local rangTaille = table.find(Config.Tailles.Ordre, taille) or 1
-		local genereux = rangRarete >= 3 or rangTaille >= 3 -- Épique ou Géante et au-dessus
-
 		local tailleMessage = if resultat.Couleur == "Rouge" then 1.25 else 1
 		afficher(tostring(resultat.Message or ""), couleurPalier, tailleMessage)
-		task.wait(1)
-		if numero ~= numeroMessage then
-			return
-		end
-		local nom = Fiche.texte(rarete, taille)
-		Sons.jouer("Plouf")
-		if rangRarete >= 5 then
-			Sons.jingle("Mythique")
-		elseif rangRarete >= 3 then
-			Sons.jingle("Rare")
-		end
-		afficher(
-			`+{math.floor(distance)} m · {nom}`,
-			couleurRarete(rarete),
-			if genereux then 1.4 else 1
-		)
-		if genereux then
-			-- Effet plus généreux : pulsations de la taille.
-			for _ = 1, 3 do
-				task.wait(0.25)
-				if numero ~= numeroMessage then
-					return
-				end
-				TweenService:Create(echelle, TweenInfo.new(0.12), { Scale = 1.6 }):Play()
-				task.wait(0.12)
-				TweenService:Create(echelle, TweenInfo.new(0.12), { Scale = 1.4 }):Play()
-			end
-		end
-		task.wait(if genereux then 2 else 1.5)
+		LancerVisuel.suivre(resultat)
+		task.wait(1.2)
 		if numero == numeroMessage then
 			message.Visible = false
+		end
+	end)
+
+	-- On ne lance que depuis la zone de départ (zone sûre) : bouton caché ailleurs.
+	task.spawn(function()
+		while true do
+			local personnage = joueur.Character
+			local racine = personnage and personnage:FindFirstChild("HumanoidRootPart")
+			local dedans = racine ~= nil
+				and racine:IsA("BasePart")
+				and ZoneSure.contient(racine.Position)
+			bouton.Visible = dedans or enCours
+			task.wait(0.25)
 		end
 	end)
 

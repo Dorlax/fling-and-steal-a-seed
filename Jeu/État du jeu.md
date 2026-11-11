@@ -98,3 +98,8 @@
 - Bases : enclos de ranch (`DecorBase`) ; plus de verrou (Raid ne gère que le vol) ; plus d'ornements `Decor.ornerBase`.
 - Aucun texte au changement de zone (bandeau, arches et bornes sans texte).
 
+## Lancer et Forge (animations)
+- Lancer seulement depuis la zone sûre (`Lancers.traiterDemarrer/traiterLacher`, bouton client masqué ailleurs) ; zone sûre de 120 studs (ligne à Z = 140).
+- Client `LancerVisuel` : geste de lancer (attribut joueur `Lancers`), vol rejoué localement (`Resultat.Depart/Arrivee`, `Config.Lancer.DureeVolGraine`), caméra qui suit, distance puis rareté à l'atterrissage.
+- `PosesForge` : sprint (Vitesse) et épaulé-jeté par positions clés (Force). Plus de mascotte Pépin.
+

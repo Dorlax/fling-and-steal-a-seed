@@ -39,59 +39,117 @@ function PosesForge.tempo(mode: string, intensite: number): number
 	if mode == "Vitesse" then
 		return melange(8, 20, i) -- foulées de plus en plus rapides
 	elseif mode == "Force" then
-		return melange(0.6, 1.3, i) -- répétitions par seconde
+		return melange(0.4, 0.8, i) -- répétitions (épaulé-jeté) par seconde
 	end
 	return melange(7, 12, i) -- tours de corde
 end
 
--- Course sur le tapis : `phase` en radians.
+-- Course sur le tapis : `phase` en radians. Foulée de sprint : genou qui
+-- monte haut devant, talon qui remonte derrière, bras pliés à angle droit
+-- qui balancent à l'opposé des jambes, buste penché et léger rebond.
+local function jambe(phi: number, amp: number, i: number): (number, number)
+	local hanche = 0.12 + amp * math.sin(phi)
+	-- Le genou se plie surtout pendant le retour de la jambe vers l'avant.
+	local retour = math.max(0, math.sin(phi + 0.9)) ^ 1.5
+	local genou = 0.25 + melange(1.1, 1.7, i) * retour
+	return hanche, genou
+end
+
 function PosesForge.course(phase: number, intensite: number): Pose
 	local i = borne(intensite)
-	local s = math.sin(phase)
-	local amp = melange(0.55, 0.95, i)
+	local amp = melange(0.6, 1.05, i)
+	local hancheG, genouG = jambe(phase, amp, i)
+	local hancheD, genouD = jambe(phase + math.pi, amp, i)
+	local bras = amp * 0.95
 	return {
-		dy = 0.12 * math.abs(math.cos(phase)) * (1 + i),
-		penche = melange(0.08, 0.3, i),
-		tete = -0.05,
-		hancheG = amp * s,
-		hancheD = -amp * s,
-		genouG = 0.3 + melange(0.7, 1.2, i) * math.max(0, -s),
-		genouD = 0.3 + melange(0.7, 1.2, i) * math.max(0, s),
-		epauleG = -amp * 0.9 * s,
-		epauleD = amp * 0.9 * s,
-		ecartG = 0.12,
-		ecartD = 0.12,
-		coudeG = 1.4,
-		coudeD = 1.4,
+		dy = melange(0.1, 0.22, i) * math.abs(math.cos(phase)),
+		penche = melange(0.14, 0.34, i),
+		tete = melange(0.04, 0.16, i), -- le regard reste devant malgré le buste penché
+		hancheG = hancheG,
+		hancheD = hancheD,
+		genouG = genouG,
+		genouD = genouD,
+		epauleG = -bras * math.sin(phase) + 0.15,
+		epauleD = bras * math.sin(phase) + 0.15,
+		ecartG = 0.1,
+		ecartD = 0.1,
+		coudeG = 1.55 + 0.2 * math.sin(phase),
+		coudeD = 1.55 - 0.2 * math.sin(phase),
 	}
 end
 
--- Hauteur de la barre (0 = contre la poitrine, 1 = bras tendus) pour une
--- répétition avancée de `progres` (0 -> 1).
+-- Hauteur de la barre (0 = au sol, 1 = bras tendus au-dessus de la tête)
+-- pour une répétition avancée de `progres` (0 -> 1).
 function PosesForge.hauteurBarre(progres: number): number
 	return (1 - math.cos(2 * math.pi * progres)) / 2
 end
 
--- Développé debout : `progres` de la répétition en cours (0 -> 1).
+-- Positions clés de l'épaulé-jeté : accroupi barre au sol, barre aux
+-- épaules, barre au-dessus de la tête (tenue), puis retour.
+type Cle = { t: number, pose: Pose }
+
+local function cle(t: number, p: { number }): Cle
+	return {
+		t = t,
+		pose = {
+			dy = p[1],
+			penche = p[2],
+			tete = p[3],
+			hancheG = p[4],
+			hancheD = p[4],
+			genouG = p[5],
+			genouD = p[5],
+			epauleG = p[6],
+			epauleD = p[6],
+			ecartG = p[7],
+			ecartD = p[7],
+			coudeG = p[8],
+			coudeD = p[8],
+		},
+	}
+end
+
+-- { dy, penche, tete, hanche, genou, epaule, ecart, coude }
+local ACCROUPI = { -1.0, 0.55, 0.3, 1.25, 1.75, 0.3, 0.12, 0.3 }
+local AUX_EPAULES = { -0.15, 0.04, 0.12, 0.25, 0.45, 0.45, 0.32, 2.4 }
+local AU_DESSUS = { 0.05, -0.06, 0.32, 0, 0.05, 2.95, 0.22, 0.08 }
+local CLES: { Cle } = {
+	cle(0, ACCROUPI),
+	cle(0.08, ACCROUPI),
+	cle(0.28, AUX_EPAULES),
+	cle(0.42, AU_DESSUS),
+	cle(0.62, AU_DESSUS),
+	cle(0.78, AUX_EPAULES),
+	cle(1, ACCROUPI),
+}
+
+local function adoucir(t: number): number
+	return t * t * (3 - 2 * t)
+end
+
+-- Épaulé-jeté : `progres` de la répétition en cours (0 -> 1). Plus la série
+-- est intense, plus on descend bas et plus le geste est franc.
 function PosesForge.souleve(progres: number, intensite: number): Pose
 	local i = borne(intensite)
-	local h = PosesForge.hauteurBarre(progres)
-	local flexion = (1 - h) * melange(0.6, 1, i) -- on plie les jambes en bas
-	return {
-		dy = -0.35 * flexion,
-		penche = 0,
-		tete = 0.25 * h,
-		hancheG = 0.4 * flexion,
-		hancheD = 0.4 * flexion,
-		genouG = 0.8 * flexion,
-		genouD = 0.8 * flexion,
-		epauleG = melange(0.55, 2.95, h),
-		epauleD = melange(0.55, 2.95, h),
-		ecartG = melange(0.35, 0.28, h),
-		ecartD = melange(0.35, 0.28, h),
-		coudeG = melange(2.3, 0.15, h),
-		coudeD = melange(2.3, 0.15, h),
-	}
+	local p = if progres ~= progres then 0 else progres % 1
+	local a, b = CLES[1], CLES[#CLES]
+	for k = 1, #CLES - 1 do
+		if p >= CLES[k].t and p <= CLES[k + 1].t then
+			a, b = CLES[k], CLES[k + 1]
+			break
+		end
+	end
+	local u = adoucir(if b.t > a.t then (p - a.t) / (b.t - a.t) else 0)
+	local profondeur = melange(0.75, 1, i)
+	local pose = {} :: any
+	for nom, va in a.pose :: any do
+		local v = melange(va, (b.pose :: any)[nom], u)
+		if nom == "dy" or nom == "genouG" or nom == "genouD" then
+			v *= if v < 0 or nom ~= "dy" then profondeur else 1
+		end
+		pose[nom] = v
+	end
+	return pose :: Pose
 end
 
 -- Hauteur du saut (0 -> 1) : au sommet quand la corde passe sous les pieds
