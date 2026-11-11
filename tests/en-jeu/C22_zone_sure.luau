@@ -116,9 +116,6 @@ local function scenario(): (any, any, Model)
 	return a, b, c
 end
 
-return {
-	["C11 RemoteEvent Plaquer et module Plaquages exposés"] = function()
-
 local SURE = Vector3.new(300, 4, Config.Monstres.BordBases - 20) -- zone sûre, hors des bases
 
 local function premierMonstre(): Model
