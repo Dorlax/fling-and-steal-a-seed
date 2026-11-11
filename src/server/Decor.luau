@@ -3216,7 +3216,7 @@ function MOTIFS.Cosmos(parent, cote, z, h, p)
 	)
 	for _ = 1, 3 do
 		local d = h:NextNumber(3, 7)
-		local cristal = contre(
+		local eclat = contre(
 			parent,
 			cote,
 			7,
@@ -3226,7 +3226,7 @@ function MOTIFS.Cosmos(parent, cote, z, h, p)
 			p.accent,
 			Enum.Material.Neon
 		)
-		cristal.Transparency = 0.15
+		eclat.Transparency = 0.15
 	end
 	for _ = 1, 4 do
 		contre(
@@ -3392,7 +3392,7 @@ function MOTIFS.Usine(parent, cote, z, h, p)
 		Enum.Material.DiamondPlate
 	)
 	for _, y in { HAUTEUR_PAROI * 0.3, HAUTEUR_PAROI * 0.65 } do
-		local tuyau = contre(
+		local conduite = contre(
 			parent,
 			cote,
 			7,
@@ -3403,7 +3403,7 @@ function MOTIFS.Usine(parent, cote, z, h, p)
 			Enum.Material.Metal,
 			Enum.PartType.Cylinder
 		)
-		tuyau.CFrame *= CFrame.Angles(0, math.rad(90), 0)
+		conduite.CFrame *= CFrame.Angles(0, math.rad(90), 0)
 	end
 	local d = h:NextNumber(10, 18)
 	local roue = contre(
@@ -3453,7 +3453,7 @@ function MOTIFS.Grotte(parent, cote, z, h, p)
 	strates(parent, cote, z, h, p, Enum.Material.Slate)
 	for _ = 1, 2 do
 		local d = h:NextNumber(3, 6)
-		local cristal = contre(
+		local eclat = contre(
 			parent,
 			cote,
 			11,
@@ -3463,7 +3463,7 @@ function MOTIFS.Grotte(parent, cote, z, h, p)
 			p.accent,
 			Enum.Material.Neon
 		)
-		cristal.CFrame *= CFrame.Angles(0, 0, math.rad(h:NextNumber(-30, 30)))
+		eclat.CFrame *= CFrame.Angles(0, 0, math.rad(h:NextNumber(-30, 30)))
 	end
 end
 

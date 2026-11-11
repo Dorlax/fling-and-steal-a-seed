@@ -47,16 +47,6 @@ local function estVivant(joueur: any): boolean
 	return racine ~= nil and humanoide ~= nil and humanoide.Health > 0
 end
 
-local function envoyerMessage(joueur: any, texte: string)
-	if not estJoueur(joueur) then
-		return
-	end
-	local remote = ReplicatedStorage:FindFirstChild("MessageJeu")
-	if remote and remote:IsA("RemoteEvent") then
-		remote:FireClient(joueur, texte)
-	end
-end
-
 local function envoyerAlerte(joueur: any, role: string, rarete: string, autre: string)
 	if not estJoueur(joueur) then
 		return
