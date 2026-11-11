@@ -34,8 +34,8 @@ local NOMBRE_EMPLACEMENTS = 12
 
 local COULEUR_SOL = Color3.fromRGB(110, 215, 80)
 local COULEUR_FORGE = Color3.fromRGB(214, 102, 38)
-local COULEUR_POTEAU = Color3.fromRGB(255, 120, 200)
-local COULEUR_LINTEAU = Color3.fromRGB(255, 220, 60)
+local COULEUR_POTEAU = Color3.fromRGB(196, 190, 178) -- pierre, comme le muret
+local COULEUR_LINTEAU = Color3.fromRGB(150, 98, 56) -- poutre en bois
 local HAUTEUR_PORTE = 10
 local LARGEUR_PORTE = 10
 
@@ -137,7 +137,7 @@ local function construire(joueur: any, centre: Vector3): Model
 	apparition.Parent = sol
 	apparition.Position = Vector3.new(0, 4, -8)
 
-	-- Porte : arche cartoon au bord Z+ (côté Terres Sauvages).
+	-- Porte : piliers de pierre et poutre en bois au bord Z+ (côté Terres Sauvages).
 	local bordZ = centre.Z + TAILLE_SOL / 2
 	local porte = Instance.new("Model")
 	porte.Name = "Porte"
@@ -145,20 +145,20 @@ local function construire(joueur: any, centre: Vector3): Model
 		local poteau = Instance.new("Part")
 		poteau.Name = "Poteau"
 		poteau.Anchored = true
-		poteau.Size = Vector3.new(1.5, HAUTEUR_PORTE, 1.5)
+		poteau.Size = Vector3.new(2.4, HAUTEUR_PORTE, 2.4)
 		poteau.Position =
 			Vector3.new(centre.X + cote * LARGEUR_PORTE / 2, centre.Y + HAUTEUR_PORTE / 2, bordZ)
 		poteau.Color = COULEUR_POTEAU
-		poteau.Material = Enum.Material.SmoothPlastic
+		poteau.Material = Enum.Material.Cobblestone
 		poteau.Parent = porte
 	end
 	local linteau = Instance.new("Part")
 	linteau.Name = "Linteau"
 	linteau.Anchored = true
-	linteau.Size = Vector3.new(LARGEUR_PORTE + 3, 2, 2)
+	linteau.Size = Vector3.new(LARGEUR_PORTE + 4, 1.6, 1.8)
 	linteau.Position = Vector3.new(centre.X, centre.Y + HAUTEUR_PORTE + 1, bordZ)
 	linteau.Color = COULEUR_LINTEAU
-	linteau.Material = Enum.Material.SmoothPlastic
+	linteau.Material = Enum.Material.Wood
 	linteau.Parent = porte
 	porte.PrimaryPart = linteau
 	porte.Parent = modele

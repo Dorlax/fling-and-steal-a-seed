@@ -42,7 +42,7 @@ local function rgb(c: { number }): Color3
 	return Color3.fromRGB(c[1], c[2], c[3])
 end
 
-local function creerBorne(parent: Instance, nom: string, z: number, texteBorne: string)
+local function creerBorne(parent: Instance, nom: string, z: number, _texteBorne: string)
 	local couleur = COULEURS_ZONES[nom] or Color3.new(1, 1, 1)
 
 	local ligne = enfant(parent, "Ligne" .. nom, "Part") :: Part
@@ -60,22 +60,15 @@ local function creerBorne(parent: Instance, nom: string, z: number, texteBorne: 
 	borne.Color = couleur
 	borne.Material = Enum.Material.Neon
 
-	local panneau = enfant(borne, "Panneau", "BillboardGui") :: BillboardGui
-	panneau.Size = UDim2.fromOffset(220, 50)
-	panneau.StudsOffset = Vector3.new(0, 6, 0)
-	panneau.MaxDistance = 90
-	local texte = enfant(panneau, "Texte", "TextLabel") :: TextLabel
-	texte.Size = UDim2.fromScale(1, 1)
-	texte.BackgroundTransparency = 1
-	texte.Font = Enum.Font.FredokaOne
-	texte.TextScaled = true
-	texte.TextColor3 = couleur
-	texte.TextStrokeTransparency = 0
-	texte.Text = texteBorne
+	-- Pas de texte : la couleur de la ligne suffit (ancien panneau retiré).
+	local ancien = borne:FindFirstChild("Panneau")
+	if ancien then
+		ancien:Destroy()
+	end
 end
 
--- Grande arche à l'entrée d'un biome (à partir du biome 2), avec son nom.
-local function creerArche(parent: Instance, biome: Biomes.Biome, numero: number, z: number)
+-- Grande arche à l'entrée d'un biome (à partir du biome 2), sans texte.
+local function creerArche(parent: Instance, biome: Biomes.Biome, _numero: number, z: number)
 	local arche = enfant(parent, "Arche", "Model") :: Model
 	local couleur = rgb(biome.Bordure)
 	for _, x in { -40, 40 } do
@@ -96,24 +89,6 @@ local function creerArche(parent: Instance, biome: Biomes.Biome, numero: number,
 	linteau.Color = rgb(biome.Sol)
 	linteau.Material = Enum.Material.SmoothPlastic
 	linteau.Parent = arche
-	local panneau = Instance.new("SurfaceGui")
-	panneau.Name = "Nom"
-	panneau.Face = Enum.NormalId.Front
-	panneau.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	panneau.PixelsPerStud = 20
-	panneau.Parent = linteau
-	local texte = Instance.new("TextLabel")
-	texte.Size = UDim2.fromScale(1, 1)
-	texte.BackgroundTransparency = 1
-	texte.Font = Enum.Font.FredokaOne
-	texte.TextScaled = true
-	texte.TextColor3 = Color3.new(1, 1, 1)
-	texte.TextStrokeTransparency = 0
-	texte.Text = `{numero} · {biome.Nom} · ×{Biomes.texteMultiplicateur(numero)}`
-	texte.Parent = panneau
-	local dos = panneau:Clone()
-	dos.Face = Enum.NormalId.Back
-	dos.Parent = linteau
 end
 
 -- Zone sûre : sol entre les bases et la ligne, et la ligne elle-même

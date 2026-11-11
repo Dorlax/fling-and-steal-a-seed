@@ -3,7 +3,7 @@
 -- a son propre ciel (couleur de l'atmosphère, horizon, voile), sa teinte et
 -- son exposition, qui changent en douceur quand le joueur change de biome.
 -- L'exposition baisse dans les biomes clairs (neige, sable, nuages) pour
--- qu'ils n'éblouissent pas. Un bandeau annonce le nom du biome et sa valeur.
+-- qu'ils n'éblouissent pas. Aucun texte n'annonce le biome.
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,7 +12,6 @@ local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Biomes = require(Shared:WaitForChild("Biomes"))
 local Config = require(Shared:WaitForChild("Config"))
-local Bandeaux = require(script.Parent:WaitForChild("Bandeaux"))
 
 local Ambiances = {}
 
@@ -232,10 +231,6 @@ function Ambiances.demarrer()
 				if numero ~= actuel then
 					actuel = numero
 					appliquer(numero)
-					local biome = Biomes.biome(numero)
-					Bandeaux.afficher(
-						`{biome.Nom} · créatures ×{Biomes.texteMultiplicateur(numero)}`
-					)
 				end
 			end
 		end

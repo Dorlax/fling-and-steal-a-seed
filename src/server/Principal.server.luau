@@ -204,7 +204,6 @@ TerresSauvages.creer()
 -- Décor cartoon et éclairage : avant le cycle jour/nuit, qui mémorise l'éclairage de jour.
 Decor.eclairer()
 Decor.creer()
-Decor.suivreBases()
 
 -- Cycle jour/nuit puis monstres : tout est décidé par le serveur, aucun
 -- RemoteEvent (le client n'envoie rien pour les monstres).

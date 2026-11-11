@@ -57,13 +57,6 @@ local FLEURS = {
 	Color3.fromRGB(255, 255, 255),
 }
 
-local BORDURES_BASE = {
-	Color3.fromRGB(255, 120, 200),
-	Color3.fromRGB(255, 220, 60),
-	Color3.fromRGB(60, 200, 255),
-	Color3.fromRGB(120, 230, 120),
-}
-
 local function piece(
 	parent: Instance,
 	nom: string,
@@ -3414,104 +3407,6 @@ function Decor.creer(): Folder
 	end
 
 	return racine
-end
-
----------------------------------------------------------------------------
--- Ornements des bases (ajoutés quand une base apparaît)
-
-function Decor.ornerBase(base: Model)
-	local trouve = base:FindFirstChild("Sol")
-	if not (trouve and trouve:IsA("BasePart")) or base:FindFirstChild("Ornements") then
-		return
-	end
-	local sol = trouve :: BasePart
-	local centre = sol.Position + Vector3.new(0, sol.Size.Y / 2, 0)
-	local ornements = Instance.new("Folder")
-	ornements.Name = "Ornements"
-
-	-- Petite bordure colorée (ne bloque rien), ouverte devant la porte.
-	local n = 0
-	local function bordure(position: Vector3, taille: Vector3)
-		n += 1
-		piece(
-			ornements,
-			"Bordure",
-			Enum.PartType.Block,
-			taille,
-			CFrame.new(position),
-			BORDURES_BASE[(n - 1) % #BORDURES_BASE + 1]
-		)
-	end
-	local d = (trouve :: BasePart).Size.X / 2
-	local segment = 5
-	for i = -d + segment / 2, d - segment / 2, segment do
-		bordure(centre + Vector3.new(i, 0.4, -d), Vector3.new(segment - 0.3, 0.8, 1))
-		bordure(centre + Vector3.new(-d, 0.4, i), Vector3.new(1, 0.8, segment - 0.3))
-		bordure(centre + Vector3.new(d, 0.4, i), Vector3.new(1, 0.8, segment - 0.3))
-		if math.abs(i) > LARGEUR_PORTE / 2 + 1 then
-			bordure(centre + Vector3.new(i, 0.4, d), Vector3.new(segment - 0.3, 0.8, 1))
-		end
-	end
-
-	-- Lampadaires-sucettes aux quatre coins.
-	for _, cx in { -1, 1 } do
-		for _, cz in { -1, 1 } do
-			local pied = centre + Vector3.new(cx * (d - 1.5), 0, cz * (d - 1.5))
-			piece(
-				ornements,
-				"Lampadaire",
-				Enum.PartType.Cylinder,
-				Vector3.new(7, 0.6, 0.6),
-				CFrame.new(pied + Vector3.new(0, 3.5, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-				Color3.new(1, 1, 1)
-			)
-			local boule = piece(
-				ornements,
-				"Lampe",
-				Enum.PartType.Ball,
-				Vector3.one * 1.8,
-				CFrame.new(pied + Vector3.new(0, 7.5, 0)),
-				BORDURES_BASE[(cx + cz + 4) % #BORDURES_BASE + 1]
-			)
-			boule.Material = Enum.Material.Neon
-			local lumiere = Instance.new("PointLight")
-			lumiere.Range = 14
-			lumiere.Brightness = 1.2
-			lumiere.Color = boule.Color
-			lumiere.Parent = boule
-		end
-	end
-
-	ornements.Parent = base
-end
-
--- Orne les bases existantes et celles qui apparaîtront.
-function Decor.suivreBases()
-	local function brancher(dossierBases: Instance)
-		for _, base in dossierBases:GetChildren() do
-			if base:IsA("Model") then
-				Decor.ornerBase(base)
-			end
-		end
-		dossierBases.ChildAdded:Connect(function(base)
-			if base:IsA("Model") then
-				-- Laisse Bases finir de remplir le modèle.
-				task.defer(Decor.ornerBase, base)
-			end
-		end)
-	end
-	local existant = Workspace:FindFirstChild("Bases")
-	if existant then
-		brancher(existant)
-	else
-		local connexion: RBXScriptConnection
-		connexion = Workspace.ChildAdded:Connect(function(enfant)
-			if enfant.Name == "Bases" and enfant:IsA("Folder") then
-				connexion:Disconnect()
-				brancher(enfant)
-			end
-		end)
-	end
 end
 
 return Decor
