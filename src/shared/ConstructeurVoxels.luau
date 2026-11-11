@@ -198,7 +198,19 @@ local function membre(m, runs, cols, curseurs, res, pal): MeshPart
 			task.wait()
 		end
 	end
-	local part = AssetService:CreateMeshPartAsync(Content.fromObject(em))
+	-- Le maillage ne change plus : on le fige en contenu opaque et on libère
+	-- l'EditableMesh (le budget mémoire client est très serré).
+	local contenu = Content.fromObject(em)
+	local okFige, resultat, fige = pcall(function()
+		return AssetService:CreateDataModelContentAsync(contenu)
+	end)
+	local part
+	if okFige and resultat == Enum.CreateContentResult.Success then
+		part = AssetService:CreateMeshPartAsync(fige)
+		em:Destroy()
+	else
+		part = AssetService:CreateMeshPartAsync(contenu)
+	end
 	part.Name = m.n
 	part.Anchored = true
 	part.CanCollide = false
