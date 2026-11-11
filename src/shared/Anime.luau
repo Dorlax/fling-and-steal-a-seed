@@ -20,6 +20,19 @@ Anime.Creature = {
 Anime.Monstre = {
 	Frequence = 6,
 	Roulis = 0.12,
+	-- Course (poursuite) : au-delà de Seuil studs/s, il penche en avant,
+	-- rebondit à chaque foulée et ses pattes vont plus vite.
+	Course = {
+		Seuil = 7, -- studs/s
+		Tangage = 0.22, -- radians vers l'avant
+		Saut = 0.6, -- studs, rebond de chaque foulée
+		Cadence = 1.8, -- pattes × 1,8 plus vite
+	},
+}
+
+-- Créature portée par un joueur : elle gigote (pattes qui pédalent).
+Anime.Portee = {
+	Cadence = 2.4, -- pattes × 2,4 plus vite qu'en marche
 }
 
 -- Amplitudes (radians) et vitesses des pièces animées.
@@ -46,7 +59,7 @@ Anime.Pieces = {
 -- Rôles qui tournent sans fin (angle = temps × vitesse).
 local CONTINUS = { Toupie = "Y", Helice = "Y", Roue = "X", Moulin = "Z" }
 
-export type Decalage = { Hauteur: number, Lacet: number, Roulis: number }
+export type Decalage = { Hauteur: number, Lacet: number, Roulis: number, Tangage: number }
 export type Rotation = { X: number, Y: number, Z: number }
 
 -- Décalage d'une créature à l'instant `t` (secondes) ; `phase` désynchronise
@@ -58,16 +71,35 @@ function Anime.creature(t: number, phase: number): Decalage
 		Hauteur = math.abs(math.sin(x)) * r.Saut,
 		Lacet = math.sin(x * 0.5) * r.Lacet,
 		Roulis = math.sin(x) * r.Roulis,
+		Tangage = 0,
 	}
 end
 
--- Décalage d'un monstre : il se dandine d'un pied sur l'autre.
-function Anime.monstre(t: number, phase: number): Decalage
+-- Vrai si un monstre allant à `vitesse` studs/s court (poursuite).
+function Anime.court(vitesse: number?): boolean
+	local v = vitesse or 0
+	return v == v and v >= Anime.Monstre.Course.Seuil
+end
+
+-- Décalage d'un monstre : il se dandine d'un pied sur l'autre ; en course
+-- (`vitesse` au-delà du seuil), il penche en avant et rebondit à chaque foulée.
+function Anime.monstre(t: number, phase: number, vitesse: number?): Decalage
 	local r = Anime.Monstre
+	if not Anime.court(vitesse) then
+		return {
+			Hauteur = 0,
+			Lacet = 0,
+			Roulis = math.sin(t * r.Frequence + phase) * r.Roulis,
+			Tangage = 0,
+		}
+	end
+	local c = r.Course
+	local x = t * r.Frequence * c.Cadence + phase
 	return {
-		Hauteur = 0,
+		Hauteur = math.abs(math.sin(x)) * c.Saut,
 		Lacet = 0,
-		Roulis = math.sin(t * r.Frequence + phase) * r.Roulis,
+		Roulis = math.sin(x) * r.Roulis * 1.5,
+		Tangage = -c.Tangage,
 	}
 end
 

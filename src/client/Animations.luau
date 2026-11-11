@@ -5,8 +5,9 @@
 -- articulation : pattes qui marchent, ailes qui battent, queue qui remue,
 -- bras et mâchoire qui frappent (attribut FrappeA du monstre).
 -- Le serveur reste maître des positions : dès qu'il déplace un modèle,
--- l'animation repart de la nouvelle position. Une créature portée (pièces
--- non ancrées) n'est pas animée.
+-- l'animation repart de la nouvelle position. Un monstre qui court (poursuite)
+-- penche en avant et rebondit ; une créature portée en voxels gigote (ses
+-- pattes pédalent) ; une créature portée en blocs (pièces soudées) ne bouge pas.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -33,6 +34,8 @@ type Suivi = {
 	monstre: boolean,
 	pieces: { Piece },
 	bougeA: number, -- dernier déplacement par le serveur (os.clock)
+	majA: number, -- dernière nouvelle position reçue (os.clock)
+	vitesse: number, -- studs/s estimée d'après les déplacements du serveur
 	-- Créature de base qui se promène (Shared.Promenade), sinon nil.
 	centre: Vector3?,
 	voxels: boolean, -- habillée en voxels (pièces locales, ancrées)
@@ -183,6 +186,8 @@ function suivre(objet: Instance)
 		monstre = sorte == "Monstre",
 		pieces = releverPieces(modele, base),
 		bougeA = 0,
+		majA = 0,
+		vitesse = 0,
 		voxels = voxels,
 	}
 	modele.Destroying:Connect(function()
@@ -200,18 +205,27 @@ end
 local parts: { BasePart } = {}
 local cadres: { CFrame } = {}
 
+-- Cadre d'une pièce : tournée autour de son articulation selon son rôle.
+local function cadrePiece(
+	s: Suivi,
+	p: Piece,
+	pose: CFrame,
+	t: number,
+	marche: boolean,
+	frappe: number
+): CFrame
+	if p.role == nil then
+		return pose * p.repos
+	end
+	local r = Anime.piece(p.role :: string, t, s.phase + p.phase, p.cote, marche, frappe)
+	local rotation = CFrame.Angles(r.X, r.Y, r.Z)
+	return pose * CFrame.new(p.joint) * rotation * CFrame.new(-p.joint) * p.repos
+end
+
 local function poser(s: Suivi, pose: CFrame, t: number, marche: boolean, frappe: number)
 	for _, p in s.pieces do
-		local cadre: CFrame
-		if p.role then
-			local r = Anime.piece(p.role :: string, t, s.phase + p.phase, p.cote, marche, frappe)
-			local rotation = CFrame.Angles(r.X, r.Y, r.Z)
-			cadre = pose * CFrame.new(p.joint) * rotation * CFrame.new(-p.joint) * p.repos
-		else
-			cadre = pose * p.repos
-		end
 		table.insert(parts, p.part)
-		table.insert(cadres, cadre)
+		table.insert(cadres, cadrePiece(s, p, pose, t, marche, frappe))
 	end
 end
 
@@ -235,13 +249,15 @@ local function pas()
 		if not (corps :: BasePart).Anchored then
 			-- Portée : c'est la soudure du serveur qui la place. Les membres
 			-- voxels (locaux, ancrés) suivent le Corps à la main.
+			-- Elles gigotent : pattes qui pédalent, queue qui remue.
 			s.pose = nil
 			if s.voxels then
 				local actuel = modele:GetPivot()
+				local tPortee = t * Anime.Portee.Cadence
 				for _, p in s.pieces do
 					if p.part ~= corps and p.part.Anchored then
 						table.insert(parts, p.part)
-						table.insert(cadres, actuel * p.repos)
+						table.insert(cadres, cadrePiece(s, p, actuel, tPortee, true, 0))
 					end
 				end
 			end
@@ -258,9 +274,17 @@ local function pas()
 				* CFrame.Angles(0, etat.Cap + etat.Tour, 0)
 		elseif pose == nil or not identiques(actuel, pose) then
 			-- Le serveur a déplacé le modèle : nouvelle position de repos.
-			if (actuel.Position - s.base.Position).Magnitude > 0.05 then
+			local ecart = actuel.Position - s.base.Position
+			local deplacement = Vector3.new(ecart.X, 0, ecart.Z).Magnitude
+			if deplacement > 0.05 then
 				s.bougeA = t
+				local dt = t - s.majA
+				if dt > 0 and dt < 1 then
+					-- Vitesse lissée (le serveur avance par pas de 0,1 s).
+					s.vitesse = s.vitesse * 0.6 + (deplacement / dt) * 0.4
+				end
 			end
+			s.majA = t
 			s.base = actuel
 		end
 		local distance = (s.base.Position - oeil).Magnitude
@@ -285,9 +309,18 @@ local function pas()
 		if type(frappeA) == "number" and serveur - frappeA < Anime.DureeFrappe then
 			frappe = (serveur - frappeA) / Anime.DureeFrappe
 		end
-		local d = if s.monstre then Anime.monstre(t, s.phase) else Anime.creature(t, s.phase)
-		local nouvelle = s.base * CFrame.new(0, d.Hauteur, 0) * CFrame.Angles(0, d.Lacet, d.Roulis)
-		poser(s, nouvelle, t, marche, frappe)
+		-- Immobile depuis un moment : plus de course.
+		if t - s.bougeA > 0.4 then
+			s.vitesse = 0
+		end
+		local court = s.monstre and Anime.court(s.vitesse)
+		local d = if s.monstre
+			then Anime.monstre(t, s.phase, s.vitesse)
+			else Anime.creature(t, s.phase)
+		local penche = CFrame.Angles(0, d.Lacet, d.Roulis) * CFrame.Angles(d.Tangage, 0, 0)
+		local nouvelle = s.base * CFrame.new(0, d.Hauteur, 0) * penche
+		local tPieces = if court then t * Anime.Monstre.Course.Cadence else t
+		poser(s, nouvelle, tPieces, marche, frappe)
 		s.pose = nouvelle
 	end
 	if #parts > 0 then
