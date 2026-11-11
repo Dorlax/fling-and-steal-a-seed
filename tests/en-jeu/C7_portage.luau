@@ -66,7 +66,7 @@ local function creatureAuSol(joueur: any, position: Vector3?): Model
 	local Lancers = module("Lancers")
 	Lancers.demarrer(joueur, 0)
 	assert(Lancers.lacher(joueur, 0.8, 0) ~= nil, "lancer attendu")
-	task.wait(2)
+	task.wait(Config.Lancer.DureeVolGraine + 1)
 	for _, c in module("TerresSauvages").dossierCreatures():GetChildren() do
 		if c:GetAttribute("Proprietaire") == joueur.UserId then
 			if position then
@@ -168,7 +168,7 @@ return {
 		local avant = j:GetAttribute("Porte")
 		Lancers.demarrer(j, 10)
 		assert(Lancers.lacher(j, 10.8, 0) ~= nil, "second lancer attendu")
-		task.wait(2)
+		task.wait(Config.Lancer.DureeVolGraine + 1)
 		local c2: Instance? = nil
 		for _, c in module("TerresSauvages").dossierCreatures():GetChildren() do
 			if c:GetAttribute("Proprietaire") == j.UserId then
@@ -315,7 +315,7 @@ return {
 			Lancers.lacher(j, t + 0.8, 0)
 			t += 0.8 + Config.Lancer.DelaiEntreLancers + 0.1
 		end
-		task.wait(Config.Lancer.DureeVolGraine + 0.6)
+		task.wait(Config.Lancer.DureeVolGraine + 1)
 		local vivante = c:IsDescendantOf(Workspace)
 		local porte = j:GetAttribute("Porte")
 		nettoyer(j)

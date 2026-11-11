@@ -157,7 +157,7 @@ return {
 		Lancers.demarrer(j, 0)
 		local r = Lancers.lacher(j, 0.8, 0)
 		assert(r ~= nil, "résultat attendu")
-		task.wait(Config.Lancer.DureeVolGraine and (Config.Lancer.DureeVolGraine + 0.5) or 1.5)
+		task.wait(Config.Lancer.DureeVolGraine + 1)
 		local liste = creaturesDe(j)
 		assert(#liste == 1, "une créature attendue, trouvée " .. #liste)
 		local c = liste[1]
@@ -190,7 +190,7 @@ return {
 			assert(Lancers.lacher(j, t + 0.8, 0) ~= nil, "lancer attendu")
 			t += 0.8 + Config.Lancer.DelaiEntreLancers + 0.1
 		end
-		task.wait(Config.Lancer.DureeVolGraine + 0.6)
+		task.wait(Config.Lancer.DureeVolGraine + 1)
 		local n = #creaturesDe(j)
 		for _, creature in creaturesDe(j) do
 			creature:Destroy()

@@ -120,7 +120,7 @@ local function scenario(): (any, Model, Model)
 	module("Bases").creer(joueur)
 	Lancers.demarrer(joueur, 0)
 	assert(Lancers.lacher(joueur, 0.8, 0) ~= nil, "lancer attendu")
-	task.wait(2)
+	task.wait(Config.Lancer.DureeVolGraine + 1)
 	local creature: Model? = nil
 	for _, c in module("TerresSauvages").dossierCreatures():GetChildren() do
 		if c:GetAttribute("Proprietaire") == joueur.UserId then

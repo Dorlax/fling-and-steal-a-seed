@@ -66,7 +66,7 @@ local function creatureAuSol(joueur: any, position: Vector3): Model
 	local Lancers = module("Lancers")
 	Lancers.demarrer(joueur, 0)
 	assert(Lancers.lacher(joueur, 0.8, 0) ~= nil, "lancer attendu")
-	task.wait(2)
+	task.wait(Config.Lancer.DureeVolGraine + 1)
 	for _, c in module("TerresSauvages").dossierCreatures():GetChildren() do
 		if c:GetAttribute("Proprietaire") == joueur.UserId then
 			(c :: Model):PivotTo(CFrame.new(position))
