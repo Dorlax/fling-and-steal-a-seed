@@ -11,21 +11,25 @@ CREME = rgb("fff1d6")
 ROSE_JOUE = rgb("ff9fb4")
 
 
-def _pattes4(s, couleur, chaussette, x=0.12, z_av=-0.08, z_ar=0.16, haut=-0.22, r=0.055, pied=-0.47):
-    """Quatre pattes droites : épaule/cuisse fondue sous le corps, patte
-    effilée bien verticale, coussinet posé à plat sous la patte."""
+def _pattes4(s, couleur, chaussette, x=0.12, z_av=-0.08, z_ar=0.16, haut=-0.22, r=0.055, pied=-0.47,
+             corps=None, sabot=False):
+    """Quatre pattes droites. La cuisse (ou l'épaule) est fondue dans le corps
+    pour éviter les bosses ; la patte est un fût effilé qui finit par un pied
+    discret (ou un sabot net si sabot=True)."""
     for cote, nx in ((-1, "G"), (1, "D")):
         for zz, nz, ph in ((z_av, "Av", 0.0), (z_ar, "Ar", 0.5)):
             px = cote * x
+            if corps is not None:
+                corps.boule((px * 0.85, haut + 0.03, zz), (r * 1.3, r * 1.6, r * 1.4), couleur, fondu=0.07)
             m = s.membre(f"Patte{nz}{nx}", "Patte", (px, haut, zz), cote, ph if cote < 0 else 0.5 - ph)
-            # Cuisse (ou épaule) : un peu plus large, cachée en partie dans le corps.
-            m.boule((px * 0.9, haut + 0.01, zz), (r * 1.45, r * 1.7, r * 1.55), couleur, fondu=0.0)
-            m.cone((px, haut, zz), (px, pied + r * 0.9, zz), r * 1.05, r * 0.85, couleur, fondu=0.03)
-            # Coussinet : plat, centré sous la patte, un peu vers l'avant.
-            m.boule((px, pied + r * 0.6, zz - r * 0.3), (r * 1.05, r * 0.62, r * 1.3), chaussette, fondu=0.025)
+            m.cone((px, haut + 0.02, zz), (px, pied + r * 0.8, zz), r, r * 0.88, couleur, fondu=0.0)
+            if sabot:
+                m.cone((px, pied + r * 0.9, zz), (px, pied + r * 0.35, zz - r * 0.1), r * 0.9, r * 0.95, chaussette, fondu=0.015)
+            else:
+                m.boule((px, pied + r * 0.5, zz - r * 0.2), (r * 1.0, r * 0.5, r * 1.15), chaussette, fondu=0.04)
             if chaussette != couleur:
-                bas = pied + (haut - pied) * 0.4
-                m.cone((px, bas, zz), (px, pied + r, zz), r * 1.2, r * 1.2, chaussette, mode="peint")
+                bas = pied + (haut - pied) * (0.22 if sabot else 0.35)
+                m.cone((px, bas, zz), (px, pied, zz), r * 1.3, r * 1.3, chaussette, mode="peint")
 
 
 def _joues(t, centre_y, z, ecart, r=0.045):
@@ -49,7 +53,7 @@ def renardelle():
     corps = s.membre("Corps")
     corps.boule((0, -0.19, 0.06), (0.17, 0.15, 0.22), ORANGE)
     corps.boule((0, -0.2, -0.04), (0.12, 0.1, 0.12), CREME, mode="peint")
-    _pattes4(s, ORANGE, FONCE, x=0.1, z_av=-0.06, z_ar=0.17, haut=-0.26, r=0.05)
+    _pattes4(s, ORANGE, FONCE, x=0.1, z_av=-0.06, z_ar=0.17, haut=-0.26, r=0.05, corps=corps)
 
     t = s.membre("Tete", "Tete", (0, 0.0, -0.06))
     t.boule((0, 0.13, -0.08), (0.22, 0.19, 0.18), ORANGE)
@@ -177,13 +181,13 @@ def lapinou():
         o.boule((cc * 0.15, 0.43, 0.04), (0.04, 0.04, 0.04), LILAS, mode="peint")
     for cc in (-1, 1):
         n = "G" if cc < 0 else "D"
-        ar = s.membre(f"PatteAr{n}", "Patte", (cc * 0.13, -0.33, 0.1), cc, 0.5)
-        ar.boule((cc * 0.14, -0.33, 0.1), (0.08, 0.1, 0.11), BLANC_L, fondu=0.0)
-        ar.boule((cc * 0.13, -0.455, 0.0), (0.06, 0.04, 0.12), BLANC_L, fondu=0.04)
-        ar.boule((cc * 0.13, -0.47, -0.04), (0.035, 0.02, 0.05), ROSE, mode="peint")
-        av = s.membre(f"PatteAv{n}", "Patte", (cc * 0.07, -0.3, -0.1), cc, 0.0)
-        av.cone((cc * 0.07, -0.3, -0.1), (cc * 0.075, -0.45, -0.13), 0.045, 0.04, BLANC_L)
-        av.boule((cc * 0.075, -0.455, -0.145), (0.045, 0.03, 0.055), BLANC_L, fondu=0.02)
+        c.boule((cc * 0.13, -0.34, 0.11), (0.085, 0.1, 0.11), BLANC_L, fondu=0.08)
+        ar = s.membre(f"PatteAr{n}", "Patte", (cc * 0.13, -0.42, 0.08), cc, 0.5)
+        ar.boule((cc * 0.13, -0.46, 0.0), (0.055, 0.032, 0.115), BLANC_L, fondu=0.0)
+        ar.boule((cc * 0.13, -0.49, -0.03), (0.03, 0.01, 0.05), ROSE, mode="peint")
+        av = s.membre(f"PatteAv{n}", "Patte", (cc * 0.075, -0.3, -0.11), cc, 0.0)
+        av.cone((cc * 0.075, -0.32, -0.11), (cc * 0.075, -0.455, -0.135), 0.04, 0.036, BLANC_L, fondu=0.0)
+        av.boule((cc * 0.075, -0.465, -0.145), (0.04, 0.025, 0.05), BLANC_L, fondu=0.02)
     return s
 
 
@@ -264,7 +268,7 @@ def cerfaurore():
     c.boule((0, -0.15, 0.06), (0.1, 0.07, 0.16), VENTRE, mode="peint")
     for x, y, z in ((-0.1, -0.03, 0.02), (0.1, -0.02, 0.1), (-0.09, 0.0, 0.17), (0.08, -0.05, 0.0), (0.0, 0.02, 0.12), (-0.04, 0.03, 0.22)):
         c.boule((x, y, z), (0.025, 0.02, 0.025), VENTRE, mode="peint")
-    _pattes4(s, FAON, rgb("7a4a35"), x=0.09, z_av=-0.06, z_ar=0.2, haut=-0.14, r=0.04)
+    _pattes4(s, FAON, rgb("7a4a35"), x=0.085, z_av=-0.05, z_ar=0.2, haut=-0.15, r=0.037, corps=c, sabot=True)
     q = s.membre("Queue", "Queue", (0, -0.04, 0.29))
     q.cone((0, -0.04, 0.28), (0, 0.0, 0.34), 0.04, 0.035, VENTRE)
     t = s.membre("Tete", "Tete", (0, 0.0, -0.08))
@@ -292,7 +296,7 @@ def lionfeuille():
     c = s.membre("Corps")
     c.boule((0, -0.19, 0.08), (0.18, 0.15, 0.22), FAUVE)
     c.boule((0, -0.24, 0.0), (0.11, 0.08, 0.12), VENTRE, mode="peint")
-    _pattes4(s, FAUVE, rgb("ffe39a"), x=0.11, z_av=-0.06, z_ar=0.2, haut=-0.26, r=0.06)
+    _pattes4(s, FAUVE, rgb("ffe39a"), x=0.11, z_av=-0.05, z_ar=0.19, haut=-0.26, r=0.058, corps=c)
     q = s.membre("Queue", "Queue", (0, -0.12, 0.28))
     q.courbe([(0, -0.14, 0.27), (0.03, -0.04, 0.38), (0.03, 0.08, 0.42)], [0.03, 0.025, 0.02], FAUVE)
     q.boule((0.03, 0.11, 0.42), (0.06, 0.045, 0.03), FEUILLE, rot=(0, 0, 30), fondu=0.0)
@@ -325,7 +329,7 @@ def dragonnet():
     c.boule((0, -0.22, -0.06), (0.12, 0.13, 0.1), VENTRE, mode="peint")
     for i, (y, z) in enumerate(((-0.03, 0.06), (-0.06, 0.16), (-0.12, 0.24))):
         c.cone((0, y, z), (0, y + 0.06, z + 0.03), 0.03, 0.006, AILE, fondu=0.01)
-    _pattes4(s, ECAILLE, ECAILLE, x=0.11, z_av=-0.05, z_ar=0.17, haut=-0.26, r=0.06)
+    _pattes4(s, ECAILLE, ECAILLE, x=0.11, z_av=-0.05, z_ar=0.17, haut=-0.26, r=0.06, corps=c)
     q = s.membre("Queue", "Queue", (0, -0.28, 0.24))
     q.courbe([(0, -0.3, 0.22), (0.05, -0.36, 0.34), (0.14, -0.38, 0.42), (0.22, -0.34, 0.45)], [0.07, 0.05, 0.035, 0.02], ECAILLE)
     q.boule((0.25, -0.33, 0.45), (0.05, 0.03, 0.03), AILE, rot=(0, 0, 30), fondu=0.0)
