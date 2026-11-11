@@ -22,7 +22,7 @@ local DEMI_LARGEUR = 600
 local BORD_BASES = Config.ZoneSure.BordBases -- bord avant des bases
 local DEBUT_SAUVAGE = Config.Monstres.BordBases -- ligne de la zone sûre
 local FOND_SAUVAGE = DEBUT_SAUVAGE + Biomes.Longueur -- fond du biome 1 (Prairie)
-local HAUTEUR_PAROI = 110 -- murs du bord de la carte (chaque biome est une « boîte »)
+local HAUTEUR_PAROI = 80 -- murs du bord de la carte (chaque biome est une « boîte » sans plafond)
 local ECART_BASES = 90
 local LARGEUR_PORTE = 10
 local GRAINE = 20261108 -- même décor à chaque serveur
@@ -55,13 +55,6 @@ local FLEURS = {
 	Color3.fromRGB(200, 110, 255),
 	Color3.fromRGB(255, 140, 60),
 	Color3.fromRGB(255, 255, 255),
-}
-
-local BORDURES_BASE = {
-	Color3.fromRGB(255, 120, 200),
-	Color3.fromRGB(255, 220, 60),
-	Color3.fromRGB(60, 200, 255),
-	Color3.fromRGB(120, 230, 120),
 }
 
 local function piece(
@@ -3020,112 +3013,594 @@ local function murInvisible(parent: Instance, debut: Vector3, fin: Vector3)
 	end
 end
 
--- Parois hautes : chaque biome est une « boîte » avec ses propres murs (couleur
--- et matière de son rempart, corniche claire en haut). À l'entrée de chaque
--- biome (sauf le premier), deux piliers et une poutre haute marquent le
--- passage d'une boîte à l'autre, sans rien bloquer au sol.
-local function teinteParoi(biome: Biomes.Biome): Color3
-	return couleurRgb(biome.Bordure):Lerp(Color3.fromRGB(40, 35, 50), 0.18)
+-- Murs du bord de la carte : chaque biome est une « boîte » ouverte sur le
+-- ciel (pas de plafond), dont les murs portent un vrai décor à son image :
+-- falaises et arbres, grès, glace, basalte et lave, cosmos et cristaux,
+-- pierre hantée, coraux, bonbons, nuages, usine, bambous, grotte, jouets.
+-- Tout est posé derrière le rempart (hors de la zone de jeu).
+
+local MUR_X = DEMI_LARGEUR + 16 -- fond du mur (studs du centre)
+local PAS_MOTIF = 30 -- studs entre deux motifs le long d'un mur
+
+type Palette = { fond: Color3, roche: Color3, dessus: Color3, accent: Color3 }
+type Motif = (parent: Instance, cote: number, z: number, h: Random, p: Palette) -> ()
+
+local function fonce(c: Color3, part: number): Color3
+	return c:Lerp(Color3.fromRGB(30, 26, 36), part)
 end
 
-local function matiereParoi(spec: Rempart): Enum.Material
-	local m = materiau(spec.lisses[1].m)
-	-- Pas de mur entièrement lumineux ou transparent (éblouissant).
-	if m == Enum.Material.Neon or m == Enum.Material.ForceField or m == Enum.Material.Glass then
-		return Enum.Material.Slate
+local function clair(c: Color3, part: number): Color3
+	return c:Lerp(Color3.new(1, 1, 1), part)
+end
+
+-- Bloc posé contre le mur : `x` = distance du mur vers l'intérieur.
+local function contre(
+	parent: Instance,
+	cote: number,
+	x: number,
+	z: number,
+	taille: Vector3,
+	y: number,
+	couleur: Color3,
+	matiere: Enum.Material,
+	forme: Enum.PartType?
+): Part
+	local p = piece(
+		parent,
+		"Mur",
+		forme or Enum.PartType.Block,
+		taille,
+		CFrame.new(cote * (MUR_X - x), y, z),
+		couleur
+	)
+	p.Material = matiere
+	return p
+end
+
+-- Strates de roche irrégulières (falaise), dessus herbu ou neigeux.
+local function strates(
+	parent: Instance,
+	cote: number,
+	z: number,
+	h: Random,
+	p: Palette,
+	matiere: Enum.Material
+)
+	local y = 0
+	local k = 0
+	while y < HAUTEUR_PAROI - 4 do
+		local hauteur = h:NextNumber(9, 16)
+		local profondeur = h:NextNumber(6, 13) - k * 0.4
+		local couleur = if k % 2 == 0 then p.roche else fonce(p.roche, 0.15)
+		contre(
+			parent,
+			cote,
+			math.max(2, profondeur) / 2,
+			z + h:NextNumber(-3, 3),
+			Vector3.new(math.max(2, profondeur), hauteur, PAS_MOTIF + h:NextNumber(0, 8)),
+			y + hauteur / 2,
+			couleur,
+			matiere
+		)
+		y += hauteur
+		k += 1
 	end
-	return m
+	contre(
+		parent,
+		cote,
+		3,
+		z,
+		Vector3.new(7, 2.5, PAS_MOTIF + 6),
+		y + 1,
+		p.dessus,
+		Enum.Material.Grass
+	)
 end
 
+local function arbreSommet(parent: Instance, cote: number, z: number, h: Random, p: Palette)
+	local y = HAUTEUR_PAROI
+	contre(
+		parent,
+		cote,
+		4,
+		z,
+		Vector3.new(2, 10, 2),
+		y + 5,
+		fonce(p.roche, 0.4),
+		Enum.Material.Wood
+	)
+	for k = 1, 3 do
+		local d = h:NextNumber(9, 14)
+		contre(
+			parent,
+			cote,
+			4 + h:NextNumber(-3, 3),
+			z + h:NextNumber(-4, 4),
+			Vector3.one * d,
+			y + 10 + k * 2,
+			p.accent:Lerp(p.dessus, k / 4),
+			Enum.Material.Grass,
+			Enum.PartType.Ball
+		)
+	end
+end
+
+local MOTIFS: { [string]: Motif } = {}
+
+function MOTIFS.Falaise(parent, cote, z, h, p)
+	strates(parent, cote, z, h, p, Enum.Material.Slate)
+	if h:NextNumber() < 0.6 then
+		arbreSommet(parent, cote, z, h, p)
+	end
+	-- Lierre qui pend.
+	for _ = 1, 2 do
+		local longueur = h:NextNumber(12, 30)
+		contre(
+			parent,
+			cote,
+			13,
+			z + h:NextNumber(-12, 12),
+			Vector3.new(1, longueur, 3),
+			HAUTEUR_PAROI - longueur / 2,
+			p.dessus,
+			Enum.Material.Grass
+		)
+	end
+end
+
+function MOTIFS.Gres(parent, cote, z, h, p)
+	strates(parent, cote, z, h, p, Enum.Material.Sandstone)
+	if h:NextNumber() < 0.4 then
+		local y = HAUTEUR_PAROI
+		contre(parent, cote, 4, z, Vector3.new(3, 12, 3), y + 6, p.accent, Enum.Material.Grass)
+		contre(parent, cote, 4, z + 3, Vector3.new(2, 5, 6), y + 6, p.accent, Enum.Material.Grass)
+	end
+end
+
+function MOTIFS.Glace(parent, cote, z, h, p)
+	strates(parent, cote, z, h, p, Enum.Material.Glacier)
+	for _ = 1, 3 do
+		local longueur = h:NextNumber(6, 14)
+		local pic = contre(
+			parent,
+			cote,
+			12,
+			z + h:NextNumber(-12, 12),
+			Vector3.new(2.5, longueur, 2.5),
+			HAUTEUR_PAROI - 2 - longueur / 2,
+			clair(p.accent, 0.5),
+			Enum.Material.Ice
+		)
+		pic.Transparency = 0.2
+	end
+end
+
+function MOTIFS.Basalte(parent, cote, z, h, p)
+	for i = -2, 2 do
+		local hauteur = HAUTEUR_PAROI * h:NextNumber(0.7, 1.05)
+		contre(
+			parent,
+			cote,
+			h:NextNumber(3, 8),
+			z + i * 6,
+			Vector3.new(6, hauteur, 5.6),
+			hauteur / 2,
+			if i % 2 == 0 then p.roche else fonce(p.roche, 0.2),
+			Enum.Material.Basalt
+		)
+	end
+	-- Coulée de lave qui brille.
+	local coulee = contre(
+		parent,
+		cote,
+		10,
+		z + h:NextNumber(-10, 10),
+		Vector3.new(0.6, HAUTEUR_PAROI * 0.8, 2),
+		HAUTEUR_PAROI * 0.4,
+		p.accent,
+		Enum.Material.Neon
+	)
+	coulee.Transparency = 0.1
+end
+
+function MOTIFS.Cosmos(parent, cote, z, h, p)
+	contre(
+		parent,
+		cote,
+		3,
+		z,
+		Vector3.new(6, HAUTEUR_PAROI, PAS_MOTIF),
+		HAUTEUR_PAROI / 2,
+		p.roche,
+		Enum.Material.Slate
+	)
+	for _ = 1, 3 do
+		local d = h:NextNumber(3, 7)
+		local eclat = contre(
+			parent,
+			cote,
+			7,
+			z + h:NextNumber(-12, 12),
+			Vector3.new(d, d * 2.2, d),
+			h:NextNumber(10, HAUTEUR_PAROI - 10),
+			p.accent,
+			Enum.Material.Neon
+		)
+		eclat.Transparency = 0.15
+	end
+	for _ = 1, 4 do
+		contre(
+			parent,
+			cote,
+			6.5,
+			z + h:NextNumber(-14, 14),
+			Vector3.one * h:NextNumber(0.8, 1.6),
+			h:NextNumber(5, HAUTEUR_PAROI),
+			Color3.new(1, 1, 1),
+			Enum.Material.Neon,
+			Enum.PartType.Ball
+		)
+	end
+end
+
+function MOTIFS.Pierre(parent, cote, z, h, p)
+	contre(
+		parent,
+		cote,
+		3,
+		z,
+		Vector3.new(6, HAUTEUR_PAROI - 10, PAS_MOTIF),
+		(HAUTEUR_PAROI - 10) / 2,
+		p.roche,
+		Enum.Material.Brick
+	)
+	-- Créneaux.
+	for i = -1, 1 do
+		contre(
+			parent,
+			cote,
+			3,
+			z + i * 10,
+			Vector3.new(6, 8, 6),
+			HAUTEUR_PAROI - 6,
+			fonce(p.roche, 0.1),
+			Enum.Material.Brick
+		)
+	end
+	-- Fenêtre allumée, parfois.
+	if h:NextNumber() < 0.5 then
+		contre(
+			parent,
+			cote,
+			6.2,
+			z,
+			Vector3.new(0.4, 7, 4),
+			h:NextNumber(20, HAUTEUR_PAROI - 25),
+			p.accent,
+			Enum.Material.Neon
+		)
+	end
+end
+
+function MOTIFS.Corail(parent, cote, z, h, p)
+	contre(
+		parent,
+		cote,
+		2,
+		z,
+		Vector3.new(4, HAUTEUR_PAROI, PAS_MOTIF),
+		HAUTEUR_PAROI / 2,
+		p.roche,
+		Enum.Material.Sand
+	)
+	for _ = 1, 6 do
+		local d = h:NextNumber(6, 14)
+		contre(
+			parent,
+			cote,
+			h:NextNumber(4, 8),
+			z + h:NextNumber(-12, 12),
+			Vector3.one * d,
+			h:NextNumber(3, HAUTEUR_PAROI * 0.7),
+			p.accent:Lerp(p.dessus, h:NextNumber()),
+			Enum.Material.SmoothPlastic,
+			Enum.PartType.Ball
+		)
+	end
+end
+
+function MOTIFS.Bonbon(parent, cote, z, h, p)
+	local bandes = 6
+	for i = 0, bandes - 1 do
+		local hauteur = HAUTEUR_PAROI / bandes
+		contre(
+			parent,
+			cote,
+			3,
+			z,
+			Vector3.new(6, hauteur, PAS_MOTIF),
+			(i + 0.5) * hauteur,
+			if i % 2 == 0 then p.accent else clair(p.dessus, 0.4),
+			Enum.Material.SmoothPlastic
+		)
+	end
+	-- Glaçage qui coule, et sucette au sommet.
+	for _ = 1, 3 do
+		local longueur = h:NextNumber(5, 14)
+		contre(
+			parent,
+			cote,
+			6.2,
+			z + h:NextNumber(-12, 12),
+			Vector3.new(1, longueur, 3),
+			HAUTEUR_PAROI - longueur / 2,
+			Color3.fromRGB(255, 250, 245),
+			Enum.Material.SmoothPlastic
+		)
+	end
+	if h:NextNumber() < 0.5 then
+		contre(
+			parent,
+			cote,
+			4,
+			z,
+			Vector3.new(1.2, 14, 1.2),
+			HAUTEUR_PAROI + 7,
+			Color3.new(1, 1, 1),
+			Enum.Material.SmoothPlastic
+		)
+		contre(
+			parent,
+			cote,
+			4,
+			z,
+			Vector3.new(3, 12, 12),
+			HAUTEUR_PAROI + 16,
+			p.dessus,
+			Enum.Material.SmoothPlastic,
+			Enum.PartType.Cylinder
+		)
+	end
+end
+
+function MOTIFS.Nuages(parent, cote, z, h, p)
+	for _ = 1, 7 do
+		local d = h:NextNumber(14, 26)
+		contre(
+			parent,
+			cote,
+			h:NextNumber(4, 10),
+			z + h:NextNumber(-12, 12),
+			Vector3.one * d,
+			h:NextNumber(4, HAUTEUR_PAROI),
+			clair(p.roche, h:NextNumber(0.5, 0.9)),
+			Enum.Material.SmoothPlastic,
+			Enum.PartType.Ball
+		)
+	end
+end
+
+function MOTIFS.Usine(parent, cote, z, h, p)
+	contre(
+		parent,
+		cote,
+		3,
+		z,
+		Vector3.new(6, HAUTEUR_PAROI, PAS_MOTIF),
+		HAUTEUR_PAROI / 2,
+		p.roche,
+		Enum.Material.DiamondPlate
+	)
+	for _, y in { HAUTEUR_PAROI * 0.3, HAUTEUR_PAROI * 0.65 } do
+		local conduite = contre(
+			parent,
+			cote,
+			7,
+			z,
+			Vector3.new(PAS_MOTIF + 1, 3, 3),
+			y,
+			fonce(p.accent, 0.2),
+			Enum.Material.Metal,
+			Enum.PartType.Cylinder
+		)
+		conduite.CFrame *= CFrame.Angles(0, math.rad(90), 0)
+	end
+	local d = h:NextNumber(10, 18)
+	local roue = contre(
+		parent,
+		cote,
+		6.5,
+		z,
+		Vector3.new(1.5, d, d),
+		h:NextNumber(20, HAUTEUR_PAROI - 15),
+		p.accent,
+		Enum.Material.Metal,
+		Enum.PartType.Cylinder
+	)
+	roue.Name = "Engrenage"
+end
+
+function MOTIFS.Bambou(parent, cote, z, h, p)
+	for i = -3, 3 do
+		local hauteur = HAUTEUR_PAROI * h:NextNumber(0.75, 1.1)
+		-- Cylindre debout : couché le long de X, puis redressé.
+		local tige = contre(
+			parent,
+			cote,
+			h:NextNumber(2, 6),
+			z + i * 4,
+			Vector3.new(hauteur, 2.4, 2.4),
+			hauteur / 2,
+			p.accent:Lerp(p.dessus, h:NextNumber(0, 0.4)),
+			Enum.Material.SmoothPlastic,
+			Enum.PartType.Cylinder
+		)
+		tige.CFrame *= CFrame.Angles(0, 0, math.rad(90))
+	end
+	contre(
+		parent,
+		cote,
+		2,
+		z,
+		Vector3.new(2, HAUTEUR_PAROI, PAS_MOTIF),
+		HAUTEUR_PAROI / 2,
+		fonce(p.roche, 0.3),
+		Enum.Material.Wood
+	)
+end
+
+function MOTIFS.Grotte(parent, cote, z, h, p)
+	strates(parent, cote, z, h, p, Enum.Material.Slate)
+	for _ = 1, 2 do
+		local d = h:NextNumber(3, 6)
+		local eclat = contre(
+			parent,
+			cote,
+			11,
+			z + h:NextNumber(-10, 10),
+			Vector3.new(d, d * 3, d),
+			h:NextNumber(8, HAUTEUR_PAROI - 12),
+			p.accent,
+			Enum.Material.Neon
+		)
+		eclat.CFrame *= CFrame.Angles(0, 0, math.rad(h:NextNumber(-30, 30)))
+	end
+end
+
+function MOTIFS.Jouets(parent, cote, z, h, p)
+	local couleurs = {
+		Color3.fromRGB(255, 80, 80),
+		Color3.fromRGB(80, 160, 255),
+		Color3.fromRGB(255, 210, 60),
+		Color3.fromRGB(90, 210, 110),
+		p.accent,
+	}
+	local y = 0
+	while y < HAUTEUR_PAROI - 6 do
+		local hauteur = h:NextNumber(8, 14)
+		local cube = contre(
+			parent,
+			cote,
+			h:NextNumber(4, 8),
+			z + h:NextNumber(-6, 6),
+			Vector3.new(h:NextNumber(8, 14), hauteur, h:NextNumber(12, 22)),
+			y + hauteur / 2,
+			couleurs[h:NextInteger(1, #couleurs)],
+			Enum.Material.SmoothPlastic
+		)
+		cube.Name = "Cube"
+		y += hauteur
+	end
+end
+
+-- Style de mur par thème de décor.
+local STYLES_MURS: { [string]: string } = {
+	Prairie = "Falaise",
+	Foret = "Falaise",
+	Jungle = "Falaise",
+	Savane = "Falaise",
+	Automne = "Falaise",
+	Ferme = "Falaise",
+	Desert = "Gres",
+	Plage = "Gres",
+	Glace = "Glace",
+	Volcan = "Basalte",
+	Galaxie = "Cosmos",
+	Reves = "Cosmos",
+	Marais = "Pierre",
+	Manoir = "Pierre",
+	Recif = "Corail",
+	Bonbon = "Bonbon",
+	Ciel = "Nuages",
+	Mecanique = "Usine",
+	Zen = "Bambou",
+	Cavernes = "Grotte",
+	Jouets = "Jouets",
+}
+
+local function paletteBiome(biome: Biomes.Biome): Palette
+	local bordure = couleurRgb(biome.Bordure)
+	return {
+		fond = fonce(bordure, 0.45),
+		roche = fonce(bordure, 0.12),
+		dessus = couleurRgb(biome.Sol),
+		accent = bordure:Lerp(couleurRgb(biome.Brume), 0.35),
+	}
+end
+
+-- Les deux murs d'un biome, de z1 à z2 : un fond uni (qui ferme la boîte)
+-- et les motifs de son style tous les PAS_MOTIF studs.
 local function paroisBiome(
 	parent: Instance,
 	biome: Biomes.Biome,
-	spec: Rempart,
+	numero: number,
 	z1: number,
-	z2: number,
-	cadre: boolean
+	z2: number
 )
-	local couleur = teinteParoi(biome)
-	local matiere = matiereParoi(spec)
-	local corniche = couleurRgb(biome.Bordure):Lerp(Color3.new(1, 1, 1), 0.35)
+	local palette = paletteBiome(biome)
+	local motif = MOTIFS[STYLES_MURS[biome.Decor] or "Falaise"] or MOTIFS.Falaise
+	local hasard = Random.new(GRAINE + numero * 131)
 	local longueur = z2 - z1
-	local milieu = (z1 + z2) / 2
-	local bord = DEMI_LARGEUR + 3
 	for _, cote in { -1, 1 } do
-		local paroi = bloc(
+		local fond = bloc(
 			parent,
 			"Paroi",
 			Vector3.new(4, HAUTEUR_PAROI, longueur),
-			CFrame.new(cote * bord, HAUTEUR_PAROI / 2, milieu),
-			couleur,
+			CFrame.new(cote * (MUR_X + 2), HAUTEUR_PAROI / 2, (z1 + z2) / 2),
+			palette.fond,
 			true
 		)
-		paroi.Material = matiere
-		paroi.CastShadow = false
-		local haut = bloc(
-			parent,
-			"Corniche",
-			Vector3.new(7, 3, longueur),
-			CFrame.new(cote * (bord - 1.5), HAUTEUR_PAROI - 1.5, milieu),
-			corniche,
-			false
-		)
-		haut.CastShadow = false
-	end
-	if cadre then
-		for _, cote in { -1, 1 } do
-			local pilier = bloc(
-				parent,
-				"PilierCadre",
-				Vector3.new(10, HAUTEUR_PAROI + 6, 10),
-				CFrame.new(cote * (bord - 3), (HAUTEUR_PAROI + 6) / 2, z1),
-				corniche,
-				true
-			)
-			pilier.Material = matiere
-			pilier.CastShadow = false
+		fond.Material = Enum.Material.Slate
+		fond.CastShadow = false
+		for z = z1 + PAS_MOTIF / 2, z2 - PAS_MOTIF / 4, PAS_MOTIF do
+			motif(parent, cote, z, hasard, palette)
 		end
-		local poutre = bloc(
-			parent,
-			"PoutreCadre",
-			Vector3.new(DEMI_LARGEUR * 2 + 6, 5, 5),
-			CFrame.new(0, HAUTEUR_PAROI + 2, z1),
-			corniche,
-			false
-		)
-		poutre.CastShadow = false
 	end
 end
 
 -- Mur plein d'un bout à l'autre de la largeur, au fond de la carte.
-local function murFond(parent: Instance, biome: Biomes.Biome, spec: Rempart, z: number)
+local function murFond(parent: Instance, biome: Biomes.Biome, z: number)
 	local paroi = bloc(
 		parent,
 		"ParoiFond",
-		Vector3.new(DEMI_LARGEUR * 2 + 10, HAUTEUR_PAROI, 4),
+		Vector3.new(MUR_X * 2 + 8, HAUTEUR_PAROI, 4),
 		CFrame.new(0, HAUTEUR_PAROI / 2, z),
-		teinteParoi(biome),
+		paletteBiome(biome).roche,
 		true
 	)
-	paroi.Material = matiereParoi(spec)
+	paroi.Material = Enum.Material.Slate
 	paroi.CastShadow = false
 end
 
 -- Remparts tout autour : chaque biome sur ses deux côtés, la Prairie derrière
 -- les bases, le dernier biome au bout de la carte ; puis les murs invisibles.
+-- Rempart d'un biome : le sien, sinon celui d'un biome au même décor.
+local function specRempart(biome: Biomes.Biome): Rempart
+	local spec = REMPARTS[biome.Id]
+	if spec then
+		return spec
+	end
+	for _, autre in Biomes.Liste do
+		if autre.Decor == biome.Decor and REMPARTS[autre.Id] then
+			return REMPARTS[autre.Id]
+		end
+	end
+	return REMPARTS.Prairie
+end
+
 local function creerLimites(racine: Instance)
 	local dossierLimites = dossier(racine, "Limites")
 	local x = DEMI_LARGEUR - 2
 	local arriere = BORD_BASES - 140
 	local fin = DEBUT_SAUVAGE + Biomes.nombre() * Biomes.Longueur
 	for numero, biome in Biomes.Liste do
-		local spec = REMPARTS[biome.Id] or REMPARTS.Prairie
+		local spec = specRempart(biome)
 		local z1 = if numero == 1 then arriere else DEBUT_SAUVAGE + Biomes.debut(numero)
 		local z2 = DEBUT_SAUVAGE + Biomes.debut(numero) + Biomes.Longueur
 		local groupe = dossier(dossierLimites, biome.Id)
 		rempart(groupe, spec, Vector3.new(-x, 0, z1), Vector3.new(-x, 0, z2))
 		rempart(groupe, spec, Vector3.new(x, 0, z1), Vector3.new(x, 0, z2))
-		paroisBiome(groupe, biome, spec, z1, z2, numero > 1)
+		paroisBiome(groupe, biome, numero, z1, z2)
 	end
 	rempart(
 		dossierLimites,
@@ -3136,13 +3611,13 @@ local function creerLimites(racine: Instance)
 	local dernier = Biomes.Liste[Biomes.nombre()]
 	rempart(
 		dossierLimites,
-		REMPARTS[dernier.Id] or REMPARTS.Prairie,
+		specRempart(dernier),
 		Vector3.new(-x, 0, fin - 2),
 		Vector3.new(x, 0, fin - 2)
 	)
 	-- Murs du fond (derrière les bases, au bout du dernier biome) : la boîte est fermée.
-	murFond(dossierLimites, Biomes.Liste[1], REMPARTS.Prairie, arriere - 3)
-	murFond(dossierLimites, dernier, REMPARTS[dernier.Id] or REMPARTS.Prairie, fin + 1)
+	murFond(dossierLimites, Biomes.Liste[1], arriere - 3)
+	murFond(dossierLimites, dernier, fin + 1)
 	local bord = DEMI_LARGEUR + 2
 	murInvisible(dossierLimites, Vector3.new(-bord, 0, arriere - 4), Vector3.new(-bord, 0, fin + 4))
 	murInvisible(dossierLimites, Vector3.new(bord, 0, arriere - 4), Vector3.new(bord, 0, fin + 4))
@@ -3414,104 +3889,6 @@ function Decor.creer(): Folder
 	end
 
 	return racine
-end
-
----------------------------------------------------------------------------
--- Ornements des bases (ajoutés quand une base apparaît)
-
-function Decor.ornerBase(base: Model)
-	local trouve = base:FindFirstChild("Sol")
-	if not (trouve and trouve:IsA("BasePart")) or base:FindFirstChild("Ornements") then
-		return
-	end
-	local sol = trouve :: BasePart
-	local centre = sol.Position + Vector3.new(0, sol.Size.Y / 2, 0)
-	local ornements = Instance.new("Folder")
-	ornements.Name = "Ornements"
-
-	-- Petite bordure colorée (ne bloque rien), ouverte devant la porte.
-	local n = 0
-	local function bordure(position: Vector3, taille: Vector3)
-		n += 1
-		piece(
-			ornements,
-			"Bordure",
-			Enum.PartType.Block,
-			taille,
-			CFrame.new(position),
-			BORDURES_BASE[(n - 1) % #BORDURES_BASE + 1]
-		)
-	end
-	local d = (trouve :: BasePart).Size.X / 2
-	local segment = 5
-	for i = -d + segment / 2, d - segment / 2, segment do
-		bordure(centre + Vector3.new(i, 0.4, -d), Vector3.new(segment - 0.3, 0.8, 1))
-		bordure(centre + Vector3.new(-d, 0.4, i), Vector3.new(1, 0.8, segment - 0.3))
-		bordure(centre + Vector3.new(d, 0.4, i), Vector3.new(1, 0.8, segment - 0.3))
-		if math.abs(i) > LARGEUR_PORTE / 2 + 1 then
-			bordure(centre + Vector3.new(i, 0.4, d), Vector3.new(segment - 0.3, 0.8, 1))
-		end
-	end
-
-	-- Lampadaires-sucettes aux quatre coins.
-	for _, cx in { -1, 1 } do
-		for _, cz in { -1, 1 } do
-			local pied = centre + Vector3.new(cx * (d - 1.5), 0, cz * (d - 1.5))
-			piece(
-				ornements,
-				"Lampadaire",
-				Enum.PartType.Cylinder,
-				Vector3.new(7, 0.6, 0.6),
-				CFrame.new(pied + Vector3.new(0, 3.5, 0)) * CFrame.Angles(0, 0, math.rad(90)),
-				Color3.new(1, 1, 1)
-			)
-			local boule = piece(
-				ornements,
-				"Lampe",
-				Enum.PartType.Ball,
-				Vector3.one * 1.8,
-				CFrame.new(pied + Vector3.new(0, 7.5, 0)),
-				BORDURES_BASE[(cx + cz + 4) % #BORDURES_BASE + 1]
-			)
-			boule.Material = Enum.Material.Neon
-			local lumiere = Instance.new("PointLight")
-			lumiere.Range = 14
-			lumiere.Brightness = 1.2
-			lumiere.Color = boule.Color
-			lumiere.Parent = boule
-		end
-	end
-
-	ornements.Parent = base
-end
-
--- Orne les bases existantes et celles qui apparaîtront.
-function Decor.suivreBases()
-	local function brancher(dossierBases: Instance)
-		for _, base in dossierBases:GetChildren() do
-			if base:IsA("Model") then
-				Decor.ornerBase(base)
-			end
-		end
-		dossierBases.ChildAdded:Connect(function(base)
-			if base:IsA("Model") then
-				-- Laisse Bases finir de remplir le modèle.
-				task.defer(Decor.ornerBase, base)
-			end
-		end)
-	end
-	local existant = Workspace:FindFirstChild("Bases")
-	if existant then
-		brancher(existant)
-	else
-		local connexion: RBXScriptConnection
-		connexion = Workspace.ChildAdded:Connect(function(enfant)
-			if enfant.Name == "Bases" and enfant:IsA("Folder") then
-				connexion:Disconnect()
-				brancher(enfant)
-			end
-		end)
-	end
 end
 
 return Decor

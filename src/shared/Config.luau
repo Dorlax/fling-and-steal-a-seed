@@ -292,15 +292,10 @@ local Config = {
 		DureePoussee = 0.2, -- secondes de poussée
 	},
 
-	-- Raids de bases : vol d'une créature exposée et verrou de la base.
+	-- Raids de bases : vol d'une créature exposée (plus de verrou de base).
 	Raid = {
 		DistanceVol = 10, -- studs max entre le voleur et la créature exposée
 		DureeVol = 1, -- secondes de maintien du ProximityPrompt « Voler »
-		DureeVerrou = 60, -- secondes de verrouillage (valeur du Plan)
-		Recharge = 60, -- secondes après la FIN du verrou avant de pouvoir le racheter
-		PrixVerrou = 100, -- pièces
-		DistanceVerrou = 10, -- studs max entre le propriétaire et le bouton « Verrouiller »
-		DistanceExpulsion = 8, -- studs devant la porte, hors de la base, où l'intrus est replacé
 		DureeAlerte = 3, -- secondes d'affichage de « VOLÉ ! »
 	},
 

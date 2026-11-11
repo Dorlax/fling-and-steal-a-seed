@@ -191,7 +191,7 @@ remote("PoserPiege").OnServerEvent:Connect(function(joueur: Player, typePiege: a
 end)
 
 -- Raids : alertes serveur -> client uniquement (aucun OnServerEvent).
--- « Voler » et « Verrouiller » passent par les ProximityPrompts des bases ;
+-- « Voler » passe par les ProximityPrompts des bases (plus de verrou) ;
 -- le serveur ne se fie qu'au joueur fourni par Triggered.
 remote("AlerteVol")
 Bases.surVol(function(declencheur: Player, proprietaire: any, numero: number)
@@ -199,17 +199,11 @@ Bases.surVol(function(declencheur: Player, proprietaire: any, numero: number)
 		Raids.voler(declencheur, proprietaire, numero)
 	end
 end)
-Bases.surVerrou(function(declencheur: Player, proprietaire: any)
-	if Sauvegarde.estCharge(declencheur) and Sauvegarde.estCharge(proprietaire) then
-		Raids.verrouiller(proprietaire, declencheur)
-	end
-end)
 
 TerresSauvages.creer()
 -- Décor cartoon et éclairage : avant le cycle jour/nuit, qui mémorise l'éclairage de jour.
 Decor.eclairer()
 Decor.creer()
-Decor.suivreBases()
 
 -- Cycle jour/nuit puis monstres : tout est décidé par le serveur, aucun
 -- RemoteEvent (le client n'envoie rien pour les monstres).
@@ -309,7 +303,6 @@ task.spawn(function()
 				Portage.verifierDepot(joueur)
 			end
 		end
-		Raids.pas()
 	end
 end)
 

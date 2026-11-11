@@ -3,7 +3,7 @@
 --  - panneaux « Panneau » des créatures et des monstres : texte seul, sans
 --    boîte (couleur de rareté, contour) ; en base, seulement le revenu « +N/s » ;
 --  - « BOUM ! » serveur de l'effet de plaquage caché (un seul « BOUM ! » à l'écran) ;
---  - prompts « Recolter », « Voler », « Verrouiller » en gros boutons cartoon.
+--  - prompts « Recolter » et « Voler » en gros boutons cartoon.
 -- Ne détruit rien, ne change aucun attribut : seules des propriétés d'affichage
 -- locales sont modifiées. Le serveur garde toute la validation.
 local Players = game:GetService("Players")
@@ -27,7 +27,6 @@ local ESSAIS = 5 -- tentatives (attributs ou texte pas encore répliqués)
 local PROMPTS: { [string]: string } = {
 	Recolter = "Jaune",
 	Voler = "Rouge",
-	Verrouiller = "Violet",
 }
 
 local restyles: { [Instance]: boolean } = setmetatable({}, { __mode = "k" }) :: any

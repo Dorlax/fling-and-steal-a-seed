@@ -6,7 +6,6 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage.Shared.Config)
 local DecorBase = require(script.Parent.DecorBase)
 local MachineForge = require(script.Parent.MachineForge)
-local Raid = require(ReplicatedStorage.Shared.Raid)
 local Revenus = require(ReplicatedStorage.Shared.Revenus)
 local Bestiaire = require(ReplicatedStorage.Shared.Bestiaire)
 local Fiche = require(ReplicatedStorage.Shared.Fiche)
@@ -19,16 +18,10 @@ local Bases = {}
 -- Rappels des ProximityPrompts de raid (branchés par Principal sur Raids).
 -- Le serveur ne fait confiance qu'aux objets fournis par Triggered.
 type RappelVol = (declencheur: Player, proprietaire: any, numero: number) -> ()
-type RappelVerrou = (declencheur: Player, proprietaire: any) -> ()
 local rappelVol: RappelVol? = nil
-local rappelVerrou: RappelVerrou? = nil
 
 function Bases.surVol(rappel: RappelVol)
 	rappelVol = rappel
-end
-
-function Bases.surVerrou(rappel: RappelVerrou)
-	rappelVerrou = rappel
 end
 
 local reglagesRaid = Config.Raid
@@ -41,13 +34,10 @@ local NOMBRE_EMPLACEMENTS = 12
 
 local COULEUR_SOL = Color3.fromRGB(110, 215, 80)
 local COULEUR_FORGE = Color3.fromRGB(214, 102, 38)
-local COULEUR_POTEAU = Color3.fromRGB(255, 120, 200)
-local COULEUR_LINTEAU = Color3.fromRGB(255, 220, 60)
-local COULEUR_BOUTON = Color3.fromRGB(60, 200, 255)
-local COULEUR_BOUCLIER = Color3.fromRGB(255, 50, 50)
+local COULEUR_POTEAU = Color3.fromRGB(196, 190, 178) -- pierre, comme le muret
+local COULEUR_LINTEAU = Color3.fromRGB(150, 98, 56) -- poutre en bois
 local HAUTEUR_PORTE = 10
 local LARGEUR_PORTE = 10
-local TRANSPARENCE_BOUCLIER = 0.75
 
 -- emplacement (numéro) -> joueur ; joueur -> { emplacement, modele }
 local occupants: { [number]: any } = {}
@@ -147,7 +137,7 @@ local function construire(joueur: any, centre: Vector3): Model
 	apparition.Parent = sol
 	apparition.Position = Vector3.new(0, 4, -8)
 
-	-- Porte : arche cartoon au bord Z+ (côté Terres Sauvages).
+	-- Porte : piliers de pierre et poutre en bois au bord Z+ (côté Terres Sauvages).
 	local bordZ = centre.Z + TAILLE_SOL / 2
 	local porte = Instance.new("Model")
 	porte.Name = "Porte"
@@ -155,84 +145,23 @@ local function construire(joueur: any, centre: Vector3): Model
 		local poteau = Instance.new("Part")
 		poteau.Name = "Poteau"
 		poteau.Anchored = true
-		poteau.Size = Vector3.new(1.5, HAUTEUR_PORTE, 1.5)
+		poteau.Size = Vector3.new(2.4, HAUTEUR_PORTE, 2.4)
 		poteau.Position =
 			Vector3.new(centre.X + cote * LARGEUR_PORTE / 2, centre.Y + HAUTEUR_PORTE / 2, bordZ)
 		poteau.Color = COULEUR_POTEAU
-		poteau.Material = Enum.Material.SmoothPlastic
+		poteau.Material = Enum.Material.Cobblestone
 		poteau.Parent = porte
 	end
 	local linteau = Instance.new("Part")
 	linteau.Name = "Linteau"
 	linteau.Anchored = true
-	linteau.Size = Vector3.new(LARGEUR_PORTE + 3, 2, 2)
+	linteau.Size = Vector3.new(LARGEUR_PORTE + 4, 1.6, 1.8)
 	linteau.Position = Vector3.new(centre.X, centre.Y + HAUTEUR_PORTE + 1, bordZ)
 	linteau.Color = COULEUR_LINTEAU
-	linteau.Material = Enum.Material.SmoothPlastic
+	linteau.Material = Enum.Material.Wood
 	linteau.Parent = porte
 	porte.PrimaryPart = linteau
 	porte.Parent = modele
-
-	local panneauVerrou = Instance.new("BillboardGui")
-	panneauVerrou.Name = "PanneauVerrou"
-	panneauVerrou.Size = UDim2.fromOffset(260, 50)
-	panneauVerrou.StudsOffset = Vector3.new(0, 3, 0)
-	panneauVerrou.MaxDistance = 60
-	-- Affiché seulement pendant le verrou (le bouton « Verrouiller » dit le prix).
-	panneauVerrou.Enabled = false
-	panneauVerrou.Parent = linteau
-	local texteVerrou = Instance.new("TextLabel")
-	texteVerrou.Name = "Texte"
-	texteVerrou.Size = UDim2.fromScale(1, 1)
-	texteVerrou.BackgroundTransparency = 1
-	texteVerrou.Font = Enum.Font.FredokaOne
-	texteVerrou.TextScaled = true
-	texteVerrou.TextColor3 = Color3.new(1, 1, 1)
-	texteVerrou.TextStrokeTransparency = 0
-	texteVerrou.TextStrokeColor3 = Color3.new(0, 0, 0)
-	texteVerrou.Text = Raid.texteVerrou(0, nil, nil)
-	texteVerrou.Parent = panneauVerrou
-
-	-- Bouton « Verrouiller » : socle près de la porte, côté intérieur.
-	local bouton = Instance.new("Part")
-	bouton.Name = "BoutonVerrou"
-	bouton.Anchored = true
-	bouton.Size = Vector3.new(3, 1.5, 3)
-	bouton.Position = Vector3.new(centre.X + 8, centre.Y + 0.75, bordZ - 4)
-	bouton.Color = COULEUR_BOUTON
-	bouton.Material = Enum.Material.Neon
-	bouton.TopSurface = Enum.SurfaceType.Smooth
-	bouton.Parent = modele
-	local promptVerrou = Instance.new("ProximityPrompt")
-	promptVerrou.Name = "Verrouiller"
-	promptVerrou.ActionText = "Verrouiller"
-	promptVerrou.ObjectText = reglagesRaid.PrixVerrou .. " pièces"
-	promptVerrou.MaxActivationDistance = reglagesRaid.DistanceVerrou
-	promptVerrou.RequiresLineOfSight = false
-	promptVerrou.KeyboardKeyCode = Enum.KeyCode.R
-	promptVerrou.GamepadKeyCode = Enum.KeyCode.ButtonB
-	promptVerrou.Parent = bouton
-	promptVerrou.Triggered:Connect(function(declencheur: Player)
-		local rappel = rappelVerrou
-		if rappel then
-			rappel(declencheur, joueur)
-		end
-	end)
-
-	-- Bouclier : visible seulement pendant le verrou, ne bloque rien.
-	local bouclier = Instance.new("Part")
-	bouclier.Name = "Bouclier"
-	bouclier.Anchored = true
-	bouclier.CanCollide = false
-	bouclier.CanQuery = false
-	bouclier.CanTouch = false
-	bouclier.CastShadow = false
-	bouclier.Size = Vector3.new(TAILLE_SOL, HAUTEUR_BASE, TAILLE_SOL)
-	bouclier.Position = centre + Vector3.new(0, HAUTEUR_BASE / 2, 0)
-	bouclier.Color = COULEUR_BOUCLIER
-	bouclier.Material = Enum.Material.Neon
-	bouclier.Transparency = 1
-	bouclier.Parent = modele
 
 	DecorBase.habiller(
 		modele,
@@ -384,49 +313,6 @@ function Bases.joueurs(): { any }
 		table.insert(liste, joueur)
 	end
 	return liste
-end
-
--- Point devant la porte, DistanceExpulsion studs à l'extérieur du bord Z+.
-function Bases.pointExpulsion(proprietaire: any): CFrame?
-	local solOuNil = Bases.solDe(proprietaire)
-	if solOuNil == nil then
-		return nil
-	end
-	local sol = solOuNil :: BasePart
-	local dessus = sol.Position + Vector3.new(0, sol.Size.Y / 2, 0)
-	local position = dessus + Vector3.new(0, 3, sol.Size.Z / 2 + reglagesRaid.DistanceExpulsion)
-	return CFrame.lookAt(position, position + Vector3.zAxis)
-end
-
--- Met à jour le panneau de la porte et le bouclier selon les attributs
--- VerrouJusqua / VerrouPretA du propriétaire (écrits par le serveur).
-function Bases.afficherVerrou(proprietaire: any, maintenant: number)
-	local base = basesParJoueur[proprietaire]
-	if base == nil then
-		return
-	end
-	local jusqua = proprietaire:GetAttribute("VerrouJusqua")
-	local pretA = proprietaire:GetAttribute("VerrouPretA")
-	local verrouJusqua = if type(jusqua) == "number" then jusqua else nil
-	local pret = if type(pretA) == "number" then pretA else nil
-	local verrouillee = Raid.estVerrouillee(maintenant, verrouJusqua)
-
-	local bouclier = base.modele:FindFirstChild("Bouclier")
-	if bouclier and bouclier:IsA("BasePart") then
-		bouclier.Transparency = if verrouillee then TRANSPARENCE_BOUCLIER else 1
-	end
-	local panneau = base.modele:FindFirstChild("PanneauVerrou", true)
-	if panneau and panneau:IsA("BillboardGui") then
-		panneau.Enabled = verrouillee
-	end
-	local texte = panneau and panneau:FindFirstChild("Texte")
-	if texte and texte:IsA("TextLabel") then
-		texte.Text = Raid.texteVerrou(maintenant, verrouJusqua, pret)
-		texte.TextColor3 = if verrouillee
-			then Color3.fromRGB(255, 80, 80)
-			elseif pret ~= nil and maintenant < pret then Color3.fromRGB(255, 200, 60)
-			else Color3.fromRGB(120, 255, 120)
-	end
 end
 
 -- Petite créature exposée dans la base (couleur de rareté, yeux, « +N/s »)

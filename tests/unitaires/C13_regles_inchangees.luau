@@ -3,8 +3,6 @@ local Config = require("../../src/shared/Config")
 return {
 	["C13 délais et durées inchangés"] = function()
 		assert(Config.Plaquage.DelaiRecuperation == 6, "Plaquage.DelaiRecuperation == 6")
-		assert(Config.Raid.DureeVerrou == 60, "Raid.DureeVerrou == 60")
-		assert(Config.Raid.Recharge == 60, "Raid.Recharge == 60")
 		assert(Config.Pieges.DelaiPose == 5, "Pieges.DelaiPose == 5")
 	end,
 

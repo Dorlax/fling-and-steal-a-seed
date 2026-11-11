@@ -9,6 +9,15 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-11 — 55 biomes, ciels, murs décorés et enclos
+
+- 34 nouveaux biomes (55 en tout), chacun avec son sol, son ciel, ses murs et son décor. Leurs créatures sont des chimères : le corps d'une espèce existante, des parties greffées d'une autre (ailes, queue, oreilles…) et les couleurs du biome. Les noms mélangent les deux espèces.
+- Chaque biome a son ciel : soleil, planètes avec anneau, lunes, aurores, étoiles, bulles, nuages, montgolfières ou orage, qui suivent la caméra. Pas de plafond.
+- Murs du bord : vrais décors par style (falaises et arbres, grès, glace, basalte et lave, cosmos, pierre hantée, coraux, bonbons, nuages, usine, bambous, grotte, jouets), 80 studs de haut ; plus de piliers ni de poutre au-dessus de la route.
+- Bases en enclos de ranch : muret de pierre et barrière, piliers à lanterne, cabane, arbres, massifs, foin, abreuvoir, mare (bases agrandies), porte en pierre et bois.
+- Le verrou des bases est supprimé (bouton, bouclier, compteur, expulsion).
+- Plus de texte en changeant de zone : ni bandeau, ni nom sur les arches, ni panneaux des sous-zones.
+
 ## 2026-11-11 — Designs voxels, animations et interface épurée
 
 - Les 16 espèces de la Prairie (10 créatures, 6 monstres) passent en voxels sculptés, construits sur la machine du joueur. Si l'option « Mesh / Image APIs » de l'expérience est coupée, les anciens blocs restent.

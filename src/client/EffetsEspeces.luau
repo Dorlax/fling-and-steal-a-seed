@@ -79,9 +79,29 @@ local function piece(modele: Model, prefixeOuNil: string?): BasePart?
 	return nil
 end
 
+-- Ambiance du biome de l'espèce ; un biome chimérique prend celle d'un
+-- biome au même décor.
 local function biomeDe(nom: string): string?
 	local numero = Biomes.indexEspece(nom)
-	return if numero then Biomes.Liste[numero].Id else nil
+	if numero == nil then
+		return nil
+	end
+	local biome = Biomes.Liste[numero :: number]
+	if (Effets.ParBiome :: any)[biome.Id] then
+		return biome.Id
+	end
+	for _, autre in Biomes.Liste do
+		if autre.Decor == biome.Decor and (Effets.ParBiome :: any)[autre.Id] then
+			return autre.Id
+		end
+	end
+	return biome.Id
+end
+
+-- Une chimère garde les effets de l'espèce dont elle a le corps.
+local function especeEffets(nom: string): string
+	local recette = (Biomes.Recettes :: any)[nom]
+	return if recette then recette.Base else nom
 end
 
 local function suivre(objet: Instance)
@@ -100,7 +120,7 @@ local function suivre(objet: Instance)
 	local rarete = modele:GetAttribute("Rarete")
 	local emissions: { Emission } = {}
 	local maintenant = os.clock()
-	for _, s in Effets.de(nom, biomeDe(nom)) do
+	for _, s in Effets.de(especeEffets(nom), biomeDe(nom)) do
 		local famille = (Effets.Familles :: any)[s.Famille]
 		if famille then
 			table.insert(emissions, {

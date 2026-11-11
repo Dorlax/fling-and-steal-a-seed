@@ -4,6 +4,9 @@
 -- Chaque biome fait `Longueur` studs et garde les trois sous-zones du Plan
 -- (Proche, Moyenne, Lointaine) avec leurs taux de rareté. Plus le biome est
 -- loin, plus ses créatures valent cher (× Croissance par biome).
+-- selene: allow(incorrect_standard_library_use)
+local Chimeres = if script then require(script.Parent.Chimeres) else (require :: any)("./Chimeres")
+
 local Biomes = {}
 
 Biomes.Longueur = 600 -- studs par biome
@@ -21,6 +24,7 @@ export type Biome = {
 	Decor: string, -- thème du décor (Prairie, Foret, Desert, ...)
 	Creatures: { [string]: { string } }, -- espèces par rareté
 	Monstres: { [string]: { string } }, -- espèces par sous-zone
+	Ciel: any?, -- ciel propre (Shared.Chimeres.Ciel ; biomes 1 à 21 : client Ambiances)
 }
 
 Biomes.Liste = {
@@ -488,6 +492,14 @@ Biomes.Liste = {
 	},
 } :: { Biome }
 
+-- Biomes 22 et suivants : univers propres et créatures chimériques
+-- (Shared.Chimeres). Leurs recettes servent au Bestiaire.
+local nouveaux, recettes = Chimeres.generer(Biomes.Liste)
+for _, biome in nouveaux do
+	table.insert(Biomes.Liste, biome :: any)
+end
+Biomes.Recettes = recettes
+
 local function estNombreFini(valeur: any): boolean
 	return type(valeur) == "number"
 		and valeur == valeur
@@ -533,7 +545,9 @@ end
 -- Multiplicateur lisible : « 1 », « 1,5 », « 2,25 », « 38 », « 1,2 M »…
 function Biomes.texteMultiplicateur(index: number): string
 	local m = Biomes.multiplicateur(index)
-	if m >= 1e6 then
+	if m >= 1e9 then
+		return (string.gsub(string.format("%.1f Md", m / 1e9), "%.", ","))
+	elseif m >= 1e6 then
 		return (string.gsub(string.format("%.1f M", m / 1e6), "%.", ","))
 	elseif m >= 100 then
 		return string.format("%d", math.floor(m + 0.5))
