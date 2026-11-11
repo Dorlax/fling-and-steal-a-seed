@@ -199,12 +199,18 @@ return {
 
 	["C11 protection après un coup : refus 'protegee', puis succès après DureeProtection"] = function()
 		local Monstres = module("Monstres")
-		local joueur, monstre = scenario()
+		local joueur, monstre, creature = scenario()
 		joueur.Character.Humanoid.MaxHealth = 1000
 		joueur.Character.Humanoid.Health = 1000
 		local t = Workspace:GetServerTimeNow()
 		assert(Monstres.frapper(monstre, joueur, t) == true, "premier coup attendu")
 		local protege = joueur:GetAttribute("ProtegeMonstreJusqua")
+		-- Les monstres ne frappent qu'un porteur : il ramasse à nouveau sa créature.
+		local point = creature:GetPivot().Position
+		joueur.Character.Humanoid.PlatformStand = false
+		placer(joueur, point)
+		assert(module("Portage").recolter(joueur, creature) == true, "nouvelle récolte attendue")
+		monstre:PivotTo(CFrame.new(point + Vector3.new(0, 0, 2)))
 		-- Monstre sans recharge : on avance au-delà de la recharge mais pas de la protection.
 		local pendant, raison = Monstres.frapper(monstre, joueur, t + 1)
 		local apres = Monstres.frapper(monstre, joueur, t + M.DureeProtection + 0.1)
