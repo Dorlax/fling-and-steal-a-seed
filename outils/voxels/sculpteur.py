@@ -62,8 +62,10 @@ def smin(a, b, k):
 # ---------------------------------------------------------------- membre
 
 class Membre:
-    def __init__(self, sculpteur: "Sculpteur", nom: str, role: str | None, joint, cote: int = 0, phase: float = 0.0):
+    def __init__(self, sculpteur: "Sculpteur", nom: str, role: str | None, joint, cote: int = 0, phase: float = 0.0,
+                 parent: str | None = None):
         self.s = sculpteur
+        self.parent = parent
         self.nom = nom
         self.role = role
         self.joint = joint
@@ -159,8 +161,8 @@ class Sculpteur:
         self.X, self.Y, self.Z = np.meshgrid(c, c, c, indexing="ij")
         self.membres: list[Membre] = []
 
-    def membre(self, nom, role=None, joint=(0, 0, 0), cote=0, phase=0.0) -> Membre:
-        m = Membre(self, nom, role, joint, cote, phase)
+    def membre(self, nom, role=None, joint=(0, 0, 0), cote=0, phase=0.0, parent=None) -> Membre:
+        m = Membre(self, nom, role, joint, cote, phase, parent)
         self.membres.append(m)
         return m
 
@@ -242,29 +244,27 @@ class Sculpteur:
         v = v * self.vox - 0.5
         return v, inv, c
 
-    # ------------------------------------------------------------ aperçu
-    def apercu(self, chemin, taille=520, lacet=-32.0, tangage=-18.0, fond=(246, 248, 255)):
-        union_occ = np.zeros((self.res,) * 3, dtype=bool)
-        couleur = np.zeros((self.res,) * 3 + (3,), dtype=np.uint8)
-        for m in self.membres:
-            occ = m.d < 0
-            couleur[occ] = m.couleur[occ]
-            union_occ |= occ
-        v, f, c = self._maillage(union_occ, couleur)
+    # ------------------------------------------------------------ rendu
+    def _rendu(self, maillages, taille=520, lacet=-32.0, tangage=-18.0, fond=(246, 248, 255), zoom=0.86, sol=0.0):
+        """Rend une liste de (sommets, quads, couleurs) en image PIL :
+        z-buffer par échantillonnage des quads, contour cartoon, ombre au sol."""
+        v = np.concatenate([m[0] for m in maillages])
+        decal = np.cumsum([0] + [len(m[0]) for m in maillages[:-1]])
+        f = np.concatenate([m[1] + d for m, d in zip(maillages, decal)])
+        c = np.concatenate([m[2] for m in maillages])
         ry, rx = math.radians(lacet), math.radians(tangage)
         Ry = np.array([[math.cos(ry), 0, math.sin(ry)], [0, 1, 0], [-math.sin(ry), 0, math.cos(ry)]])
         Rx = np.array([[1, 0, 0], [0, math.cos(rx), -math.sin(rx)], [0, math.sin(rx), math.cos(rx)]])
         p = v @ (Rx @ Ry).T
-        echelle = taille * 0.86
+        echelle = taille * zoom
         sx = p[:, 0] * echelle + taille / 2
         sy = -p[:, 1] * echelle + taille / 2 + taille * 0.02
         sz = p[:, 2]
-        # Échantillonnage dense de chaque quad, z-buffer par tri en profondeur.
         k = 7
         u = (np.arange(k) + 0.5) / k
         U, V = np.meshgrid(u, u)
         U, V = U.ravel(), V.ravel()
-        w = np.stack([(1 - U) * (1 - V), U * (1 - V), U * V, (1 - U) * V], axis=1)  # (k², 4)
+        w = np.stack([(1 - U) * (1 - V), U * (1 - V), U * V, (1 - U) * V], axis=1)
         X = (w @ sx[f].T).T.ravel()
         Y = (w @ sy[f].T).T.ravel()
         Zs = (w @ sz[f].T).T.ravel()
@@ -278,7 +278,6 @@ class Sculpteur:
         img[yi[ordre], xi[ordre]] = C[ordre]
         prof[yi[ordre], xi[ordre]] = Zs[ordre]
         masque = np.isfinite(prof)
-        # Contour cartoon : bord de silhouette + ruptures de profondeur.
         bord = np.zeros_like(masque)
         for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1), (2, 0), (-2, 0), (0, 2), (0, -2)):
             m2 = np.roll(np.roll(masque, dy, 0), dx, 1)
@@ -289,19 +288,79 @@ class Sculpteur:
         out[:] = np.array(fond, dtype=np.float32)
         out[masque] = img[masque]
         out[bord] = CONTOUR
-        # Petite ombre portée au sol.
         im = Image.fromarray(out.astype(np.uint8))
-        os.makedirs(os.path.dirname(chemin) or ".", exist_ok=True)
+        # Ombre portée au sol (rétrécit quand la créature saute).
         ombre = Image.new("L", im.size, 0)
         dd = ImageDraw.Draw(ombre)
-        pied = (-0.5 * echelle * math.cos(rx)) * -1 + taille / 2 + taille * 0.02
-        dd.ellipse([taille * 0.2, pied - taille * 0.035, taille * 0.8, pied + taille * 0.035], fill=70)
+        pied = 0.5 * echelle * math.cos(rx) + taille / 2 + taille * 0.02
+        lg = 0.3 / (1 + sol * 4)
+        dd.ellipse([taille * (0.5 - lg), pied - taille * 0.035, taille * (0.5 + lg), pied + taille * 0.035], fill=int(70 / (1 + sol * 3)))
         ombre = ombre.filter(ImageFilter.GaussianBlur(8))
         sombre = Image.new("RGB", im.size, (200, 205, 225))
         fond_img = Image.new("RGB", im.size, fond)
         fond_img = Image.composite(sombre, fond_img, ombre)
         fond_img.paste(im, (0, 0), Image.fromarray(((masque | bord) * 255).astype(np.uint8)))
-        fond_img.save(chemin)
+        return fond_img
+
+    def apercu(self, chemin, taille=520, lacet=-32.0, tangage=-18.0, fond=(246, 248, 255), zoom=0.86):
+        union_occ = np.zeros((self.res,) * 3, dtype=bool)
+        couleur = np.zeros((self.res,) * 3 + (3,), dtype=np.uint8)
+        for m in self.membres:
+            occ = m.d < 0
+            couleur[occ] = m.couleur[occ]
+            union_occ |= occ
+        im = self._rendu([self._maillage(union_occ, couleur)], taille, lacet, tangage, fond, zoom)
+        os.makedirs(os.path.dirname(chemin) or ".", exist_ok=True)
+        im.save(chemin)
+        return chemin
+
+    # ------------------------------------------------------------ animation
+    def _parent(self, m):
+        if m.parent:
+            return m.parent
+        if m.role in ("Oreille", "Antenne", "Machoire", "Corne"):
+            return "Tete" if any(x.nom == "Tete" for x in self.membres) else None
+        return None
+
+    def animer(self, chemin, anim, images=24, duree=1.0, taille=360, lacet=-32.0, tangage=-14.0, zoom=0.72, bande=None):
+        """GIF d'une animation. `anim` : nom d'une pose auto (voir animations.py)
+        ou fonction (sculpteur, t dans [0, 1[) -> {membre: (rot°, translation)}."""
+        import animations
+        if not hasattr(self, "_mailles"):
+            self._mailles = {}
+            for m in self.membres:
+                occ = m.d < 0
+                if occ.any():
+                    self._mailles[m.nom] = self._maillage(occ, m.couleur)
+        par_nom = {m.nom: m for m in self.membres}
+        fonction = anim if callable(anim) else animations.POSES[anim]
+        frames = []
+        for i in range(images):
+            t = i / images
+            pose = fonction(self, t)
+            racine = pose.get("racine", ((0, 0, 0), (0, 0, 0)))
+
+            def monde(nom, v):
+                # Transformations du membre puis de ses parents puis de la racine.
+                while nom:
+                    m = par_nom[nom]
+                    rot, tr = pose.get(nom, ((0, 0, 0), (0, 0, 0)))
+                    j = np.array(m.joint, dtype=np.float32)
+                    v = (v - j) @ _rot(rot).T + j + np.array(tr, dtype=np.float32)
+                    nom = self._parent(m)
+                pivot = np.array([0, -0.5, 0], dtype=np.float32)
+                return (v - pivot) @ _rot(racine[0]).T + pivot + np.array(racine[1], dtype=np.float32)
+
+            liste = [(monde(n, v), f, c) for n, (v, f, c) in self._mailles.items()]
+            frames.append(self._rendu(liste, taille, lacet, tangage, zoom=zoom, sol=max(0.0, racine[1][1])))
+        os.makedirs(os.path.dirname(chemin) or ".", exist_ok=True)
+        if bande:  # planche de contrôle : 8 images de l'animation côte à côte
+            sel = frames[:: max(1, images // 8)][:8]
+            pl = Image.new("RGB", (taille * len(sel), taille))
+            for i, fr in enumerate(sel):
+                pl.paste(fr, (i * taille, 0))
+            pl.save(bande)
+        frames[0].save(chemin, save_all=True, append_images=frames[1:], duration=int(1000 * duree / images), loop=0, disposal=2)
         return chemin
 
     # ------------------------------------------------------------ export
