@@ -30,12 +30,8 @@ local function base64(s: string): buffer
 		local b = DEC[string.byte(s, i + 1)] or 0
 		local c = DEC[string.byte(s, i + 2)]
 		local d = DEC[string.byte(s, i + 3)]
-		local v = bit32.bor(
-			bit32.lshift(a, 18),
-			bit32.lshift(b, 12),
-			bit32.lshift(c or 0, 6),
-			d or 0
-		)
+		local v =
+			bit32.bor(bit32.lshift(a, 18), bit32.lshift(b, 12), bit32.lshift(c or 0, 6), d or 0)
 		buffer.writeu8(out, o, bit32.rshift(v, 16))
 		o += 1
 		if c then
