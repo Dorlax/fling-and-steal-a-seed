@@ -230,9 +230,33 @@ end
 local modeles: { [string]: Model | false } = {}
 local enCours: { [string]: boolean } = {}
 
--- Vrai si l'espèce a un modèle sculpté en voxels.
+-- Recette de chimère (espèce des biomes chimériques), chargée à la demande.
+local recettes: { [string]: any }? = nil
+local function recetteDe(nom: string): any
+	if recettes == nil then
+		local Biomes = require(ReplicatedStorage.Shared:WaitForChild("Biomes"))
+		recettes = Biomes.Recettes or {}
+	end
+	return (recettes :: any)[nom]
+end
+
+-- Données voxel de l'espèce : les siennes, ou celles de son espèce de base
+-- si c'est une chimère (recolorée à sa teinte). Renvoie aussi la recette.
+local function sourceDe(nom: string): (Instance?, any)
+	local propre = dossier:FindFirstChild(nom)
+	if propre then
+		return propre, nil
+	end
+	local recette = recetteDe(nom)
+	if recette and type(recette.Base) == "string" then
+		return dossier:FindFirstChild(recette.Base), recette
+	end
+	return nil, nil
+end
+
+-- Vrai si l'espèce a un modèle sculpté en voxels (ou sa base, pour une chimère).
 function ConstructeurVoxels.existe(nom: string?): boolean
-	return type(nom) == "string" and dossier:FindFirstChild(nom) ~= nil
+	return type(nom) == "string" and (sourceDe(nom :: string)) ~= nil
 end
 
 -- Modèle de l'espèce à la taille 1 (construit une seule fois, peut attendre
@@ -246,7 +270,7 @@ function ConstructeurVoxels.modele(nom: string): Model?
 	if deja ~= nil then
 		return if deja then deja else nil
 	end
-	local source = dossier:FindFirstChild(nom)
+	local source, recette = sourceDe(nom)
 	if source == nil or not source:IsA("ModuleScript") then
 		return nil
 	end
@@ -256,9 +280,21 @@ function ConstructeurVoxels.modele(nom: string): Model?
 		local h = HttpService:JSONDecode(donnees.tete)
 		local runs = base64(donnees.runs)
 		local cols = base64(donnees.cols)
-		local pal = {}
+		local rgbs = {}
 		for i = 1, #h.pal, 3 do
-			table.insert(pal, Color3.fromRGB(h.pal[i], h.pal[i + 1], h.pal[i + 2]))
+			table.insert(rgbs, { h.pal[i], h.pal[i + 1], h.pal[i + 2] })
+		end
+		if recette and type(recette.Teinte) == "number" then
+			-- Chimère : même recoloration que ses blocs (Bestiaire).
+			local Chimeres = require(ReplicatedStorage.Shared:WaitForChild("Chimeres"))
+			local reference = Chimeres.teintePrincipale(rgbs)
+			for i, c in rgbs do
+				rgbs[i] = Chimeres.teinter(c, recette.Teinte, reference)
+			end
+		end
+		local pal = {}
+		for _, c in rgbs do
+			table.insert(pal, Color3.fromRGB(c[1], c[2], c[3]))
 		end
 		local m = Instance.new("Model")
 		m.Name = nom

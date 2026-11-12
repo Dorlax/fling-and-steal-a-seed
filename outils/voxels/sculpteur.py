@@ -135,6 +135,15 @@ class Membre:
         d = np.linalg.norm(np.maximum(q, 0.0), axis=-1) + np.minimum(q.max(axis=-1), 0.0) - arrondi
         return self._ajouter(d, couleur, mode, fondu, plat)
 
+    def cylindre(self, centre, rayon, demi_hauteur, couleur, arrondi=0.02, mode="ajout", fondu=0.03, plat=False):
+        """Cylindre vertical à bords légèrement arrondis (gâteau, tambour)."""
+        p = self._coords(centre, None)
+        dxz = np.sqrt(p[..., 0] ** 2 + p[..., 2] ** 2) - (rayon - arrondi)
+        dy = np.abs(p[..., 1]) - (demi_hauteur - arrondi)
+        q = np.stack([dxz, dy], axis=-1)
+        d = np.linalg.norm(np.maximum(q, 0.0), axis=-1) + np.minimum(np.maximum(dxz, dy), 0.0) - arrondi
+        return self._ajouter(d, couleur, mode, fondu, plat)
+
     def oeil(self, centre, rayon, regard=(0, 0, -1), iris=None):
         """Gros oeil brillant : globe sombre (ou iris coloré) + deux reflets."""
         self.boule(centre, (rayon, rayon * 1.12, rayon * 0.75), iris or NOIR_OEIL, fondu=0.0, plat=True)
