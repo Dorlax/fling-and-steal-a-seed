@@ -72,6 +72,12 @@ type Sportif = {
 	mode: string?,
 	aligne: boolean,
 	accessoires: Folder?,
+	-- Joueur local : tenu au poste pendant l'entraînement (racine ancrée
+	-- localement) ; `sortie` = il a choisi de partir (pas de reprise avant
+	-- d'avoir quitté la Forge) ; `envie` = depuis quand il pousse le stick.
+	verrou: boolean,
+	sortie: boolean,
+	envie: number,
 }
 
 local machines: { [Model]: Machine } = {}
@@ -196,15 +202,17 @@ end
 
 local function majMachine(machine: Machine, dt: number)
 	local joueur = proprietaireDe(machine.modele)
-	local mode = if joueur then joueur:GetAttribute("ModeForge") else "Vitesse"
+	local sportif = if joueur then sportifs[joueur] else nil
+	local actif = sportif ~= nil and sportif.actif
+	-- Au repos, la Forge montre la roue (on reconnaît l'agrès) ; pendant
+	-- l'entraînement, l'agrès du mode choisi.
+	local mode = if joueur and actif then joueur:GetAttribute("ModeForge") else "Vitesse"
 	if type(mode) ~= "string" then
 		mode = "Vitesse"
 	end
 	if mode ~= machine.mode then
 		afficherMode(machine, mode :: string)
 	end
-	local sportif = if joueur then sportifs[joueur] else nil
-	local actif = sportif ~= nil and sportif.actif
 	local intensite = if joueur and actif then intensiteDe(joueur) else 0
 	cacherBarre(machine, actif and mode == "Force")
 
@@ -227,7 +235,8 @@ local function majMachine(machine: Machine, dt: number)
 		local axe = roue and roue:GetAttribute("Axe")
 		local rayon = roue and roue:GetAttribute("Rayon")
 		if roue and typeof(axe) == "CFrame" and type(rayon) == "number" then
-			local rotation = (axe :: CFrame) * CFrame.Angles(-machine.defilement / rayon, 0, 0)
+			-- Le joueur court vers +Z (dos à l'enclos) : la roue tourne vers lui.
+			local rotation = (axe :: CFrame) * CFrame.Angles(machine.defilement / rayon, 0, 0)
 			for _, p in roue:GetChildren() do
 				local decalage = p:GetAttribute("Decalage")
 				if p:IsA("BasePart") and typeof(decalage) == "CFrame" then
@@ -238,7 +247,7 @@ local function majMachine(machine: Machine, dt: number)
 		for _, bande in vitesse:GetChildren() do
 			local indice = bande:GetAttribute("Indice")
 			if bande:IsA("BasePart") and type(indice) == "number" and machine.plateforme then
-				local z = -3 + ((indice * 0.85 + machine.defilement) % 6.8)
+				local z = -3 + ((indice * 0.85 - machine.defilement) % 6.8)
 				local centre = (machine.plateforme :: BasePart).Position
 				bande.CFrame = CFrame.new(bande.Position.X, bande.Position.Y, centre.Z + z)
 			end
@@ -289,13 +298,34 @@ end
 -- L'apparence de l'avatar remplace les membres (et leurs articulations) après
 -- l'apparition : un moteur gardé en cache peut ne plus être dans le
 -- personnage. On les recherche alors.
+-- Toutes les articulations du rig doivent être trouvées et encore dans le
+-- personnage : l'avatar se charge par morceaux, une articulation absente à
+-- l'apparition (ex. hanche droite) laissait la pose incomplète ou nulle.
+local ARTICULATIONS_R15: { string } = {
+	"racine",
+	"cou",
+	"hancheG",
+	"hancheD",
+	"genouG",
+	"genouD",
+	"epauleG",
+	"epauleD",
+	"coudeG",
+	"coudeD",
+}
+local ARTICULATIONS_R6: { string } = { "racine", "cou", "hancheG", "hancheD", "epauleG", "epauleD" }
+
 local function moteursValides(moteurs: Moteurs, personnage: Model): boolean
-	for _, m in { moteurs.racine, moteurs.epauleD, moteurs.hancheG } do
+	local noms: { string } = if moteurs.r15 then ARTICULATIONS_R15 else ARTICULATIONS_R6
+	for _, nom in noms do
+		local m = (moteurs :: any)[nom]
 		if m == nil or not (m :: Instance):IsDescendantOf(personnage) then
 			return false
 		end
 	end
-	return true
+	local humanoide = personnage:FindFirstChildOfClass("Humanoid")
+	local r15 = humanoide ~= nil and humanoide.RigType == Enum.HumanoidRigType.R15
+	return r15 == moteurs.r15
 end
 
 local function poser(m: Articulation?, cf: CFrame)
@@ -543,7 +573,12 @@ local function estActif(joueur: Player, personnage: Model): boolean
 		return false
 	end
 	if joueur == Players.LocalPlayer then
-		return (humanoide :: Humanoid).MoveDirection.Magnitude < 0.1
+		-- Tenu au poste : on s'entraîne même si le stick bouge (il faut le
+		-- pousser un instant pour partir). Sinon, seulement à l'arrêt.
+		local sportif = sportifs[joueur]
+		return sportif ~= nil
+			and not sportif.sortie
+			and (sportif.verrou or (humanoide :: Humanoid).MoveDirection.Magnitude < 0.1)
 	end
 	local v = (racine :: BasePart).AssemblyLinearVelocity
 	return Vector3.new(v.X, 0, v.Z).Magnitude < 2
@@ -582,6 +617,9 @@ local function sportifDe(joueur: Player): Sportif?
 			mode = nil,
 			aligne = false,
 			accessoires = nil,
+			verrou = false,
+			sortie = false,
+			envie = 0,
 		}
 		sportifs[joueur] = sportif
 	end
@@ -614,6 +652,55 @@ local function reprendreAnimations(personnage: Model)
 	end
 end
 
+-- Durée de poussée du stick (ou saut) qui fait quitter la Forge.
+local DELAI_SORTIE = 0.25
+
+local function verrouiller(sportif: Sportif, racine: BasePart, oui: boolean)
+	if sportif.verrou == oui then
+		return
+	end
+	sportif.verrou = oui
+	racine.AssemblyLinearVelocity = Vector3.zero
+	racine.Anchored = oui
+end
+
+-- Joueur local : tenu au poste tant qu'il s'entraîne. Pousser le stick (un
+-- court instant) ou sauter le libère ; il n'est repris qu'à sa prochaine
+-- arrivée sur la Forge.
+local function gererVerrou(
+	joueur: Player,
+	personnage: Model,
+	sportif: Sportif,
+	racine: BasePart,
+	dt: number
+)
+	local trouve = personnage:FindFirstChildOfClass("Humanoid")
+	if joueur:GetAttribute("SurForge") ~= true or trouve == nil or trouve.Health <= 0 then
+		verrouiller(sportif, racine, false)
+		sportif.sortie = false
+		sportif.aligne = false
+		sportif.envie = 0
+		return
+	end
+	if sportif.sortie then
+		verrouiller(sportif, racine, false)
+		return
+	end
+	local humanoide = trouve :: Humanoid
+	local pousse = humanoide.MoveDirection.Magnitude > 0.1 or humanoide.Jump
+	-- Décroît sans retomber d'un coup : une entrée qui hache (une image sur
+	-- quatre à zéro) compte quand même.
+	sportif.envie = if pousse then sportif.envie + dt else math.max(0, sportif.envie - dt * 2)
+	if sportif.envie >= DELAI_SORTIE or (sportif.verrou and humanoide.Jump) then
+		sportif.sortie = true
+		sportif.envie = 0
+		verrouiller(sportif, racine, false)
+		if humanoide.Jump then
+			humanoide:ChangeState(Enum.HumanoidStateType.Jumping)
+		end
+	end
+end
+
 local function pas(dt: number)
 	local camera = Workspace.CurrentCamera
 	local oeil = if camera then camera.CFrame.Position else Vector3.zero
@@ -624,6 +711,9 @@ local function pas(dt: number)
 		if sportif and personnage and racine and racine:IsA("BasePart") then
 			local proche = (racine.Position - oeil).Magnitude < DISTANCE
 			local mode = joueur:GetAttribute("ModeForge")
+			if joueur == Players.LocalPlayer then
+				gererVerrou(joueur, personnage, sportif, racine :: BasePart, dt)
+			end
 			local actif = proche and estActif(joueur, personnage) and type(mode) == "string"
 			if mode ~= sportif.mode then
 				retirerAccessoires(sportif)
@@ -650,6 +740,7 @@ local function pas(dt: number)
 				if joueur == Players.LocalPlayer and not sportif.aligne then
 					sportif.aligne = true
 					aligner(joueur, personnage)
+					verrouiller(sportif, racine :: BasePart, true)
 				end
 				local intensite = intensiteDe(joueur)
 				sportif.phase += dt * PosesForge.tempo(mode :: string, intensite)

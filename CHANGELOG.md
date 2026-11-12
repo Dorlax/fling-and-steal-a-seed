@@ -9,6 +9,13 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-12 — Forge : joueur tenu au poste, roue visible au repos
+
+- En arrivant à l'arrêt sur la Forge, le joueur est placé au poste (dos à l'enclos) et tenu sur place (racine ancrée côté client) : l'animation continue même s'il touche au stick. Pousser le stick un quart de seconde ou sauter le libère ; il n'est repris qu'à sa prochaine arrivée sur la Forge.
+- Au repos, la Forge montre la roue pour qu'on reconnaisse l'agrès ; l'agrès du mode choisi n'apparaît que pendant l'entraînement.
+- La roue et le tapis tournent dans le bon sens pour un joueur qui court dos à l'enclos.
+- Poses parfois absentes : la validité des articulations ne vérifiait que trois d'entre elles (et une liste à trous) ; une hanche manquante à l'apparition laissait la pose nulle. Toutes les articulations du rig sont maintenant vérifiées, et recherchées de nouveau au besoin.
+
 ## 2026-11-12 — Forge : sans socle, dos à l'enclos, plus de retour forcé au poste
 
 - Plus de socle en bois ni de bordure néon : la zone de Forge est une Part invisible à ras du sol, décorée d'une dalle ronde (matière selon le palier) bordée de pavés.
