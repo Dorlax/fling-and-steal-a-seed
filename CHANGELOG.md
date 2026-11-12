@@ -9,6 +9,10 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-12 — Forge : animations par défaut suspendues, sons de gain retirés
+
+- En jeu publié, les poses de la Forge ne se voyaient pas (personnage immobile dans la roue et sous la charge). Pendant l'entraînement, les pistes de l'Animator sont arrêtées et le script Animate du joueur local est désactivé, puis réactivé à la sortie, pour que rien ne réécrive les articulations après les poses.
+- Plus de son à chaque gain de Force ou de Vitesse (le « +1 » reste).
 ## 2026-11-12 — Tous les monstres en voxels
 
 - Les 60 monstres des 20 biomes de base (Bois Moussu → Plage) sont sculptés en voxels (`outils/voxels/monstres_lot1..5.py`, aides `monstres_aide.py`, registre `catalogue.py`) et exportés dans `src/shared/Voxels` ; résolution abaissée automatiquement jusqu'à 48 pour rester sous 19 000 triangles par pièce.
