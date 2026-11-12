@@ -202,9 +202,14 @@ def gargouillard():
     for cc in (-1, 1):
         t.courbe([(cc * 0.08, 0.24, -0.06), (cc * 0.14, 0.33, -0.02), (cc * 0.12, 0.4, 0.04)], [0.03, 0.02, 0.006], FONCE)
     for cc, nom in ((-1, "AileG"), (1, "AileD")):
+        # Aile de chauve-souris : bras osseux, pans de membrane en pointe.
         a = s.membre(nom, "Aile", (cc * 0.14, 0.02, 0.15), cc)
-        a.cone((cc * 0.14, 0.02, 0.15), (cc * 0.42, 0.25, 0.22), 0.025, 0.012, FONCE, fondu=0.0)
-        a.boule((cc * 0.32, 0.1, 0.22), (0.15, 0.13, 0.015), FONCE, rot=(0, cc * -15, cc * 35), fondu=0.0)
+        a.courbe([(cc * 0.14, 0.02, 0.15), (cc * 0.3, 0.22, 0.2), (cc * 0.46, 0.3, 0.22)], [0.025, 0.02, 0.012], FONCE)
+        for k, (x, y) in enumerate(((0.26, 0.06), (0.36, 0.1), (0.44, 0.16))):
+            a.boite((cc * x, y, 0.21), (0.06, 0.12 - k * 0.02, 0.008), PIERRE, arrondi=0.006,
+                    rot=(0, 0, cc * (25 + k * 12)), fondu=0.0)
+            a.cone((cc * (x + 0.02), y - 0.1 + k * 0.02, 0.21), (cc * (x + 0.04), y - 0.17 + k * 0.03, 0.21), 0.02,
+                   0.004, PIERRE, fondu=0.0)
     q = s.membre("Queue", "Queue", (0, -0.25, 0.22))
     q.courbe([(0, -0.25, 0.22), (0.05, -0.35, 0.34), (0.12, -0.36, 0.42)], [0.04, 0.03, 0.015], PIERRE)
     q.cone((0.12, -0.36, 0.42), (0.16, -0.35, 0.47), 0.03, 0.004, FONCE, fondu=0.0)
@@ -255,16 +260,17 @@ def vautourbe():
     t.courbe([(0, 0.13, -0.35), (0, 0.1, -0.42), (0, 0.05, -0.43)], [0.035, 0.022, 0.008], BEC)
     visage(t, 0.17, -0.34, 0.04, 0.028, crocs=False, angle=32)
     for cc, nom in ((-1, "AileG"), (1, "AileD")):
-        a = s.membre(nom, "Aile", (cc * 0.15, 0.02, 0.06), cc)
-        a.boule((cc * 0.34, 0.06, 0.08), (0.22, 0.06, 0.025), PLUME, rot=(0, 0, cc * -25), fondu=0.0)
-        for k in range(4):
-            a.cone((cc * (0.48 + k * 0.005), 0.12 - k * 0.04, 0.07), (cc * (0.56 + k * 0.01), 0.16 - k * 0.05, 0.09),
-                   0.02, 0.005, FONCE, fondu=0.0)
+        # Ailes repliées le long du corps, rémiges sombres en bout.
+        a = s.membre(nom, "Aile", (cc * 0.15, 0.02, 0.0), cc)
+        a.boule((cc * 0.17, -0.04, 0.1), (0.05, 0.13, 0.22), PLUME, rot=(-15, 0, cc * 8), fondu=0.0)
+        for k in range(3):
+            a.cone((cc * 0.18, -0.08 - k * 0.04, 0.24), (cc * 0.19, -0.14 - k * 0.04, 0.38), 0.025, 0.006, FONCE,
+                   fondu=0.0)
     q = s.membre("Queue", "Queue", (0, -0.12, 0.28))
     q.boule((0, -0.16, 0.36), (0.09, 0.025, 0.09), FONCE, rot=(30, 0, 0), fondu=0.0)
     for cc, nom in ((-1, "PatteG"), (1, "PatteD")):
         p = s.membre(nom, "Patte", (cc * 0.07, -0.2, 0.06), cc, 0.0 if cc < 0 else 0.5)
-        p.cone((cc * 0.07, -0.2, 0.06), (cc * 0.07, -0.46, 0.0), 0.024, 0.02, BEC, fondu=0.0)
+        p.cone((cc * 0.07, -0.2, 0.06), (cc * 0.07, -0.46, 0.0), 0.03, 0.024, BEC, fondu=0.0)
         for dx, dz in ((-0.03, -0.05), (0.0, -0.06), (0.03, -0.05)):
             p.cone((cc * 0.07, -0.47, 0.0), (cc * 0.07 + dx, -0.475, dz), 0.018, 0.01, FONCE, fondu=0.01)
     return s
