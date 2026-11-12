@@ -9,6 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-12 — Tous les monstres en voxels
+
+- Les 60 monstres des 20 biomes de base (Bois Moussu → Plage) sont sculptés en voxels (`outils/voxels/monstres_lot1..5.py`, aides `monstres_aide.py`, registre `catalogue.py`) et exportés dans `src/shared/Voxels` ; résolution abaissée automatiquement jusqu'à 48 pour rester sous 19 000 triangles par pièce.
+- Chimères : `ConstructeurVoxels` reprend le modèle voxel de l'espèce de base (`Biomes.Recettes`) et le recolore à la teinte de la chimère, comme ses blocs. Les biomes chimériques ont donc aussi leurs monstres (et créatures dont la base est sculptée) en voxels, sans les greffes du donneur.
+- Sculpteur : nouvelle forme `cylindre` (gâteau, tambour, bambou…).
+
 ## 2026-11-12 — Forge devant l'enclos, bases plus grandes, créatures qui s'envolaient
 
 - La Forge est sortie de l'enclos : elle est posée devant la porte, à la même place pour tous les joueurs. Le chemin de pierres va maintenant du point d'apparition à la porte.

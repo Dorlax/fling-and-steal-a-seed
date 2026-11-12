@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 import especes
 import monstres
 
-TOUT = {**especes.ESPECES, **monstres.MONSTRES}
+from catalogue import MONSTRES_BIOMES, TOUT  # noqa: E402
 ANIMS = ("repos", "marche", "course", "plaquage", "drole")
 
 ICI = os.path.dirname(os.path.abspath(__file__))
@@ -55,11 +55,13 @@ if __name__ == "__main__":
     t0 = time.time()
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     style = "cubes" if "--cubes" in sys.argv else "arrondi"
-    groupe = args[0] if args in (["prairie"], ["monstres"]) else None
+    groupe = args[0] if args in (["prairie"], ["monstres"], ["biomes"]) else None
     if not args or groupe == "prairie":
         noms = list(especes.ESPECES)
     elif groupe == "monstres":
         noms = list(monstres.MONSTRES)
+    elif groupe == "biomes":
+        noms = list(MONSTRES_BIOMES)
     else:
         noms = args
     res = [produire(n, style, "--export" in sys.argv, "--anims" in sys.argv) for n in noms]

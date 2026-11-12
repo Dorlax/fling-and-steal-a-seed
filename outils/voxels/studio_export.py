@@ -17,7 +17,7 @@ import especes
 import monstres
 from sculpteur import Sculpteur
 
-TOUT = {**especes.ESPECES, **monstres.MONSTRES}
+from catalogue import TOUT  # noqa: E402
 
 
 def _exposes(occ):
