@@ -73,10 +73,12 @@ local function dossierBases(): Folder
 	return nouveau
 end
 
--- Les emplacements forment une ligne centrée sur l'origine : 0, +90, -90…
--- Le bord avant de la base reste à Z = BORD_BASES, quelle que soit sa taille.
+-- Les emplacements forment une ligne symétrique autour de l'origine, remplie
+-- du centre vers les bords : +E/2, -E/2, +3E/2, -3E/2… (12 bases tiennent
+-- dans le monde de 1 200 studs). Le bord avant de la base reste à
+-- Z = BORD_BASES, quelle que soit sa taille.
 local function centreEmplacement(numero: number, taille: number): Vector3
-	local rang = math.floor(numero / 2)
+	local rang = math.ceil(numero / 2) - 0.5
 	local signe = if numero % 2 == 1 then 1 else -1
 	return Vector3.new(signe * rang * Config.Bases.Ecart, 0, BORD_BASES - taille / 2)
 end
@@ -110,7 +112,9 @@ local function construire(joueur: any, centre: Vector3): Model
 	forge.Name = "Forge"
 	forge.Anchored = true
 	forge.Size = Vector3.new(largeur, 1, largeur)
-	forge.Position = centre + Vector3.new(0, 0.5, 8)
+	-- Devant l'enclos, face à la porte (même place pour tous les joueurs).
+	local devant = centre.Z + TAILLE_SOL / 2 + 6 + largeur / 2
+	forge.Position = Vector3.new(centre.X, centre.Y + 0.5, devant)
 	forge.Color = COULEUR_FORGE
 	forge.Material = Enum.Material.Neon
 	forge.TopSurface = Enum.SurfaceType.Smooth

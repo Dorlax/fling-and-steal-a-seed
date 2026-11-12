@@ -166,7 +166,22 @@ function suivre(objet: Instance)
 		else
 			HabillageVoxels.preparer(modele, function()
 				local s = suivis[modele]
-				if s and modele.Parent ~= nil and HabillageVoxels.habiller(modele, s.base) then
+				if s == nil or modele.Parent == nil then
+					return
+				end
+				-- Les pièces sont peut-être posées (rebond, penché) : on les remet
+				-- au repos avant de relever, sinon ce décalage serait compté dans
+				-- leur repos et s'ajouterait à chaque image (la créature
+				-- s'envolait).
+				if s.pose ~= nil then
+					for _, p in s.pieces do
+						if p.part.Anchored then
+							p.part.CFrame = s.base * p.repos
+						end
+					end
+					s.pose = nil
+				end
+				if HabillageVoxels.habiller(modele, s.base) then
 					s.voxels = true
 					s.pieces = releverPieces(modele, s.base)
 				end

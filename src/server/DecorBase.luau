@@ -391,7 +391,7 @@ function DecorBase.habiller(
 	centre: Vector3,
 	taille: number,
 	ouverture: number,
-	forge: Vector3,
+	_forge: Vector3,
 	apparition: Vector3
 )
 	local dossier = Instance.new("Folder")
@@ -460,9 +460,9 @@ function DecorBase.habiller(
 		)
 	end
 
-	-- Chemin de pierres de la porte jusqu'à la Forge.
 	local depart = Vector3.new(centre.X, y, centre.Z + d)
-	local arrivee = Vector3.new(forge.X, y, forge.Z + 4.5)
+	-- Chemin dans l'enclos, du point d'apparition à la porte (la Forge est dehors).
+	local arrivee = Vector3.new(centre.X, y, centre.Z - 6)
 	local longueur = (arrivee - depart).Magnitude
 	local pas = 2.6
 	for k = 0, math.floor(longueur / pas) do
