@@ -47,7 +47,7 @@ def triangles_max(tete, runs_b64, res):
 
 
 def ecrire(nom):
-    for res in (80, 72, 64):
+    for res in (80, 72, 64, 56, 48):
         tete, runs, cols = exporter(nom, res)
         pire = triangles_max(tete, runs, res)
         if pire <= 19000:
