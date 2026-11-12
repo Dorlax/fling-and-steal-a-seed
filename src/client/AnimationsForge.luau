@@ -298,13 +298,24 @@ end
 -- L'apparence de l'avatar remplace les membres (et leurs articulations) après
 -- l'apparition : un moteur gardé en cache peut ne plus être dans le
 -- personnage. On les recherche alors.
+-- Toutes les articulations du rig doivent être trouvées et encore dans le
+-- personnage : l'avatar se charge par morceaux, une articulation absente à
+-- l'apparition (ex. hanche droite) laissait la pose incomplète ou nulle.
+local ARTICULATIONS_R15 =
+	{ "racine", "cou", "hancheG", "hancheD", "genouG", "genouD", "epauleG", "epauleD", "coudeG", "coudeD" }
+local ARTICULATIONS_R6 = { "racine", "cou", "hancheG", "hancheD", "epauleG", "epauleD" }
+
 local function moteursValides(moteurs: Moteurs, personnage: Model): boolean
-	for _, m in { moteurs.racine, moteurs.epauleD, moteurs.hancheG } do
+	local noms = if moteurs.r15 then ARTICULATIONS_R15 else ARTICULATIONS_R6
+	for _, nom in noms do
+		local m = (moteurs :: any)[nom]
 		if m == nil or not (m :: Instance):IsDescendantOf(personnage) then
 			return false
 		end
 	end
-	return true
+	local humanoide = personnage:FindFirstChildOfClass("Humanoid")
+	local r15 = humanoide ~= nil and humanoide.RigType == Enum.HumanoidRigType.R15
+	return r15 == moteurs.r15
 end
 
 local function poser(m: Articulation?, cf: CFrame)
@@ -660,7 +671,9 @@ local function gererVerrou(joueur: Player, personnage: Model, sportif: Sportif, 
 		return
 	end
 	local pousse = humanoide.MoveDirection.Magnitude > 0.1 or humanoide.Jump
-	sportif.envie = if pousse then sportif.envie + dt else 0
+	-- Décroît sans retomber d'un coup : une entrée qui hache (une image sur
+	-- quatre à zéro) compte quand même.
+	sportif.envie = if pousse then sportif.envie + dt else math.max(0, sportif.envie - dt * 2)
 	if sportif.envie >= DELAI_SORTIE or (sportif.verrou and humanoide.Jump) then
 		sportif.sortie = true
 		sportif.envie = 0
