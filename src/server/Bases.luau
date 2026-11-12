@@ -111,13 +111,16 @@ local function construire(joueur: any, centre: Vector3): Model
 	local forge = Instance.new("Part")
 	forge.Name = "Forge"
 	forge.Anchored = true
-	forge.Size = Vector3.new(largeur, 1, largeur)
+	-- Zone d'entraînement à ras du sol, invisible : le décor (dalle ronde)
+	-- est posé par MachineForge. Pas de socle sur lequel buter.
+	forge.Size = Vector3.new(largeur, 0.2, largeur)
 	-- Devant l'enclos, face à la porte (même place pour tous les joueurs).
 	local devant = centre.Z + TAILLE_SOL / 2 + 6 + largeur / 2
-	forge.Position = Vector3.new(centre.X, centre.Y + 0.5, devant)
+	forge.Position = Vector3.new(centre.X, centre.Y + 0.1, devant)
 	forge.Color = COULEUR_FORGE
-	forge.Material = Enum.Material.Neon
-	forge.TopSurface = Enum.SurfaceType.Smooth
+	forge.Transparency = 1
+	forge.CanCollide = false
+	forge.CastShadow = false
 	forge.Parent = modele
 	MachineForge.construire(forge, centre.Y, joueur.UserId, joueur:GetAttribute("NiveauForge"))
 	-- L'agrès se modernise quand le niveau de Forge change de palier.

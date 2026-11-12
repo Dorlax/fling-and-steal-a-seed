@@ -624,29 +624,32 @@ end
 -- Plateforme et agrès du palier ; renvoie le modèle.
 local function remplir(modele: Model, plateforme: BasePart, palier: number)
 	local sol = SOLS[palier] or SOLS[1]
-	plateforme.Material = sol.matiere
-	plateforme.Color = sol.couleur
 	local centre = plateforme.Position
 	local haut = centre.Y + plateforme.Size.Y / 2
-	local demi = plateforme.Size.X / 2
-	for _, cote in { -1, 1 } do
-		neon(
-			piece(
-				modele,
-				"Anneau",
-				Vector3.new(plateforme.Size.X, 0.1, 0.35),
-				CFrame.new(centre.X, haut + 0.05, centre.Z + cote * (demi - 0.2)),
-				BLEU
-			)
-		)
-		neon(
-			piece(
-				modele,
-				"Anneau",
-				Vector3.new(0.35, 0.1, plateforme.Size.Z - 0.7),
-				CFrame.new(centre.X + cote * (demi - 0.2), haut + 0.05, centre.Z),
-				BLEU
-			)
+	local diametre = plateforme.Size.X
+	-- Dalle ronde à ras du sol (matière selon le palier) bordée de pavés.
+	cylindre(
+		modele,
+		"Dalle",
+		0.12,
+		diametre - 1.2,
+		Vector3.new(centre.X, haut - 0.05, centre.Z),
+		"Y",
+		sol.couleur,
+		sol.matiere
+	)
+	local n = 16
+	for i = 1, n do
+		local a = (i - 0.5) / n * 2 * math.pi
+		local r = diametre / 2 - 0.3
+		piece(
+			modele,
+			"Pave",
+			Vector3.new(1.1, 0.2, 0.7),
+			CFrame.new(centre.X + math.cos(a) * r, haut, centre.Z + math.sin(a) * r)
+				* CFrame.Angles(0, -a + math.pi / 2, 0),
+			if i % 2 == 0 then rgb(150, 146, 140) else rgb(126, 122, 118),
+			Enum.Material.Cobblestone
 		)
 	end
 	local origine = Vector3.new(centre.X, haut, centre.Z)
@@ -674,7 +677,7 @@ function MachineForge.construire(
 	remplir(modele, plateforme, palier)
 
 	if plateforme:FindFirstChild("Poste") == nil then
-		-- Point où se tient le joueur (au centre, regard vers -Z).
+		-- Point où se tient le joueur (au centre, dos à l'enclos : regard vers +Z).
 		local point = Instance.new("Attachment")
 		point.Name = "Poste"
 		point.Parent = plateforme

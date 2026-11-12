@@ -549,7 +549,7 @@ local function estActif(joueur: Player, personnage: Model): boolean
 	return Vector3.new(v.X, 0, v.Z).Magnitude < 2
 end
 
--- Place le joueur local au poste, face à l'agrès (une fois par série).
+-- Place le joueur local au poste (une fois par passage sur la Forge).
 local function aligner(joueur: Player, personnage: Model)
 	local machine = machineDe(joueur)
 	local plateforme = machine and machine.plateforme
@@ -558,7 +558,8 @@ local function aligner(joueur: Player, personnage: Model)
 	if poste and poste:IsA("Attachment") and racine and racine:IsA("BasePart") then
 		local p = poste.WorldPosition
 		local position = Vector3.new(p.X, racine.Position.Y, p.Z)
-		racine.CFrame = CFrame.lookAt(position, position - Vector3.zAxis)
+		-- Dos à l'enclos (la Forge est devant la porte, côté +Z).
+		racine.CFrame = CFrame.lookAt(position, position + Vector3.zAxis)
 	end
 end
 
@@ -637,7 +638,11 @@ local function pas(dt: number)
 					end
 				end
 				sportif.actif = false
-				sportif.aligne = false
+				-- On ne recentre qu'à la prochaine arrivée sur la Forge : un
+				-- joueur qui s'arrête en sortant n'est pas ramené au poste.
+				if joueur:GetAttribute("SurForge") ~= true then
+					sportif.aligne = false
+				end
 				sportif.phase = 0
 			else
 				sportif.actif = true
