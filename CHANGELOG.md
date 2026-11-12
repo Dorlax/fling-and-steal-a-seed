@@ -9,6 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-12 — Retouches de trois monstres voxels
+
+- Gargouillard : vraies ailes de chauve-souris (bras osseux, pans de membrane en pointe).
+- Vautourbe : ailes repliées le long du corps, pattes plus épaisses.
+- Billerage : bandes en spirale bien visibles.
+
 ## 2026-11-12 — Forge : joueur tenu au poste, roue visible au repos
 
 - En arrivant à l'arrêt sur la Forge, le joueur est placé au poste (dos à l'enclos) et tenu sur place (racine ancrée côté client) : l'animation continue même s'il touche au stick. Pousser le stick un quart de seconde ou sauter le libère ; il n'est repris qu'à sa prochaine arrivée sur la Forge.

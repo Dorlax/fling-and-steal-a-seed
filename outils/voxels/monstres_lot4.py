@@ -195,10 +195,10 @@ def billerage():
     VERRE, SPIRALE, SPIRALE2 = rgb("8ad8ff"), rgb("ff3a6a"), rgb("ffd23a")
     c = s.membre("Corps")
     c.boule((0, -0.2, 0), (0.27, 0.27, 0.27), VERRE)
-    for i in range(3):
-        a = i * 60
-        c.boite((0, -0.2, 0), (0.275, 0.025, 0.08), SPIRALE if i % 2 == 0 else SPIRALE2, arrondi=0.02,
-                rot=(a, 30, 20), mode="peint")
+    # Bandes en spirale bien visibles (comme une bille de verre).
+    for i in range(4):
+        c.boite((0, -0.2, 0), (0.29, 0.03, 0.29), SPIRALE if i % 2 == 0 else SPIRALE2, arrondi=0.02,
+                rot=(i * 45, 25, 15), mode="peint")
     c.boule((-0.12, -0.04, -0.2), (0.05, 0.04, 0.03), BLANC, mode="peint", plat=True)
     visage(c, -0.16, -0.25, 0.09, 0.045, angle=30, bouche_y=-0.31)
     return s
