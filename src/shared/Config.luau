@@ -172,11 +172,11 @@ local Config = {
 	-- taille de base). Les anciens étages achetés comptent comme des
 	-- agrandissements (migration dans Shared.Donnees).
 	Bases = {
-		Tailles = { 40, 56, 72, 84 },
+		Tailles = { 48, 64, 80, 92 },
 		Capacites = { 10, 20, 30, 40 },
 		PrixAgrandissement = { 5000, 150000, 5000000 },
 		EchelleMax = { 1.3, 2.1, 2.8, 2.8 },
-		Ecart = 90, -- distance entre deux bases (assez pour la plus grande)
+		Ecart = 100, -- distance entre deux bases (assez pour la plus grande)
 	},
 
 	-- Zone sûre : bande entre le bord avant des bases et la ligne de départ

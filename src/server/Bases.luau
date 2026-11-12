@@ -110,7 +110,9 @@ local function construire(joueur: any, centre: Vector3): Model
 	forge.Name = "Forge"
 	forge.Anchored = true
 	forge.Size = Vector3.new(largeur, 1, largeur)
-	forge.Position = centre + Vector3.new(0, 0.5, 8)
+	-- Devant l'enclos, face à la porte (même place pour tous les joueurs).
+	local devant = centre.Z + TAILLE_SOL / 2 + 6 + largeur / 2
+	forge.Position = Vector3.new(centre.X, centre.Y + 0.5, devant)
 	forge.Color = COULEUR_FORGE
 	forge.Material = Enum.Material.Neon
 	forge.TopSurface = Enum.SurfaceType.Smooth

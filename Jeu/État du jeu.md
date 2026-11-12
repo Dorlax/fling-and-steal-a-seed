@@ -31,7 +31,7 @@
 ## Porter et revenus
 - Créatures libres dans la base : chacune se promène autour de sa place (`Shared.Promenade`, déterministe serveur/client), sauts et pirouettes ; vol vérifié sur sa position calculée. Plus de socles.
 - Gestion (bouton « Base », `InterfaceBase`) : vente (2 min de revenu, `VendreCreature`), rangement par valeur (`TrierBase`) ; gains hors ligne 50 % jusqu'à 12 h (`DerniereConnexion`).
-- Base sur un seul niveau (plus d'étages ni d'ascenseurs) : agrandissements (`Config.Bases`) sol 40 / 56 / 72 / 84 studs, 10 / 20 / 30 / 40 places (`Capacites`, `Donnees.capacite`), prix 5 000 / 150 000 / 5 M (RemoteEvent `AgrandirBase`, sauvegardé `Agrandissement`) ; anciens `Etages` convertis en agrandissement au chargement ; bord avant toujours à Z = 20 ; créatures en colonnes de 5 le long des bords X ; tailles exposées jusqu'à × 1,3 / 2,1 / 2,8 / 2,8. Bases espacées de 90 studs, monde de 1 200 studs.
+- Base sur un seul niveau (plus d'étages ni d'ascenseurs) : agrandissements (`Config.Bases`) sol 48 / 64 / 80 / 92 studs, 10 / 20 / 30 / 40 places (`Capacites`, `Donnees.capacite`), prix 5 000 / 150 000 / 5 M (RemoteEvent `AgrandirBase`, sauvegardé `Agrandissement`) ; anciens `Etages` convertis en agrandissement au chargement ; bord avant toujours à Z = 20 ; créatures en colonnes de 5 le long des bords X ; tailles exposées jusqu'à × 1,3 / 2,1 / 2,8 / 2,8. Forge devant la porte de l'enclos (hors du sol de la base). Bases espacées de 100 studs, monde de 1 200 studs.
 - Récolter (ProximityPrompt, 10 studs), porter, déposer automatiquement dans sa base (places selon l'agrandissement, « Base pleine ! »). [[03 Porter et revenus]]
 - Compteur de pièces, « +N » flottant, « +X / s » ; une créature portée retombe à la mort.
 
