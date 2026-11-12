@@ -9,6 +9,12 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-12 — Forge : sans socle, dos à l'enclos, plus de retour forcé au poste
+
+- Plus de socle en bois ni de bordure néon : la zone de Forge est une Part invisible à ras du sol, décorée d'une dalle ronde (matière selon le palier) bordée de pavés.
+- Le joueur est placé dos à l'enclos (regard vers +Z) pendant l'entraînement.
+- Le joueur n'est recentré qu'à son arrivée sur la Forge : s'il s'arrête en sortant, il n'est plus ramené au milieu.
+
 ## 2026-11-12 — Forge : animations par défaut suspendues, sons de gain retirés
 
 - En jeu publié, les poses de la Forge ne se voyaient pas (personnage immobile dans la roue et sous la charge). Pendant l'entraînement, les pistes de l'Animator sont arrêtées et le script Animate du joueur local est désactivé, puis réactivé à la sortie, pour que rien ne réécrive les articulations après les poses.
