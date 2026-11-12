@@ -301,7 +301,7 @@ end
 -- Toutes les articulations du rig doivent être trouvées et encore dans le
 -- personnage : l'avatar se charge par morceaux, une articulation absente à
 -- l'apparition (ex. hanche droite) laissait la pose incomplète ou nulle.
-local ARTICULATIONS_R15 = {
+local ARTICULATIONS_R15: { string } = {
 	"racine",
 	"cou",
 	"hancheG",
@@ -313,10 +313,10 @@ local ARTICULATIONS_R15 = {
 	"coudeG",
 	"coudeD",
 }
-local ARTICULATIONS_R6 = { "racine", "cou", "hancheG", "hancheD", "epauleG", "epauleD" }
+local ARTICULATIONS_R6: { string } = { "racine", "cou", "hancheG", "hancheD", "epauleG", "epauleD" }
 
 local function moteursValides(moteurs: Moteurs, personnage: Model): boolean
-	local noms = if moteurs.r15 then ARTICULATIONS_R15 else ARTICULATIONS_R6
+	local noms: { string } = if moteurs.r15 then ARTICULATIONS_R15 else ARTICULATIONS_R6
 	for _, nom in noms do
 		local m = (moteurs :: any)[nom]
 		if m == nil or not (m :: Instance):IsDescendantOf(personnage) then
@@ -674,8 +674,8 @@ local function gererVerrou(
 	racine: BasePart,
 	dt: number
 )
-	local humanoide = personnage:FindFirstChildOfClass("Humanoid")
-	if joueur:GetAttribute("SurForge") ~= true or humanoide == nil or humanoide.Health <= 0 then
+	local trouve = personnage:FindFirstChildOfClass("Humanoid")
+	if joueur:GetAttribute("SurForge") ~= true or trouve == nil or trouve.Health <= 0 then
 		verrouiller(sportif, racine, false)
 		sportif.sortie = false
 		sportif.aligne = false
@@ -686,6 +686,7 @@ local function gererVerrou(
 		verrouiller(sportif, racine, false)
 		return
 	end
+	local humanoide = trouve :: Humanoid
 	local pousse = humanoide.MoveDirection.Magnitude > 0.1 or humanoide.Jump
 	-- Décroît sans retomber d'un coup : une entrée qui hache (une image sur
 	-- quatre à zéro) compte quand même.
