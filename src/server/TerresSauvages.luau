@@ -11,7 +11,7 @@ local TerresSauvages = {}
 
 -- Les 12 emplacements de Bases vont de X = -360 à +360 (sols de 40 studs) :
 -- 800 studs de large les couvrent tous.
-local LARGEUR = 1200 -- couvre les 12 bases (90 studs d'écart, jusqu'à 72 de large)
+local LARGEUR = 1200 -- couvre les 12 bases (100 studs d'écart, jusqu'à 92 de large)
 -- Début des Terres Sauvages = ligne de la zone sûre (les bases sont à
 -- Z = ZoneSure.BordBases, la bande entre les deux est la zone sûre).
 local BORD_BASES = Config.Monstres.BordBases

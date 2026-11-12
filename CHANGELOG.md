@@ -12,7 +12,7 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 ## 2026-11-12 — Forge devant l'enclos, bases plus grandes, créatures qui s'envolaient
 
 - La Forge est sortie de l'enclos : elle est posée devant la porte, à la même place pour tous les joueurs. Le chemin de pierres va maintenant du point d'apparition à la porte.
-- Bases un peu plus grandes : 48 / 64 / 80 / 92 studs (au lieu de 40 / 56 / 72 / 84), écart entre bases 100.
+- Bases un peu plus grandes : 48 / 64 / 80 / 92 studs (au lieu de 40 / 56 / 72 / 84), écart entre bases 100 ; emplacements symétriques autour de l'origine (±50, ±150… ±550) pour que les 12 bases tiennent dans le monde.
 - Créatures lancées qui s'envolaient (inattrapables) : quand leur modèle voxel se construisait pendant qu'elles bougeaient, le décalage d'animation était compté dans leur position de repos et s'ajoutait à chaque image. Les pièces sont remises au repos avant le relevé.
 
 ## 2026-11-12 — Animations de la Forge et décor de l'enclos
