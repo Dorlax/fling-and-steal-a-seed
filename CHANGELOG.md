@@ -9,6 +9,11 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-12 — Animations de la Forge et décor de l'enclos
+
+- Forge : les poses (course dans la roue, épaulé-jeté) ne s'appliquaient pas quand l'avatar finissait de charger après l'apparition (moteurs remplacés). Les moteurs sont maintenant recherchés de nouveau quand ils ne sont plus dans le personnage.
+- Enclos : l'abreuvoir est posé le long du muret au lieu de le traverser ; les massifs fleuris ne mordent plus sur le muret.
+
 ## 2026-11-12 — Interface masquée pendant le vol de la graine
 
 - Pendant le suivi caméra de la graine, le reste de l'interface (argent, boutons) est caché : la distance et la rareté ne se chevauchent plus avec la barre d'argent. L'interface revient à la fin du vol.

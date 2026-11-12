@@ -281,6 +281,18 @@ local function moteursDe(personnage: Model): Moteurs
 	}
 end
 
+-- L'apparence de l'avatar remplace les membres (et leurs Motor6D) après
+-- l'apparition : un moteur gardé en cache peut ne plus être dans le
+-- personnage. On les recherche alors.
+local function moteursValides(moteurs: Moteurs, personnage: Model): boolean
+	for _, m in { moteurs.racine, moteurs.epauleD, moteurs.hancheG } do
+		if m == nil or not (m :: Motor6D):IsDescendantOf(personnage) then
+			return false
+		end
+	end
+	return true
+end
+
 local function poser(m: Motor6D?, cf: CFrame)
 	if m then
 		m.Transform = cf
@@ -607,6 +619,9 @@ local function pas(dt: number)
 					sportif.phase %= 2 * math.pi
 				end
 				local pose = PosesForge.pose(mode, sportif.phase, intensite)
+				if not moteursValides(sportif.moteurs, personnage) then
+					sportif.moteurs = moteursDe(personnage)
+				end
 				if pose then
 					local machine = machineDe(joueur)
 					local station = if machine then posteDe(machine, mode :: string) else nil
