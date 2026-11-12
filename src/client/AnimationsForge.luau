@@ -301,8 +301,18 @@ end
 -- Toutes les articulations du rig doivent être trouvées et encore dans le
 -- personnage : l'avatar se charge par morceaux, une articulation absente à
 -- l'apparition (ex. hanche droite) laissait la pose incomplète ou nulle.
-local ARTICULATIONS_R15 =
-	{ "racine", "cou", "hancheG", "hancheD", "genouG", "genouD", "epauleG", "epauleD", "coudeG", "coudeD" }
+local ARTICULATIONS_R15 = {
+	"racine",
+	"cou",
+	"hancheG",
+	"hancheD",
+	"genouG",
+	"genouD",
+	"epauleG",
+	"epauleD",
+	"coudeG",
+	"coudeD",
+}
 local ARTICULATIONS_R6 = { "racine", "cou", "hancheG", "hancheD", "epauleG", "epauleD" }
 
 local function moteursValides(moteurs: Moteurs, personnage: Model): boolean
@@ -657,7 +667,13 @@ end
 -- Joueur local : tenu au poste tant qu'il s'entraîne. Pousser le stick (un
 -- court instant) ou sauter le libère ; il n'est repris qu'à sa prochaine
 -- arrivée sur la Forge.
-local function gererVerrou(joueur: Player, personnage: Model, sportif: Sportif, racine: BasePart, dt: number)
+local function gererVerrou(
+	joueur: Player,
+	personnage: Model,
+	sportif: Sportif,
+	racine: BasePart,
+	dt: number
+)
 	local humanoide = personnage:FindFirstChildOfClass("Humanoid")
 	if joueur:GetAttribute("SurForge") ~= true or humanoide == nil or humanoide.Health <= 0 then
 		verrouiller(sportif, racine, false)
