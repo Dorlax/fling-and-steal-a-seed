@@ -587,6 +587,32 @@ local function sportifDe(joueur: Player): Sportif?
 	return sportif
 end
 
+-- Pendant l'entraînement, les animations par défaut (script Animate) sont
+-- arrêtées : sinon l'Animator peut réécrire les articulations après nous
+-- (constaté en jeu publié : le personnage restait immobile).
+local function suspendreAnimations(personnage: Model, local_: boolean)
+	local humanoide = personnage:FindFirstChildOfClass("Humanoid")
+	local animateur = humanoide and humanoide:FindFirstChildOfClass("Animator")
+	if animateur then
+		for _, piste in animateur:GetPlayingAnimationTracks() do
+			piste:Stop(0)
+		end
+	end
+	if local_ then
+		local animate = personnage:FindFirstChild("Animate")
+		if animate and animate:IsA("LocalScript") and animate.Enabled then
+			animate.Enabled = false
+		end
+	end
+end
+
+local function reprendreAnimations(personnage: Model)
+	local animate = personnage:FindFirstChild("Animate")
+	if animate and animate:IsA("LocalScript") and not animate.Enabled then
+		animate.Enabled = true
+	end
+end
+
 local function pas(dt: number)
 	local camera = Workspace.CurrentCamera
 	local oeil = if camera then camera.CFrame.Position else Vector3.zero
@@ -606,12 +632,16 @@ local function pas(dt: number)
 			if not actif then
 				if sportif.actif then
 					retirerAccessoires(sportif)
+					if joueur == Players.LocalPlayer then
+						reprendreAnimations(personnage)
+					end
 				end
 				sportif.actif = false
 				sportif.aligne = false
 				sportif.phase = 0
 			else
 				sportif.actif = true
+				suspendreAnimations(personnage, joueur == Players.LocalPlayer)
 				if joueur == Players.LocalPlayer and not sportif.aligne then
 					sportif.aligne = true
 					aligner(joueur, personnage)
@@ -745,7 +775,6 @@ local function suivreGains()
 				and joueur:GetAttribute("SurForge") == true
 			then
 				surgir(joueur, `{ICONES[nom]} +{Nombres.abreger(valeur - avant)}`, COULEURS[nom])
-				Sons.jouer("Gain", if nom == "Force" then 1.2 else 1.6)
 			end
 			avant = valeur
 		end)

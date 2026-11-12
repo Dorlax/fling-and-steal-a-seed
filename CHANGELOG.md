@@ -9,6 +9,11 @@ Chaque mise à jour du jeu ajoute ici une section datée (agent Contexte).
 
 
 
+## 2026-11-12 — Forge : animations par défaut suspendues, sons de gain retirés
+
+- En jeu publié, les poses de la Forge ne se voyaient pas (personnage immobile dans la roue et sous la charge). Pendant l'entraînement, les pistes de l'Animator sont arrêtées et le script Animate du joueur local est désactivé, puis réactivé à la sortie, pour que rien ne réécrive les articulations après les poses.
+- Plus de son à chaque gain de Force ou de Vitesse (le « +1 » reste).
+
 ## 2026-11-12 — Forge devant l'enclos, bases plus grandes, créatures qui s'envolaient
 
 - La Forge est sortie de l'enclos : elle est posée devant la porte, à la même place pour tous les joueurs. Le chemin de pierres va maintenant du point d'apparition à la porte.
