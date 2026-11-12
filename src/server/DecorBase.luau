@@ -369,13 +369,14 @@ local function foin(dossier: Instance, p: Vector3)
 end
 
 -- Abreuvoir en bois rempli d'eau.
+-- Posé le long d'un muret latéral : longueur selon Z.
 local function abreuvoir(dossier: Instance, p: Vector3)
 	local bac = CFrame.new(p + Vector3.new(0, 0.6, 0))
-	piece(dossier, "Abreuvoir", Vector3.new(4, 1.2, 1.6), bac, BOIS, Enum.Material.Wood)
+	piece(dossier, "Abreuvoir", Vector3.new(1.6, 1.2, 4), bac, BOIS, Enum.Material.Wood)
 	piece(
 		dossier,
 		"EauAbreuvoir",
-		Vector3.new(3.6, 0.1, 1.2),
+		Vector3.new(1.2, 0.1, 3.6),
 		CFrame.new(p + Vector3.new(0, 1.15, 0)),
 		EAU,
 		Enum.Material.Glass
@@ -425,7 +426,11 @@ function DecorBase.habiller(
 	for _, sens in { -1, 1 } do
 		massif(
 			dossier,
-			Vector3.new(centre.X + sens * (5 + largeurMassif / 2), y, centre.Z - d + 2),
+			Vector3.new(
+				centre.X + sens * (5 + largeurMassif / 2),
+				y,
+				centre.Z - d + EPAISSEUR_MURET / 2 + 1.5
+			),
 			largeurMassif,
 			hasard
 		)
@@ -441,13 +446,15 @@ function DecorBase.habiller(
 	else
 		foin(dossier, Vector3.new(centre.X + d - 5, y, centre.Z - 2))
 	end
-	abreuvoir(dossier, Vector3.new(centre.X - d + 3, y, centre.Z + d - 6))
+	-- Contre le muret gauche, sans le toucher.
+	local interieur = d - EPAISSEUR_MURET / 2 -- face intérieure du muret
+	abreuvoir(dossier, Vector3.new(centre.X - interieur + 1.4, y, centre.Z + d - 7))
 
 	-- Massifs de part et d'autre de la porte.
 	for _, sens in { -1, 1 } do
 		massif(
 			dossier,
-			Vector3.new(centre.X + sens * (ouverture / 2 + 3.5), y, centre.Z + d - 1.8),
+			Vector3.new(centre.X + sens * (ouverture / 2 + 3.5), y, centre.Z + interieur - 1.5),
 			4,
 			hasard
 		)

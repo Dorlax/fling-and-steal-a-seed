@@ -33,10 +33,11 @@ local joueurLocal = Players.LocalPlayer
 
 local gestes: { [Model]: number } = {} -- personnage -> début du geste (os.clock)
 
-local function moteur(personnage: Model, partie: string, nom: string): Motor6D?
+-- Motor6D ou AnimationConstraint (avatars aux articulations mises à niveau).
+local function moteur(personnage: Model, partie: string, nom: string): any?
 	local p = personnage:FindFirstChild(partie)
 	local m = p and p:FindFirstChild(nom)
-	return if m and m:IsA("Motor6D") then m else nil
+	return if m and (m:IsA("Motor6D") or m:IsA("AnimationConstraint")) then m else nil
 end
 
 local function lisse(a: number, b: number, t: number): number

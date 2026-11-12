@@ -8,7 +8,8 @@
 --   et fait tourner la corde ;
 -- * « +N » au-dessus de la tête et fête du nouvel agrès pour le joueur local.
 -- Les poses (Shared.PosesForge) remplacent l'animation par défaut en écrivant
--- Motor6D.Transform à chaque PreSimulation, après l'Animator.
+-- Transform des articulations (Motor6D ou AnimationConstraint, selon le rig
+-- de l'avatar) à chaque PreSimulation, après l'Animator.
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -45,18 +46,22 @@ type Machine = {
 	palier: number?,
 }
 
+-- Articulation animable : Motor6D (ancien rig) ou AnimationConstraint
+-- (avatars aux articulations mises à niveau). Les deux ont `Transform`.
+type Articulation = any
+
 type Moteurs = {
 	r15: boolean,
-	racine: Motor6D?,
-	cou: Motor6D?,
-	hancheG: Motor6D?,
-	hancheD: Motor6D?,
-	genouG: Motor6D?,
-	genouD: Motor6D?,
-	epauleG: Motor6D?,
-	epauleD: Motor6D?,
-	coudeG: Motor6D?,
-	coudeD: Motor6D?,
+	racine: Articulation?,
+	cou: Articulation?,
+	hancheG: Articulation?,
+	hancheD: Articulation?,
+	genouG: Articulation?,
+	genouD: Articulation?,
+	epauleG: Articulation?,
+	epauleD: Articulation?,
+	coudeG: Articulation?,
+	coudeD: Articulation?,
 }
 
 type Sportif = {
@@ -247,10 +252,10 @@ end
 
 -- ===== Personnages =====
 
-local function moteur(personnage: Model, partieNom: string, nom: string): Motor6D?
+local function moteur(personnage: Model, partieNom: string, nom: string): Articulation?
 	local p = personnage:FindFirstChild(partieNom)
 	local m = p and p:FindFirstChild(nom)
-	return if m and m:IsA("Motor6D") then m else nil
+	return if m and (m:IsA("Motor6D") or m:IsA("AnimationConstraint")) then m else nil
 end
 
 local function moteursDe(personnage: Model): Moteurs
@@ -281,7 +286,19 @@ local function moteursDe(personnage: Model): Moteurs
 	}
 end
 
-local function poser(m: Motor6D?, cf: CFrame)
+-- L'apparence de l'avatar remplace les membres (et leurs articulations) après
+-- l'apparition : un moteur gardé en cache peut ne plus être dans le
+-- personnage. On les recherche alors.
+local function moteursValides(moteurs: Moteurs, personnage: Model): boolean
+	for _, m in { moteurs.racine, moteurs.epauleD, moteurs.hancheG } do
+		if m == nil or not (m :: Instance):IsDescendantOf(personnage) then
+			return false
+		end
+	end
+	return true
+end
+
+local function poser(m: Articulation?, cf: CFrame)
 	if m then
 		m.Transform = cf
 	end
@@ -607,6 +624,9 @@ local function pas(dt: number)
 					sportif.phase %= 2 * math.pi
 				end
 				local pose = PosesForge.pose(mode, sportif.phase, intensite)
+				if not moteursValides(sportif.moteurs, personnage) then
+					sportif.moteurs = moteursDe(personnage)
+				end
 				if pose then
 					local machine = machineDe(joueur)
 					local station = if machine then posteDe(machine, mode :: string) else nil
